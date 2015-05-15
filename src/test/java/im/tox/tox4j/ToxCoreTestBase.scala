@@ -82,7 +82,7 @@ object ToxCoreTestBase {
     entropy
   }
 
-  @NotNull protected def randomBytes(length: Int): Array[Byte] = {
+  @NotNull def randomBytes(length: Int): Array[Byte] = {
     val array = new Array[Byte](length)
     new Random().nextBytes(array)
     array
