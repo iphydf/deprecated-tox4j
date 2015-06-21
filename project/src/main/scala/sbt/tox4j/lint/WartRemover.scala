@@ -22,8 +22,10 @@ object WartRemover extends Tox4jBuildPlugin {
   override val moduleSettings = Seq(
     wartremoverClasspaths += (classDirectory in (Tox4jLibraryBuild.lint, Compile)).value.toURI.toString,
     wartremoverErrors in (Compile, compile) := Warts.allBut(
+      Wart.Any,
       Wart.DefaultArguments,
       Wart.NonUnitStatements,
+      Wart.Nothing,
       Wart.Var
     ) ++ custom((classDirectory in (Tox4jLibraryBuild.lint, Compile)).value),
     wartremoverErrors in (Test, compile) := Warts.allBut(
@@ -32,6 +34,7 @@ object WartRemover extends Tox4jBuildPlugin {
       Wart.DefaultArguments,
       Wart.IsInstanceOf,
       Wart.NonUnitStatements,
+      Wart.Nothing,
       Wart.Null,
       Wart.Throw,
       Wart.Var

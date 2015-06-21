@@ -4,6 +4,7 @@ version       := "0.0.0-SNAPSHOT"
 
 // Build dependencies.
 libraryDependencies ++= Seq(
+  "com.github.nscala-time" %% "nscala-time" % "2.0.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "org.json" % "json" % "20131018"
 )
