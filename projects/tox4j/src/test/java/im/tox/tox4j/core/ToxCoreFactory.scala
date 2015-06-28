@@ -2,21 +2,26 @@ package im.tox.tox4j.core
 
 import im.tox.tox4j.core.exceptions.ToxNewException
 import im.tox.tox4j.core.options.{ ProxyOptions, SaveDataOptions, ToxOptions }
-import im.tox.tox4j.impl.jni.ToxCoreImpl
+import im.tox.tox4j.impl.tcp.ToxCoreTcpMock
+import im.tox.tox4j.impl.tcp.PublicKey
+import im.tox.tox4j.impl.tcp.server.Server
 
 import scala.collection.mutable.ArrayBuffer
 
 object ToxCoreFactory {
 
+  private final val server = new Server(PublicKey.empty)
+  server.start()
+
   private final val toxes = new ArrayBuffer[ToxCore]
 
   def make(options: ToxOptions = ToxOptions()): ToxCore = {
     try {
-      new ToxCoreImpl(options)
+      new ToxCoreTcpMock()
     } catch {
       case e: ToxNewException if e.code == ToxNewException.Code.PORT_ALLOC =>
         System.gc()
-        new ToxCoreImpl(options)
+        new ToxCoreTcpMock()
     }
   }
 
