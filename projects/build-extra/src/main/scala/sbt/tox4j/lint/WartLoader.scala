@@ -65,9 +65,13 @@ object WartLoader extends AutoPlugin {
       }
     },
     wartremoverErrors in (Compile, compile) := Warts.allBut(
+      Wart.Any,
       Wart.DefaultArguments,
       Wart.NoNeedForMonad, // https://github.com/puffnfresh/wartremover/issues/179
+      Wart.Nothing,
       Wart.NonUnitStatements,
+      Wart.Product,
+      Wart.Serializable,
       Wart.Throw, // https://github.com/puffnfresh/wartremover/issues/182
       Wart.Var
     ),
@@ -78,8 +82,11 @@ object WartLoader extends AutoPlugin {
       Wart.IsInstanceOf,
       Wart.NoNeedForMonad, // https://github.com/puffnfresh/wartremover/issues/179
       Wart.NonUnitStatements,
+      Wart.Nothing,
       Wart.Null,
       Wart.OptionPartial,
+      Wart.Product,
+      Wart.Serializable,
       Wart.Throw,
       Wart.Var
     )
