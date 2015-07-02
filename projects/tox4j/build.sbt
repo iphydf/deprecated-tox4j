@@ -22,12 +22,14 @@ ProtobufJni.moduleSettings
 // Snapshot and linter repository.
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
+val scalazVersion = "7.2.0-M1"
+
 // Build dependencies.
 libraryDependencies ++= Seq(
   "com.intellij" % "annotations" % "12.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "org.json" % "json" % "20131018",
-  "org.scalaz" %% "scalaz-core" % "7.2.0-M1"
+  "org.scalaz" %% "scalaz-core" % scalazVersion
 )
 
 // Test dependencies.
@@ -37,6 +39,7 @@ libraryDependencies ++= Seq(
   "junit" % "junit" % "4.12",
   "org.scalacheck" %% "scalacheck" % "1.12.2",
   "org.scalatest" %% "scalatest" % "2.2.4",
+  "org.scalaz" %% "scalaz-scalacheck-binding" % scalazVersion,
   "org.slf4j" % "slf4j-log4j12" % "1.7.12"
 ) map (_ % Test)
 
