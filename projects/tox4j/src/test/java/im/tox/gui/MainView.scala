@@ -5,7 +5,9 @@ import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.Date
 import javax.swing._
-
+import im.tox.client.hlapi.entity.CoreState
+import CoreState.ToxState
+import im.tox.client.hlapi.adapter.ToxAdapter
 import im.tox.gui.domain.{ FileTransferModel, FriendList }
 import im.tox.gui.events._
 import im.tox.gui.forms.MainViewBase
@@ -15,6 +17,8 @@ import org.jetbrains.annotations.Nullable
 import org.slf4j.{ Logger, LoggerFactory }
 
 object MainView {
+
+  var state: ToxState = ToxState()
   private val logger: Logger = LoggerFactory.getLogger(classOf[MainView])
   private val MAX_MESSAGES: Int = 1000
   private val DATE_FORMAT: SimpleDateFormat = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss.SSS]")
@@ -91,29 +95,38 @@ final class MainView extends MainViewBase {
 
   @Nullable
   def load(): Option[Array[Byte]] = {
-    val saveFile = new ObjectInputStream(new FileInputStream("/tmp/toxgui.tox"))
+    var saveFile: ObjectInputStream = null
     try {
-      val saveData = saveFile.readObject.asInstanceOf[MainView.SaveData]
+      saveFile = new ObjectInputStream(new FileInputStream("/tmp/toxgui.tox"))
+      try {
+        val saveData = saveFile.readObject.asInstanceOf[MainView.SaveData]
 
-      if (saveData.friendList != null) {
-        friendListModel = saveData.friendList
-        friendList.setModel(friendListModel)
+        if (saveData.friendList != null) {
+          friendListModel = saveData.friendList
+          friendList.setModel(friendListModel)
+        }
+
+        if (saveData.messages != null) {
+          messageModel = saveData.messages
+          messages.setModel(messageModel)
+        }
+
+        Some(saveData.toxSave)
+
+      } catch {
+        case e: IOException => None
+        case e: ClassNotFoundException =>
+          e.printStackTrace()
+          None
+      } finally {
+        saveFile.close()
       }
-
-      if (saveData.messages != null) {
-        messageModel = saveData.messages
-        messages.setModel(messageModel)
-      }
-
-      Some(saveData.toxSave)
-
     } catch {
-      case e: IOException => None
-      case e: ClassNotFoundException =>
-        e.printStackTrace()
+      case e: IOException =>
+      if (saveFile != null) {
+        saveFile.close()
+      }
         None
-    } finally {
-      saveFile.close()
     }
   }
 
@@ -128,4 +141,6 @@ final class MainView extends MainViewBase {
   sendButton.addActionListener(new SendButtonOnAction(this))
   messageText.addKeyListener(new MessageTextOnKey(this))
   sendFileButton.addActionListener(new SendFileButtonOnAction(this))
+  setNicknameButton.addActionListener(new SetNicknameButtonOnAction(this))
+  setStatusMessageButton.addActionListener(new SetStatusMessageButtonOnAction(this))
 }

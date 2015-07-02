@@ -33,6 +33,12 @@ public class MainViewBase extends JFrame {
   public JTextField fileName;
   public JProgressBar fileProgress;
   public JButton sendFileButton;
+  public JTabbedPane tabbedPane2;
+  public JButton setNicknameButton;
+  public JButton userStatusButton;
+  public JTextField setNicknameField;
+  public JTextField setStatusMessageField;
+  public JButton setStatusMessageButton;
 
   public MainViewBase() {
     setContentPane(contentPane);

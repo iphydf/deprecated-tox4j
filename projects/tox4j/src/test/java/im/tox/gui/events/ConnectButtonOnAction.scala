@@ -1,15 +1,15 @@
 package im.tox.gui.events
 
 import java.awt.event.{ ActionEvent, ActionListener }
-import javax.swing._
-
-import im.tox.gui.MainView
+import im.tox.client.hlapi.adapter.ToxAdapter
+import im.tox.client.hlapi.entity.{CoreState, Event}
+import im.tox.gui.util.InvokeLaterToxEventListener
 import im.tox.tox4j.ToxCoreTestBase.readablePublicKey
-import im.tox.tox4j.core.options.{ SaveDataOptions, ProxyOptions, ToxOptions }
-import im.tox.tox4j.exceptions.ToxException
-import im.tox.tox4j.impl.jni.ToxCoreImpl
-
-import scala.annotation.tailrec
+import im.tox.gui.{GuiToxEventListener, MainView}
+import im.tox.gui.MainView.state
+import ToxAdapter._
+import Event._
+import CoreState._
 
 final class ConnectButtonOnAction(toxGui: MainView) extends ActionListener {
 
@@ -39,78 +39,45 @@ final class ConnectButtonOnAction(toxGui: MainView) extends ActionListener {
     ).foreach(_.setEnabled(!enabled))
   }
 
-  private def toxOptions: ToxOptions = {
-    val proxy: ProxyOptions =
+  private def toxOptions: ConnectionOptions = {
+    val proxy: ProxyOption = {
       if (toxGui.httpRadioButton.isSelected) {
-        ProxyOptions.Http(toxGui.proxyHost.getText, toxGui.proxyPort.getText.toInt)
+        Http(toxGui.proxyHost.getText, toxGui.proxyPort.getText.toInt)
       } else if (toxGui.socksRadioButton.isSelected) {
-        ProxyOptions.Socks5(toxGui.proxyHost.getText, toxGui.proxyPort.getText.toInt)
+        Socks5(toxGui.proxyHost.getText, toxGui.proxyPort.getText.toInt)
       } else {
-        ProxyOptions.None
+        NoProxy()
       }
+    }
 
-    val toxSave: SaveDataOptions =
+
+    val toxSave =
       toxGui.load() match {
-        case None       => SaveDataOptions.None
-        case Some(data) => SaveDataOptions.ToxSave(data)
+        case None       => NoSaveData()
+        case Some(data) => ToxSave(data)
       }
-
-    ToxOptions(
+    ConnectionOptions(
       toxGui.enableIPv6CheckBox.isSelected,
       toxGui.enableUdpCheckBox.isSelected,
-      proxy = proxy,
-      saveData = toxSave
+      proxy,
+      toxSave
     )
   }
 
   private def connect(): Unit = {
-    try {
-      toxGui.tox = new ToxCoreImpl[Unit](toxOptions)
-
-      for (friendNumber <- toxGui.tox.getFriendList) {
-        toxGui.friendListModel.add(
-          friendNumber,
-          toxGui.tox.getFriendPublicKey(friendNumber)
-        )
-      }
-
-      toxGui.selfPublicKey.setText(readablePublicKey(toxGui.tox.getAddress))
-      toxGui.tox.callback(toxGui.toxEvents)
-
-      toxGui.eventLoop = new Thread(new Runnable() {
-        @tailrec
-        override def run(): Unit = {
-          Thread.sleep(toxGui.tox.iterationInterval)
-          toxGui.tox.iterate(())
-          run()
-        }
-      })
-
-      toxGui.eventLoop.start()
-      toxGui.connectButton.setText("Disconnect")
-      setConnectSettingsEnabled(false)
-      toxGui.addMessage("Created Tox instance; started event loop")
-    } catch {
-      case e: ToxException[_] =>
-        toxGui.addMessage("Error creating Tox instance: " + e.code)
-      case e: Throwable =>
-        JOptionPane.showMessageDialog(toxGui, MainView.printExn(e))
-    }
+    acceptEvent(state, SetConnectionStatusEvent(Connect(toxOptions)))
+    acceptEvent(state, RegisterEventListener(toxGui.toxEvents))
+    toxGui.selfPublicKey.setText(readablePublicKey(state.publicKey))
+    toxGui.connectButton.setText("Disconnect")
+    setConnectSettingsEnabled(false)
+    toxGui.addMessage("Created Tox instance; started event loop")
   }
 
   private def disconnect(): Unit = {
-    toxGui.eventLoop.interrupt()
-    try {
-      toxGui.tox.close()
-      toxGui.tox = null
-      toxGui.eventLoop.join()
-      setConnectSettingsEnabled(true)
-      toxGui.connectButton.setText("Connect")
-      toxGui.addMessage("Disconnected")
-    } catch {
-      case e: InterruptedException =>
-        toxGui.addMessage("Disconnect interrupted")
-    }
+    acceptEvent(state, SetConnectionStatusEvent(Disconnect()))
+    setConnectSettingsEnabled(true)
+    toxGui.connectButton.setText("Connect")
+    toxGui.addMessage("Disconnected")
   }
 
   override def actionPerformed(event: ActionEvent): Unit = {
