@@ -33,6 +33,8 @@ case class Alias(entity: ToxEntity) extends ToxAttribute
 //This should be separated from attributes later
 case class FileList(entity: ToxEntity) extends ToxAttribute
 case class isMute(entity: ToxEntity) extends ToxAttribute
+case class isStarred(entity: ToxEntity) extends ToxAttribute
+case class isBlocked(entity: ToxEntity) extends ToxAttribute
 /*
   Operations
  */
@@ -44,8 +46,6 @@ case class GetEntity() extends ToxOperation
 case class CreateEntity(param: String) extends ToxOperation
 case class LeaveEntity() extends ToxOperation
 case class DestroyEntity() extends ToxOperation
-case class BlockEntity() extends ToxOperation
-case class StarEntity() extends ToxOperation
 case class EditMessage(param: String) extends ToxOperation
 case class RecallMessage() extends ToxOperation
 case class AddTo() extends ToxOperation
@@ -139,11 +139,11 @@ abstract class PseudoEventToxClient {
   }
 
   def blockFriend: Unit = {
-    ToxEventAdaptor.passToxEvent(SingleEvent(Friend("brown"), BlockEntity()))
+    ToxEventAdaptor.passToxEvent(AttributeEvent(isBlocked(Friend("brown")), SetAttribute("starred")))
   }
 
   def startFriend: Unit = {
-    ToxEventAdaptor.passToxEvent(SingleEvent(Friend("brown"), StarEntity()))
+    ToxEventAdaptor.passToxEvent(AttributeEvent(isStarred(Friend("brown")), SetAttribute("star")))
   }
 
   def initialAudioCall: Unit = {
