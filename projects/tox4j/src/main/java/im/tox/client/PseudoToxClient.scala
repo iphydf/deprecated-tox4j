@@ -227,7 +227,7 @@ abstract class PseudoToxClient {
     // Another way is to discriminate between the group chat message and private chat message to reduce duplicated data
     //The following are for display, client might as well wrap these into a function like displayConversationDetail(Conversation)
     //foreach(message: Message)(loadThumbnail: () => ThumbnailId): ThumbnailId
-    //foreach(message: Message)(loadContent: () => TextMessage): TextMessage / Array[Byte] / String （ dont know which level is better)
+    //foreach(message: Message)(loadContent: () => TextMessage): TextMessageit / Array[Byte] / String （ dont know which level is better)
     updateConversationMessages("brown", Array.ofDim[String](0), deleteMessages)
   }
 
