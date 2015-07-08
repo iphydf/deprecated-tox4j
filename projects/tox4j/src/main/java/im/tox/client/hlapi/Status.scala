@@ -1,29 +1,50 @@
 package im.tox.client.hlapi
 
-import im.tox.tox4j.core.proto.Core.Connection
-
-sealed trait Status
-
-object Status {
-
-  sealed abstract class ConnectionStatus extends Status
-  sealed abstract class UserStatus extends Status
-
-  final case class TCP() extends ConnectionStatus
-  final case class UDP() extends ConnectionStatus
-  final case class None() extends ConnectionStatus
-
-  final case class Online() extends UserStatus
-  final case class Away() extends UserStatus
-  final case class Busy() extends UserStatus
-  final case class Offline() extends UserStatus
-
-  def changeStatus(connectionStatus: ConnectionStatus, userStatus: UserStatus): (ConnectionStatus, UserStatus) =
-    connectionStatus match {
-      case connectionStatus: None => (None(), Offline())
-      case connectionStatus: _ => userStatus match {
-        case userStatus: Offline => (None(), Offline())
-        case userStatus: _ => (connectionStatus, userStatus)
+class State {
+  final case class ToxState() {
+    case class UserStatus()
+    case class ConnectionStatus()
+    case class FriendList() {
+      Seq(User)
     }
+    case class ConversationList() {
+      Seq(Conversation)
+    }
+    case class Profile() {
+      case class Nickname()
+      case class ProfilePhoto()
+    }
+    case class User() {
+      case class Alias()
+      case class Blocked()
+      Profile
+    }
+    case class Conversation() {
+
+      case class Starred()
+      case class Muted()
+      case class MessageList() {
+        Seq(Message)
+      }
+      case class FileTransmissionList() {
+        Seq(FileRecord)
+      }
+
+    }
+    case class PrivateConversation() extends Conversation()
+    case class GroupConversation() extends Conversation()
+    case class TransmissionStatus()
+    case class Message() {
+      case class TimeStamp()
+      case class Context()
+      final case class MessageTransmissionStatus() extends TransmissionStatus()
+    }
+    case class FileRecord() {
+      case class TimeStamp()
+      case class File()
+      final case class FileTransmissionStatus() extends TransmissionStatus()
+    }
+
   }
+
 }
