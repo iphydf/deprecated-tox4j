@@ -1,100 +1,105 @@
 package im.tox.client.hlapi
 
+trait Event
+
 object Event {
+
+  sealed abstract class NetworkEvent extends Event
+  sealed abstract class UiEvent extends Event
   /**
    * Network Events
    */
   //  Self connection status (connected/disconnected)
-  case class ReceiveSelfConnectionStatus()
+  final case class ReceiveSelfConnectionStatus() extends NetworkEvent
   //  Receive file transmission control from friends
-  case class ReceiveFileTransmissionControl()
+  final case class ReceiveFileTransmissionControl() extends NetworkEvent
   //  Receive file transmission request from friends
-  case class ReceiveFileTransmissionRequest()
+  final case class ReceiveFileTransmissionRequest() extends NetworkEvent
   //  Receive a chunk of file under transmission from friends
-  case class ReceiveFileChunk()
+  final case class ReceiveFileChunk() extends NetworkEvent
   //  A friend’s connection status changes (online/offline)
-  case class ReceiveFriendConnectionStatusChange()
+  final case class ReceiveFriendConnectionStatusChange() extends NetworkEvent
   //  Receive a message from a friend
-  case class ReceiveFriendMessage()
+  final case class ReceiveFriendMessage() extends NetworkEvent
   //  Receive a message from a group
-  case class ReceiveGroupMessage()
+  final case class ReceiveGroupMessage() extends NetworkEvent
   //  A friend’s name changes
-  case class ReceiveFriendNameChange()
+  final case class ReceiveFriendNameChange() extends NetworkEvent
   //  Receive a friend request
-  case class ReceiveFriendRequest()
+  final case class ReceiveFriendRequest() extends NetworkEvent
   //  A friend’s user status changes
-  case class ReceiveFriendUserStatusChange()
+  final case class ReceiveFriendUserStatusChange() extends NetworkEvent
   //  A friend’s status message changes
-  case class ReceiveFriendStatusMessageChange()
+  final case class ReceiveFriendStatusMessageChange() extends NetworkEvent
   //  A friend typing status changes
-  case class ReceiveFriendTypingStatusChange()
+  final case class ReceiveFriendTypingStatusChange() extends NetworkEvent
   //  A lossy packet arrives
-  case class ReceiveLossyPacket()
+  final case class ReceiveLossyPacket() extends NetworkEvent
   //  A lossless packet arrives
-  case class ReceiveLosslessPacket()
+  final case class ReceiveLosslessPacket() extends NetworkEvent
   //  Receive the read receipt of a message
-  case class ReceiveReadReceipt()
+  final case class ReceiveReadReceipt() extends NetworkEvent
 
   /**
    * GUI Events
    */
   //  Send a friend request
-  case class SendFriendRequest(friendId: String, request: String)
+  final case class SendFriendRequest(friendId: String, request: String) extends UiEvent
   //  Delete a friend
-  case class DeleteFriend(friendId: String)
+  final case class DeleteFriend(friendId: String) extends UiEvent
   //  See the details of a friend’s profile
-  case class RequestFriendProfile(friendId: String)
+  final case class RequestFriendProfile(friendId: String) extends UiEvent
   //  Change personal profile information
-  case class UpdateSelfProfile(profile: String)
+  final case class UpdateSelfProfile(profile: String) extends UiEvent
   //  Change a friend’s alias
-  case class ChangeFriendAlias(friendId: String, newAlias: String)
+  final case class ChangeFriendAlias(friendId: String, newAlias: String) extends UiEvent
   //  Change a group conversation’s alias
-  case class ChangeGroupAlias(groupId: String, newAlias: String)
+  final case class ChangeGroupAlias(groupId: String, newAlias: String) extends UiEvent
   //  Send a request to join a group
-  case class SendJoinGroupConversationRequest(groupId: String, request: String)
+  final case class SendJoinGroupConversationRequest(groupId: String, request: String) extends UiEvent
   //  Invite a friend to a group chat
-  case class InviteFriendToGroupRequest(groupId: String, friendId: String, request: String)
+  final case class InviteFriendToGroupRequest(groupId: String, friendId: String, request: String) extends UiEvent
   //  Create a group chat
-  case class CreateGroup()
+  final case class CreateGroup() extends UiEvent
   //  Initiate a conversation with a friend
-  case class CreatePrivateConversation(friendId: String)
+  final case class CreatePrivateConversation(friendId: String) extends UiEvent
   //  Initiate a group conversation
-  case class CreateGroupConversation(groupId: String)
+  final case class CreateGroupConversation(groupId: String) extends UiEvent
   //  Remove a member from a group chat
-  case class RemoveMemberFromGroupConversation(groupId: String, friendId: String)
+  final case class RemoveMemberFromGroupConversation(groupId: String, friendId: String) extends UiEvent
   //  Dismiss a group
-  case class DismissGroupConversation(groupId: String)
+  final case class DismissGroupConversation(groupId: String) extends UiEvent
   //  Leave a group conversation
-  case class LeaveGroupConversation(groupId: String)
+  final case class LeaveGroupConversation(groupId: String) extends UiEvent
   //  Delete a conversation
-  case class DeleteConversation(conversationId: String)
+  final case class DeleteConversation(conversationId: String) extends UiEvent
   //  Send a text message to a conversation (group/private)
-  case class SendTextMessage(conversationId: String, message: String)
+  final case class SendTextMessage(conversationId: String, message: String) extends UiEvent
   //  Initiate a file transmission request to a friend
-  case class SendFileTransmissionRequest(friendId: String, fileDescription: String)
+  final case class SendFileTransmissionRequest(friendId: String, fileDescription: String) extends UiEvent
   //  Get all conversations
-  case class GetConversationList()
+  final case class GetConversationList() extends UiEvent
   //  Get all friends
-  case class GetFriendList()
+  final case class GetFriendList() extends UiEvent
   //  Get the messages associated with a conversation
-  case class GetMessageList(conversationId: String)
+  final case class GetMessageList(conversationId: String) extends UiEvent
   //  Get the file sent history with a friend
-  case class GetFileSentList(conversationId: String)
+  final case class GetFileSentList(conversationId: String) extends UiEvent
   //  Login
-  case class Login(username: String, password: String)
+  final case class Login(username: String, password: String) extends UiEvent
   // Logout
-  case class Logout()
+  final case class Logout() extends UiEvent
   //  Set status message
-  case class ChangeStatusMessage(newStatusMessage: String)
+  final case class ChangeStatusMessage(newStatusMessage: String) extends UiEvent
   //  Change self user status
-  case class ChangeUserStatus(status: String)
+  final case class ChangeUserStatus(status: String) extends UiEvent
   //  Change self connection status
-  case class ChangeConnectionStatus(status: String)
+  final case class ChangeConnectionStatus(status: String) extends UiEvent
   //  Block/unblock a friend
-  case class ChangeFriendBlockStatus(friendId: String)
+  final case class ChangeFriendBlockStatus(friendId: String) extends UiEvent
   //  Mute/unmute a conversation
-  case class ChangeConversationMuteStatus(friendId: String)
+  final case class ChangeConversationMuteStatus(friendId: String) extends UiEvent
   //  Star/unstar a friend
-  case class ChangeConversationStarStatus(friendId: String)
+  final case class ChangeConversationStarStatus(friendId: String) extends UiEvent
 
 }
