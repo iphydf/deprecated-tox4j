@@ -1,6 +1,6 @@
 package im.tox.client.hlapi
 
-trait Event
+sealed trait Event
 
 object Event {
 
@@ -60,7 +60,7 @@ object Event {
   //  Invite a friend to a group chat
   final case class InviteFriendToGroupRequest(groupId: String, friendId: String, request: String) extends UiEvent
   //  Create a group chat
-  final case class CreateGroup() extends UiEvent
+  final case class CreateGroup(groupName: String, option: String) extends UiEvent
   //  Initiate a conversation with a friend
   final case class CreatePrivateConversation(friendId: String) extends UiEvent
   //  Initiate a group conversation
