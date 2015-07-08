@@ -43,64 +43,65 @@ abstract class PseudoToxClient {
     case ReceiveReadReceipt() =>
 
   }
-  protected def handleUiEvent(e: UiEvent): Unit = {
-    case SendFriendRequest(friendId: String, request: String) =>
+  protected def handleUiEvent(e: UiEvent): Unit = e match {
+
+    case SendFriendRequest(friendId, request) =>
     //  Delete a friend
-    case DeleteFriend(friendId: String) =>
+    case DeleteFriend(friendId) =>
     //  See the details of a friend’s profile
-    case RequestFriendProfile(friendId: String) =>
+    case RequestFriendProfile(friendId) =>
     //  Change personal profile information
-    case UpdateSelfProfile(profile: String) =>
+    case UpdateSelfProfile(profile) =>
     //  Change a friend’s alias
-    case ChangeFriendAlias(friendId: String, newAlias: String) =>
+    case ChangeFriendAlias(friendId, newAlias) =>
     //  Change a group conversation’s alias
-    case ChangeGroupAlias(groupId: String, newAlias: String) =>
+    case ChangeGroupAlias(groupId, newAlias) =>
     //  Send a request to join a group
-    case SendJoinGroupConversationRequest(groupId: String, request: String) =>
+    case SendJoinGroupConversationRequest(groupId, request) =>
     //  Invite a friend to a group chat
-    case InviteFriendToGroupRequest(groupId: String, friendId: String, request: String) =>
+    case InviteFriendToGroupRequest(groupId, friendId, request) =>
     //  Create a group chat
-    case CreateGroup(groupName: String, option: String) =>
+    case CreateGroup(groupName, option) =>
     //  Initiate a conversation with a friend
-    case CreatePrivateConversation(friendId: String) =>
+    case CreatePrivateConversation(friendId) =>
     //  Initiate a group conversation
-    case CreateGroupConversation(groupId: String) =>
+    case CreateGroupConversation(groupId) =>
     //  Remove a member from a group chat
-    case RemoveMemberFromGroupConversation(groupId: String, friendId: String) =>
+    case RemoveMemberFromGroupConversation(groupId, friendId) =>
     //  Dismiss a group
-    case DismissGroupConversation(groupId: String) =>
+    case DismissGroupConversation(groupId) =>
     //  Leave a group conversation
-    case LeaveGroupConversation(groupId: String) =>
+    case LeaveGroupConversation(groupId) =>
     //  Delete a conversation
-    case DeleteConversation(conversationId: String) =>
+    case DeleteConversation(conversationId) =>
     //  Send a text message to a conversation (group/private)
-    case SendTextMessage(conversationId: String, message: String) =>
+    case SendTextMessage(conversationId, message) =>
     //  Initiate a file transmission request to a friend
-    case SendFileTransmissionRequest(friendId: String, fileDescription: String) =>
+    case SendFileTransmissionRequest(friendId, fileDescription) =>
     //  Get all conversations
     case GetConversationList() =>
     //  Get all friends
     case GetFriendList() =>
     //  Get the messages associated with a conversation
-    case GetMessageList(conversationId: String) =>
+    case GetMessageList(conversationId) =>
     //  Get the file sent history with a friend
-    case GetFileSentList(conversationId: String) =>
+    case GetFileSentList(conversationId) =>
     //  Login
-    case Login(username: String, password: String) =>
+    case Login(username, password) =>
     // Logout
     case Logout() =>
     //  Set status message
-    case ChangeStatusMessage(newStatusMessage: String) =>
+    case ChangeStatusMessage(newStatusMessage) =>
     //  Change self user status
-    case ChangeUserStatus(status: String) =>
+    case ChangeUserStatus(status) =>
     //  Change self connection status
-    case ChangeConnectionStatus(status: String) =>
+    case ChangeConnectionStatus(status) =>
     //  Block/unblock a friend
-    case ChangeFriendBlockStatus(friendId: String) =>
+    case ChangeFriendBlockStatus(friendId) =>
     //  Mute/unmute a conversation
-    case ChangeConversationMuteStatus(friendId: String) =>
+    case ChangeConversationMuteStatus(friendId) =>
     //  Star/unstar a friend
-    case ChangeConversationStarStatus(friendId: String) =>
+    case ChangeConversationStarStatus(friendId) =>
 
   }
 
