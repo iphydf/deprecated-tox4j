@@ -52,10 +52,10 @@ final class PseudoToxClient {
   private def handleUiEvent(state: ToxState, e: UiEvent): ToxState = {
     e match {
 
-      case ChangeConnectionStatus(status) => state.copy(connectionStatus = "blah")
-      case ChangeUserStatus(status) => state.copy(userStatus = "blah")
-      case ChangeStatusMessage(newStatusMessage) => state.copy(userProfile = state.userProfile.copy(nickName = "blah"))
-      case ChangeNickname(nickname) => state.copy(userProfile = state.userProfile.copy(statusMessage = "blah"))
+      case ChangeConnectionStatus(status) => state.copy(connectionStatus = status)
+      case ChangeUserStatus(status) => state.copy(userStatus = status)
+      case ChangeStatusMessage(newStatusMessage) => state.copy(userProfile = state.userProfile.copy(nickName = newStatusMessage))
+      case ChangeNickname(nickname) => state.copy(userProfile = state.userProfile.copy(statusMessage = nickname))
       case SendFriendRequest(friendId, request) => state
       //  Delete a friend
       case DeleteFriend(friendId) => state
