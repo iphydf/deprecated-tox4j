@@ -52,31 +52,49 @@ final class PseudoToxClient {
   private def handleUiEvent(state: ToxState, e: UiEvent): ToxState = {
     e match {
 
-      case ChangeConnectionStatus(status) => state.copy(connectionStatus = status)
-      case ChangeUserStatus(status) => state.copy(userStatus = status)
+      /*
+      Some of the cases only can be done after requests are approved by the other side,
+      treated as already approve
+       */
+      case ChangeConnectionStatus(status)     => state.copy(connectionStatus = status)
+      case ChangeUserStatus(status)           => state.copy(userStatus = status)
       case ChangeStatusMessage(statusMessage) => state.copy(userProfile = state.userProfile.copy(statusMessage = statusMessage))
-      case ChangeNickname(nickname) => state.copy(userProfile = state.userProfile.copy(nickname = nickname))
-      case SendFriendRequest(friendId, request) => state
+      case ChangeNickname(nickname)           => state.copy(userProfile = state.userProfile.copy(nickname = nickname))
       //  Delete a friend
-      case DeleteFriend(friendId) => state
+      case DeleteFriend(friend)               => state.copy(friends = state.friends.filter(p => p == friend))
+      //  Change a friend’s alias
+      case ChangeFriendAlias(friend, alias) => state.copy(friends =
+        state.friends.updated(state.friends.indexOf(friend), friend.copy(alias = alias)))
+      //  Change a group conversation’s alias
+      case ChangeGroupAlias(group, alias) => state.copy(groups =
+        state.groups.updated(state.groups.indexOf(group), group.copy(alias = alias)))
+      //  Create a group chat
+      case CreateGroup(groupName, option) => state.copy(groups = state.groups :+
+        Group(
+          GroupProfile(groupName, "null", "null", Seq[User]()),
+          PublicConversation("blah", Seq[Message]()),
+          groupName, "none", option
+        ))
+      //  Remove a member from a group chat
+      case RemoveMemberFromGroupConversation(group, user) => state.copy(groups =
+        state.groups.updated(
+          state.groups.indexOf(group),
+          group.copy(group = group.group.copy(
+            members = group.group.members.filter(p => p == group)
+          ))
+        ))
+
+      case SendFriendRequest(friendId, request) => state.copy()
       //  See the details of a friend’s profile
       case RequestFriendProfile(friendId) => state
-      //  Change a friend’s alias
-      case ChangeFriendAlias(friendId, newAlias) => state
-      //  Change a group conversation’s alias
-      case ChangeGroupAlias(groupId, newAlias) => state
       //  Send a request to join a group
       case SendJoinGroupConversationRequest(groupId, request) => state
       //  Invite a friend to a group chat
       case InviteFriendToGroupRequest(groupId, friendId, request) => state
-      //  Create a group chat
-      case CreateGroup(groupName, option) => state
       //  Initiate a conversation with a friend
       case CreatePrivateConversation(friendId) => state
       //  Initiate a group conversation
       case CreateGroupConversation(groupId) => state
-      //  Remove a member from a group chat
-      case RemoveMemberFromGroupConversation(groupId, friendId) => state
       //  Dismiss a group
       case DismissGroupConversation(groupId) => state
       //  Leave a group conversation

@@ -1,5 +1,7 @@
 package im.tox.client.hlapi
 
+import im.tox.client.hlapi.State._
+
 sealed trait Event
 
 object Event {
@@ -47,15 +49,15 @@ object Event {
   //  Send a friend request
   final case class SendFriendRequest(friendId: String, request: String) extends UiEvent
   //  Delete a friend
-  final case class DeleteFriend(friendId: String) extends UiEvent
+  final case class DeleteFriend(friend: Friend) extends UiEvent
   //  See the details of a friend’s profile
   final case class RequestFriendProfile(friendId: String) extends UiEvent
   //  Change user nickname
   final case class ChangeNickname(nickname: String) extends UiEvent
   //  Change a friend’s alias
-  final case class ChangeFriendAlias(friendId: String, newAlias: String) extends UiEvent
+  final case class ChangeFriendAlias(friend: Friend, newAlias: String) extends UiEvent
   //  Change a group conversation’s alias
-  final case class ChangeGroupAlias(groupId: String, newAlias: String) extends UiEvent
+  final case class ChangeGroupAlias(group: Group, newAlias: String) extends UiEvent
   //  Send a request to join a group
   final case class SendJoinGroupConversationRequest(groupId: String, request: String) extends UiEvent
   //  Invite a friend to a group chat
@@ -67,7 +69,7 @@ object Event {
   //  Initiate a group conversation
   final case class CreateGroupConversation(groupId: String) extends UiEvent
   //  Remove a member from a group chat
-  final case class RemoveMemberFromGroupConversation(groupId: String, friendId: String) extends UiEvent
+  final case class RemoveMemberFromGroupConversation(group: Group, user: User) extends UiEvent
   //  Dismiss a group
   final case class DismissGroupConversation(groupId: String) extends UiEvent
   //  Leave a group conversation
