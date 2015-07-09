@@ -13,7 +13,7 @@ object Event {
    * Network Events
    */
   //  Self connection status (connected/disconnected)
-  final case class ReceiveSelfConnectionStatus() extends NetworkEvent
+  final case class ReceiveSelfConnectionStatus(connectionStatus: String) extends NetworkEvent
   //  Receive file transmission control from friends
   final case class ReceiveFileTransmissionControl() extends NetworkEvent
   //  Receive file transmission request from friends
@@ -23,11 +23,11 @@ object Event {
   //  A friend’s connection status changes (online/offline)
   final case class ReceiveFriendConnectionStatusChange() extends NetworkEvent
   //  Receive a message from a friend
-  final case class ReceiveFriendMessage() extends NetworkEvent
+  final case class ReceiveFriendMessage(friendNumber: Int, messageType: String, timestamp: Int, content: String) extends NetworkEvent
   //  Receive a message from a group
   final case class ReceiveGroupMessage() extends NetworkEvent
   //  A friend’s name changes
-  final case class ReceiveFriendNameChange() extends NetworkEvent
+  final case class ReceiveFriendName(friendNumber: Int, name: String) extends NetworkEvent
   //  Receive a friend request
   final case class ReceiveFriendRequest() extends NetworkEvent
   //  A friend’s user status changes
@@ -35,13 +35,13 @@ object Event {
   //  A friend’s status message changes
   final case class ReceiveFriendStatusMessageChange() extends NetworkEvent
   //  A friend typing status changes
-  final case class ReceiveFriendTypingStatusChange() extends NetworkEvent
+  final case class ReceiveFriendTyping(friendNumber: Int, isTyping: Boolean) extends NetworkEvent
   //  A lossy packet arrives
   final case class ReceiveLossyPacket() extends NetworkEvent
   //  A lossless packet arrives
   final case class ReceiveLosslessPacket() extends NetworkEvent
   //  Receive the read receipt of a message
-  final case class ReceiveReadReceipt() extends NetworkEvent
+  final case class ReceiveReadReceipt(friendNumber: Int, messageId: Int) extends NetworkEvent
 
   /**
    * GUI Events
@@ -76,8 +76,10 @@ object Event {
   final case class LeaveGroupConversation(groupId: String) extends UiEvent
   //  Delete a conversation
   final case class DeleteConversation(conversationId: String) extends UiEvent
-  //  Send a text message to a conversation (group/private)
-  final case class SendTextMessage(conversationId: String, message: String) extends UiEvent
+  //  Send a text message to a private conversation
+  final case class SendPrivateMessage(friend: Friend, message: Message) extends UiEvent
+  //  Send a text message to a group conversation
+  final case class SendPublicMessage(group: Group, message: Message) extends UiEvent
   //  Initiate a file transmission request to a friend
   final case class SendFileTransmissionRequest(friendId: String, fileDescription: String) extends UiEvent
   //  Get all conversations
@@ -99,10 +101,13 @@ object Event {
   //  Change self connection status
   final case class ChangeConnectionStatus(status: String) extends UiEvent
   //  Block/unblock a friend
-  final case class ChangeFriendBlockStatus(friendId: String) extends UiEvent
-  //  Mute/unmute a conversation
-  final case class ChangeConversationMuteStatus(friendId: String) extends UiEvent
+  final case class ChangeFriendBlockStatus(friend: Friend) extends UiEvent
+  //  Mute/unmute a private conversation
+  final case class ChangeFriendConversationMuteStatus(friend: Friend) extends UiEvent
+  //  Mute/unmute a group conversation
+  final case class ChangeGroupConversationMuteStatus(group: Group) extends UiEvent
   //  Star/unstar a friend
-  final case class ChangeConversationStarStatus(friendId: String) extends UiEvent
-
+  final case class ChangeFriendStarStatus(friend: Friend) extends UiEvent
+  //  Start/unstar a group
+  final case class ChangeGroupStarStatus(group: Group) extends UiEvent
 }

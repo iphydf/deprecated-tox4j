@@ -13,10 +13,24 @@ final class PseudoToxClient {
     }
   }
 
+  /**
+   * Get the corresponding friend
+   * @param state
+   * @param friendNumber
+   * @return
+   */
+  private def getFriend(state: ToxState, friendNumber: Int): Friend = {
+    state.friends.filter(p => friendNumber == friendNumber).apply(0)
+  }
+
+  private def getMessageWithFriend(state: ToxState, friendNumber: Int, messageId: Int): Message = {
+    getFriend(state, friendNumber).conversation.messages.filter(p => messageId == p.Id).apply(0)
+  }
+
   private def handleNetworkEvent(state: ToxState, e: NetworkEvent): ToxState = {
     e match {
 
-      case ReceiveSelfConnectionStatus()         => state
+      case ReceiveSelfConnectionStatus(status)   => state.copy(connectionStatus = status)
       //  Receive file transmission control from friends
       case ReceiveFileTransmissionControl()      => state
       //  Receive file transmission request from friends
@@ -26,26 +40,52 @@ final class PseudoToxClient {
       //  A friend’s connection status changes (online/offline)
       case ReceiveFriendConnectionStatusChange() => state
       //  Receive a message from a friend
-      case ReceiveFriendMessage()                => state
-      //  Receive a message from a group
-      case ReceiveGroupMessage()                 => state
+      case ReceiveFriendMessage(friendNumber, messageType, timeStamp, content) => state.copy(friends =
+        state.friends.updated(
+          state.friends.indexOf(getFriend(state, friendNumber)),
+          getFriend(state, friendNumber).copy(conversation =
+            getFriend(state, friendNumber).conversation.copy(messages =
+              getFriend(state, friendNumber).conversation.messages
+                :+ Message("new id", messageType, timeStamp, content, "received")))
+        ))
       //  A friend’s name changes
-      case ReceiveFriendNameChange()             => state
+      case ReceiveFriendName(friendNumber: Int, name: String) => state.copy(friends =
+        state.friends.updated(
+          state.friends.indexOf(getFriend(state, friendNumber)),
+          getFriend(state, friendNumber).copy(user =
+            getFriend(state, friendNumber).user.copy(userProfile =
+              getFriend(state, friendNumber).user.userProfile.copy(nickname = name)))
+        ))
       //  Receive a friend request
-      case ReceiveFriendRequest()                => state
+      case ReceiveFriendRequest()             => state
       //  A friend’s user status changes
-      case ReceiveFriendUserStatusChange()       => state
+      case ReceiveFriendUserStatusChange()    => state
       //  A friend’s status message changes
-      case ReceiveFriendStatusMessageChange()    => state
+      case ReceiveFriendStatusMessageChange() => state
       //  A friend typing status changes
-      case ReceiveFriendTypingStatusChange()     => state
+      case ReceiveFriendTyping(friendNumber, isTyping) => state.copy(friends =
+        state.friends.updated(
+          state.friends.indexOf(getFriend(state, friendNumber)),
+          getFriend(state, friendNumber).copy(conversation =
+            getFriend(state, friendNumber).conversation.copy(isTyping = isTyping))
+        ))
       //  A lossy packet arrives
-      case ReceiveLossyPacket()                  => state
+      case ReceiveLossyPacket()    => state
       //  A lossless packet arrives
-      case ReceiveLosslessPacket()               => state
+      case ReceiveLosslessPacket() => state
       //  Receive the read receipt of a message
-      case ReceiveReadReceipt()                  => state
-
+      case ReceiveReadReceipt(friendNumber, messageId) => state.copy(friends =
+        state.friends.updated(
+          state.friends.indexOf(getFriend(state, friendNumber)),
+          getFriend(state, friendNumber).copy(conversation =
+            getFriend(state, friendNumber).conversation.copy(messages =
+              getFriend(state, friendNumber).conversation.messages.updated(
+                getFriend(state, friendNumber).conversation.messages.indexOf(
+                  getMessageWithFriend(state, friendNumber, messageId)
+                ),
+                getMessageWithFriend(state, friendNumber, messageId).copy(status = "read")
+              )))
+        ))
     }
   }
 
@@ -83,6 +123,52 @@ final class PseudoToxClient {
             members = group.group.members.filter(p => p == group)
           ))
         ))
+      //  Send a text message to a group
+      case SendPrivateMessage(friend, message) => state.copy(friends =
+        state.friends.updated(
+          state.friends.indexOf(friend),
+          friend.copy(conversation = friend.conversation.copy(
+            messages = friend.conversation.messages :+ message
+          ))
+        ))
+      //  Send a text message to a group conversation
+      case SendPublicMessage(group, message) => state.copy(groups =
+        state.groups.updated(
+          state.groups.indexOf(group),
+          group.copy(conversation = group.conversation.copy(
+            messages = group.conversation.messages :+ message
+          ))
+        ))
+      //  Star/unstar a friend
+      case ChangeFriendStarStatus(friend) => state.copy(friends =
+        state.friends.updated(
+          state.friends.indexOf(friend),
+          friend.copy(isStarred = "Star/unstar")
+        ))
+      // Star/unstar a group
+      case ChangeGroupStarStatus(group) => state.copy(groups =
+        state.groups.updated(
+          state.groups.indexOf(group),
+          group.copy(isStarred = "Star/unstar")
+        ))
+      //  Block/unblock a friend
+      case ChangeFriendBlockStatus(friend) => state.copy(friends =
+        state.friends.updated(
+          state.friends.indexOf(friend),
+          friend.copy(isBlocked = "block/unblock")
+        ))
+      //  Mute/unmute a private conversation
+      case ChangeFriendConversationMuteStatus(friend) => state.copy(friends =
+        state.friends.updated(
+          state.friends.indexOf(friend),
+          friend.copy(conversation = friend.conversation.copy(isMuted = "Mute/Unmute"))
+        ))
+      //  Mute/unmute a group conversation
+      case ChangeGroupConversationMuteStatus(group) => state.copy(groups =
+        state.groups.updated(
+          state.groups.indexOf(group),
+          group.copy(conversation = group.conversation.copy(isMuted = "Mute/Unmute"))
+        ))
 
       case SendFriendRequest(friendId, request) => state.copy()
       //  See the details of a friend’s profile
@@ -101,8 +187,6 @@ final class PseudoToxClient {
       case LeaveGroupConversation(groupId) => state
       //  Delete a conversation
       case DeleteConversation(conversationId) => state
-      //  Send a text message to a conversation (group/private)
-      case SendTextMessage(conversationId, message) => state
       //  Initiate a file transmission request to a friend
       case SendFileTransmissionRequest(friendId, fileDescription) => state
       //  Get all conversations
@@ -117,13 +201,6 @@ final class PseudoToxClient {
       case Login(username, password) => state
       // Logout
       case Logout() => state
-      //  Block/unblock a friend
-      case ChangeFriendBlockStatus(friendId) => state
-      //  Mute/unmute a conversation
-      case ChangeConversationMuteStatus(friendId) => state
-      //  Star/unstar a friend
-      case ChangeConversationStarStatus(friendId) => state
-
     }
   }
 
