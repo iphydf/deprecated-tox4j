@@ -3,52 +3,52 @@ package im.tox.client
 import im.tox.client.hlapi.Event
 import im.tox.client.hlapi.Event._
 
-abstract class PseudoToxClient {
+final class PseudoToxClient {
 
   def acceptEvent(e: Event): Unit = {
     e match {
       case e: NetworkEvent => handleNetworkEvent(e)
-      case e: UiEvent => handleUiEvent(e)
+      case e: UiEvent      => handleUiEvent(e)
     }
   }
 
-  protected def handleNetworkEvent(e: NetworkEvent): Unit = {
+  private def handleNetworkEvent(e: NetworkEvent): Unit = {
     e match {
 
-      case ReceiveSelfConnectionStatus() =>
+      case ReceiveSelfConnectionStatus()         =>
       //  Receive file transmission control from friends
-      case ReceiveFileTransmissionControl() =>
+      case ReceiveFileTransmissionControl()      =>
       //  Receive file transmission request from friends
-      case ReceiveFileTransmissionRequest() =>
+      case ReceiveFileTransmissionRequest()      =>
       //  Receive a chunk of file under transmission from friends
-      case ReceiveFileChunk() =>
+      case ReceiveFileChunk()                    =>
       //  A friend’s connection status changes (online/offline)
       case ReceiveFriendConnectionStatusChange() =>
       //  Receive a message from a friend
-      case ReceiveFriendMessage() =>
+      case ReceiveFriendMessage()                =>
       //  Receive a message from a group
-      case ReceiveGroupMessage() =>
+      case ReceiveGroupMessage()                 =>
       //  A friend’s name changes
-      case ReceiveFriendNameChange() =>
+      case ReceiveFriendNameChange()             =>
       //  Receive a friend request
-      case ReceiveFriendRequest() =>
+      case ReceiveFriendRequest()                =>
       //  A friend’s user status changes
-      case ReceiveFriendUserStatusChange() =>
+      case ReceiveFriendUserStatusChange()       =>
       //  A friend’s status message changes
-      case ReceiveFriendStatusMessageChange() =>
+      case ReceiveFriendStatusMessageChange()    =>
       //  A friend typing status changes
-      case ReceiveFriendTypingStatusChange() =>
+      case ReceiveFriendTypingStatusChange()     =>
       //  A lossy packet arrives
-      case ReceiveLossyPacket() =>
+      case ReceiveLossyPacket()                  =>
       //  A lossless packet arrives
-      case ReceiveLosslessPacket() =>
+      case ReceiveLosslessPacket()               =>
       //  Receive the read receipt of a message
-      case ReceiveReadReceipt() =>
+      case ReceiveReadReceipt()                  =>
 
     }
   }
 
-  protected def handleUiEvent(e: UiEvent): Unit = {
+  private def handleUiEvent(e: UiEvent): Unit = {
     e match {
 
       case SendFriendRequest(friendId, request) =>
