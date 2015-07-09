@@ -6,6 +6,7 @@ object Event {
 
   sealed abstract class NetworkEvent extends Event
   sealed abstract class UiEvent extends Event
+  sealed abstract class UiStatusEvent extends UiEvent
   /**
    * Network Events
    */
@@ -92,9 +93,9 @@ object Event {
   //  Set status message
   final case class ChangeStatusMessage(newStatusMessage: String) extends UiEvent
   //  Change self user status
-  final case class ChangeUserStatus(status: String) extends UiEvent
+  final case class ChangeUserStatus(status: String) extends UiStatusEvent
   //  Change self connection status
-  final case class ChangeConnectionStatus(status: String) extends UiEvent
+  final case class ChangeConnectionStatus(status: String) extends UiStatusEvent
   //  Block/unblock a friend
   final case class ChangeFriendBlockStatus(friendId: String) extends UiEvent
   //  Mute/unmute a conversation

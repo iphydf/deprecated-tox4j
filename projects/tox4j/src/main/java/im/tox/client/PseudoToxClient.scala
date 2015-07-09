@@ -2,18 +2,29 @@ package im.tox.client
 
 import im.tox.client.hlapi.Event
 import im.tox.client.hlapi.Event._
+import im.tox.client.hlapi.State._
 
 final class PseudoToxClient {
 
-  def acceptEvent(e: Event): Unit = {
+  def acceptEvent(state: ToxState, e: Event): ToxState = {
     e match {
-      case e: NetworkEvent => handleNetworkEvent(e)
-      case e: UiEvent      => handleUiEvent(e)
+      case e: NetworkEvent => handleNetworkEvent(state, e)
+      case e: UiEvent      => handleUiEvent(state, e)
     }
   }
 
-  private def handleNetworkEvent(e: NetworkEvent): Unit = {
-    e match {
+  private def StatusEventHandler(state: ToxState, e: UiStatusEvent): ToxState = {
+    state.copy(status = {
+      e match {
+        case ChangeConnectionStatus(status) => state.status.copy(connectionStatus = "blah")
+        case ChangeUserStatus(status)       => state.status.copy(userStatus = "blah")
+      }
+    })
+  }
+
+  private def handleNetworkEvent(state: ToxState, e: NetworkEvent): ToxState = {
+    state
+    /*e match {
 
       case ReceiveSelfConnectionStatus()         =>
       //  Receive file transmission control from friends
@@ -45,12 +56,15 @@ final class PseudoToxClient {
       //  Receive the read receipt of a message
       case ReceiveReadReceipt()                  =>
 
-    }
+    }*/
   }
 
-  private def handleUiEvent(e: UiEvent): Unit = {
+  private def handleUiEvent(state: ToxState, e: UiEvent): ToxState = {
     e match {
 
+      case e: UiStatusEvent => StatusEventHandler(state, e)
+      case _                => state
+      /*
       case SendFriendRequest(friendId, request) =>
       //  Delete a friend
       case DeleteFriend(friendId) =>
@@ -98,17 +112,13 @@ final class PseudoToxClient {
       case Logout() =>
       //  Set status message
       case ChangeStatusMessage(newStatusMessage) =>
-      //  Change self user status
-      case ChangeUserStatus(status) =>
-      //  Change self connection status
-      case ChangeConnectionStatus(status) =>
       //  Block/unblock a friend
       case ChangeFriendBlockStatus(friendId) =>
       //  Mute/unmute a conversation
       case ChangeConversationMuteStatus(friendId) =>
       //  Star/unstar a friend
       case ChangeConversationStarStatus(friendId) =>
-
+*/
     }
   }
 
