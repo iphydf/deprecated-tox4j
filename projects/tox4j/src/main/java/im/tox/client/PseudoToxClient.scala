@@ -16,15 +16,19 @@ final class PseudoToxClient {
   private def handleNetworkEvent(state: ToxState, e: NetworkEvent): ToxState = {
     e match {
 
-      case ReceiveSelfConnectionStatus(status)   => state.copy(connectionStatus = status)
+      case ReceiveSelfConnectionStatus(status) => state.copy(connectionStatus = status)
       //  Receive file transmission control from friends
-      case ReceiveFileTransmissionControl()      => state
+      case ReceiveFileTransmissionControl()    => state
       //  Receive file transmission request from friends
-      case ReceiveFileTransmissionRequest()      => state
+      case ReceiveFileTransmissionRequest()    => state
       //  Receive a chunk of file under transmission from friends
-      case ReceiveFileChunk()                    => state
+      case ReceiveFileChunk()                  => state
       //  A friend’s connection status changes (online/offline)
-      case ReceiveFriendConnectionStatus() => state
+      case ReceiveFriendConnectionStatus(friendNumber, status) => state.copy(friends =
+        state.friends.updated(
+          friendNumber,
+          state.friends(friendNumber).copy(status = status)
+        ))
       //  Receive a message from a friend
       case ReceiveFriendMessage(friendNumber, messageType, timeStamp, content) => state.copy(friends =
         state.friends.updated(
@@ -42,16 +46,15 @@ final class PseudoToxClient {
             state.friends(friendNumber).userProfile.copy(nickname = name))
         ))
       //  Receive a friend request
-      case ReceiveFriendRequest()                    => state
+      case ReceiveFriendRequest() => state
       //  A friend’s user status changes
       case ReceiveFriendStatus(friendNumber, status) => state.copy(friends =
         state.friends.updated(
-        friendNumber,
-        state.friends(friendNumber).copy(status = status)
-        )
-      )
+          friendNumber,
+          state.friends(friendNumber).copy(status = status)
+        ))
       //  A friend’s status message changes
-      case ReceiveFriendStatusMessageChange()        => state
+      case ReceiveFriendStatusMessageChange() => state
       //  A friend typing status changes
       case ReceiveFriendTyping(friendNumber, isTyping) => state.copy(friends =
         state.friends.updated(
