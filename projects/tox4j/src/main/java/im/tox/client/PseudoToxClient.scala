@@ -54,8 +54,8 @@ final class PseudoToxClient {
 
       case ChangeConnectionStatus(status) => state.copy(connectionStatus = status)
       case ChangeUserStatus(status) => state.copy(userStatus = status)
-      case ChangeStatusMessage(newStatusMessage) => state.copy(userProfile = state.userProfile.copy(statusMessage = newStatusMessage))
-      case ChangeNickname(newNickname) => state.copy(userProfile = state.userProfile.copy(nickName = newNickname))
+      case ChangeStatusMessage(statusMessage) => state.copy(userProfile = state.userProfile.copy(statusMessage = statusMessage))
+      case ChangeNickname(nickname) => state.copy(userProfile = state.userProfile.copy(nickname = nickname))
       case SendFriendRequest(friendId, request) => state
       //  Delete a friend
       case DeleteFriend(friendId) => state
