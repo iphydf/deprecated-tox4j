@@ -24,7 +24,7 @@ final class PseudoToxClient {
       //  Receive a chunk of file under transmission from friends
       case ReceiveFileChunk()                    => state
       //  A friend’s connection status changes (online/offline)
-      case ReceiveFriendConnectionStatusChange() => state
+      case ReceiveFriendConnectionStatus() => state
       //  Receive a message from a friend
       case ReceiveFriendMessage(friendNumber, messageType, timeStamp, content) => state.copy(friends =
         state.friends.updated(
@@ -44,7 +44,12 @@ final class PseudoToxClient {
       //  Receive a friend request
       case ReceiveFriendRequest()                    => state
       //  A friend’s user status changes
-      case ReceiveFriendStatus(friendNumber, status) => state
+      case ReceiveFriendStatus(friendNumber, status) => state.copy(friends =
+        state.friends.updated(
+        friendNumber,
+        state.friends(friendNumber).copy(status = status)
+        )
+      )
       //  A friend’s status message changes
       case ReceiveFriendStatusMessageChange()        => state
       //  A friend typing status changes

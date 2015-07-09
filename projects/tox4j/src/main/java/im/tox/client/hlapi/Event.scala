@@ -21,7 +21,7 @@ object Event {
   //  Receive a chunk of file under transmission from friends
   final case class ReceiveFileChunk() extends NetworkEvent
   //  A friend’s connection status changes (online/offline)
-  final case class ReceiveFriendConnectionStatusChange() extends NetworkEvent
+  final case class ReceiveFriendConnectionStatus() extends NetworkEvent
   //  Receive a message from a friend
   final case class ReceiveFriendMessage(friendNumber: Int, messageType: String, timestamp: Int, content: String) extends NetworkEvent
   //  Receive a message from a group
