@@ -53,11 +53,10 @@ final class PseudoToxClient {
   private def handleUiEvent(state: ToxState, e: UiEvent): ToxState = {
     e match {
 
-      case ChangeConnectionStatus(status)        => ConnectionStatusHandler(state, e)
-      case ChangeUserStatus(status)              => UserStatusHandler(state, e)
-      case ChangeStatusMessage(newStatusMessage) => StatusMessageHandler(state, e)
-      case ChangeNickname(nickname)              => NicknameHandler(state, e)
-      case _                                     => state
+      case ChangeConnectionStatus(status)        => state.copy(connectionStatus = "blah")
+      case ChangeUserStatus(status)              => state.copy(userStatus = "blah")
+      case ChangeStatusMessage(newStatusMessage) => state.copy(userProfile = state.userProfile.copy(nickName = "blah"))
+      case ChangeNickname(nickname)              => state.copy(userProfile = state.userProfile.copy(statusMessage = "blah"))
       /*
       case SendFriendRequest(friendId, request) =>
       //  Delete a friend
@@ -112,19 +111,4 @@ final class PseudoToxClient {
     }
   }
 
-  private def ConnectionStatusHandler(toxState: ToxState, e: UiEvent): ToxState = {
-    toxState.copy(connectionStatus = "blah")
-  }
-
-  private def UserStatusHandler(toxState: ToxState, e: UiEvent): ToxState = {
-    toxState.copy(userStatus = "blah")
-  }
-
-  private def NicknameHandler(toxState: ToxState, e: UiEvent): ToxState = {
-    toxState.copy(userProfile = toxState.userProfile.copy(nickName = "blah"))
-  }
-
-  private def StatusMessageHandler(toxState: ToxState, e: UiEvent): ToxState = {
-    toxState.copy(userProfile = toxState.userProfile.copy(statusMessage = "blah"))
-  }
 }
