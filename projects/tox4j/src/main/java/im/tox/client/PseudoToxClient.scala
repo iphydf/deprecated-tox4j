@@ -48,6 +48,7 @@ abstract class PseudoToxClient {
 
     }
   }
+  
   protected def handleUiEvent(e: UiEvent): Unit = {
     e match {
 
