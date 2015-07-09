@@ -9,7 +9,6 @@ abstract class PseudoToxClient {
     e match {
       case e: NetworkEvent => handleNetworkEvent(e)
       case e: UiEvent => handleUiEvent(e)
-
     }
   }
 
@@ -48,7 +47,7 @@ abstract class PseudoToxClient {
 
     }
   }
-  
+
   protected def handleUiEvent(e: UiEvent): Unit = {
     e match {
 
