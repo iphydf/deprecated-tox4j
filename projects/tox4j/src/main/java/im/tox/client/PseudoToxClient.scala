@@ -13,20 +13,6 @@ final class PseudoToxClient {
     }
   }
 
-  /**
-   * Get the corresponding friend
-   * @param state
-   * @param friendNumber
-   * @return
-   */
-  private def getFriend(state: ToxState, friendNumber: Int): Friend = {
-    state.friends.filter(p => friendNumber == friendNumber).apply(0)
-  }
-
-  private def getMessageWithFriend(state: ToxState, friendNumber: Int, messageId: Int): Message = {
-    getFriend(state, friendNumber).conversation.messages.filter(p => messageId == p.Id).apply(0)
-  }
-
   private def handleNetworkEvent(state: ToxState, e: NetworkEvent): ToxState = {
     e match {
 
@@ -42,32 +28,31 @@ final class PseudoToxClient {
       //  Receive a message from a friend
       case ReceiveFriendMessage(friendNumber, messageType, timeStamp, content) => state.copy(friends =
         state.friends.updated(
-          state.friends.indexOf(getFriend(state, friendNumber)),
-          getFriend(state, friendNumber).copy(conversation =
-            getFriend(state, friendNumber).conversation.copy(messages =
-              getFriend(state, friendNumber).conversation.messages
-                :+ Message("new id", messageType, timeStamp, content, "received")))
+          friendNumber,
+          state.friends.apply(friendNumber).copy(conversation =
+            state.friends.apply(friendNumber).conversation.copy(messages =
+              state.friends.apply(friendNumber).conversation.messages
+                + ((0, Message("new id", messageType, timeStamp, content, "received")))))
         ))
       //  A friend’s name changes
       case ReceiveFriendName(friendNumber: Int, name: String) => state.copy(friends =
         state.friends.updated(
-          state.friends.indexOf(getFriend(state, friendNumber)),
-          getFriend(state, friendNumber).copy(user =
-            getFriend(state, friendNumber).user.copy(userProfile =
-              getFriend(state, friendNumber).user.userProfile.copy(nickname = name)))
+          friendNumber,
+          state.friends.apply(friendNumber).copy(userProfile =
+            state.friends.apply(friendNumber).userProfile.copy(nickname = name))
         ))
       //  Receive a friend request
-      case ReceiveFriendRequest()             => state
+      case ReceiveFriendRequest()                    => state
       //  A friend’s user status changes
-      case ReceiveFriendUserStatusChange()    => state
+      case ReceiveFriendStatus(friendNumber, status) => state
       //  A friend’s status message changes
-      case ReceiveFriendStatusMessageChange() => state
+      case ReceiveFriendStatusMessageChange()        => state
       //  A friend typing status changes
       case ReceiveFriendTyping(friendNumber, isTyping) => state.copy(friends =
         state.friends.updated(
-          state.friends.indexOf(getFriend(state, friendNumber)),
-          getFriend(state, friendNumber).copy(conversation =
-            getFriend(state, friendNumber).conversation.copy(isTyping = isTyping))
+          friendNumber,
+          state.friends.apply(friendNumber).copy(conversation =
+            state.friends.apply(friendNumber).conversation.copy(isTyping = isTyping))
         ))
       //  A lossy packet arrives
       case ReceiveLossyPacket()    => state
@@ -76,14 +61,12 @@ final class PseudoToxClient {
       //  Receive the read receipt of a message
       case ReceiveReadReceipt(friendNumber, messageId) => state.copy(friends =
         state.friends.updated(
-          state.friends.indexOf(getFriend(state, friendNumber)),
-          getFriend(state, friendNumber).copy(conversation =
-            getFriend(state, friendNumber).conversation.copy(messages =
-              getFriend(state, friendNumber).conversation.messages.updated(
-                getFriend(state, friendNumber).conversation.messages.indexOf(
-                  getMessageWithFriend(state, friendNumber, messageId)
-                ),
-                getMessageWithFriend(state, friendNumber, messageId).copy(status = "read")
+          friendNumber,
+          state.friends.apply(friendNumber).copy(conversation =
+            state.friends.apply(friendNumber).conversation.copy(messages =
+              state.friends.apply(friendNumber).conversation.messages.updated(
+                messageId,
+                state.friends.apply(friendNumber).conversation.messages.apply(messageId).copy(status = "read")
               )))
         ))
     }
@@ -101,73 +84,76 @@ final class PseudoToxClient {
       case ChangeStatusMessage(statusMessage) => state.copy(userProfile = state.userProfile.copy(statusMessage = statusMessage))
       case ChangeNickname(nickname)           => state.copy(userProfile = state.userProfile.copy(nickname = nickname))
       //  Delete a friend
-      case DeleteFriend(friend)               => state.copy(friends = state.friends.filter(p => p == friend))
+      case DeleteFriend(friendNumber)         => state.copy(friends = state.friends - friendNumber)
       //  Change a friend’s alias
-      case ChangeFriendAlias(friend, alias) => state.copy(friends =
-        state.friends.updated(state.friends.indexOf(friend), friend.copy(alias = alias)))
+      case ChangeFriendAlias(friendNumber, alias) => state.copy(friends =
+        state.friends.updated(friendNumber, state.friends.apply(friendNumber).copy(alias = alias)))
       //  Change a group conversation’s alias
-      case ChangeGroupAlias(group, alias) => state.copy(groups =
-        state.groups.updated(state.groups.indexOf(group), group.copy(alias = alias)))
+      case ChangeGroupAlias(groupNumber, alias) => state.copy(groups =
+        state.groups.updated(groupNumber, state.groups.apply(groupNumber).copy(alias = alias)))
       //  Create a group chat
-      case CreateGroup(groupName, option) => state.copy(groups = state.groups :+
-        Group(
-          GroupProfile(groupName, "null", "null", Seq[User]()),
-          PublicConversation("blah", Seq[Message]()),
+      case CreateGroup(groupName, option) => state.copy(groups = state.groups +
+        ((0, Group(
+          GroupProfile(groupName, "null", "null", Map[Int, UserProfile]()),
+          PublicConversation("blah", Map[Int, Message]()),
           groupName, "none", option
-        ))
+        ))))
       //  Remove a member from a group chat
-      case RemoveMemberFromGroupConversation(group, user) => state.copy(groups =
+      case RemoveMemberFromGroupConversation(groupNumber, friendNumber) => state.copy(groups =
         state.groups.updated(
-          state.groups.indexOf(group),
-          group.copy(group = group.group.copy(
-            members = group.group.members.filter(p => p == group)
-          ))
+          groupNumber,
+          state.groups.apply(groupNumber).copy(groupProfile =
+            state.groups.apply(groupNumber).groupProfile.copy(members =
+              state.groups.apply(groupNumber).groupProfile.members - friendNumber))
         ))
       //  Send a text message to a group
-      case SendPrivateMessage(friend, message) => state.copy(friends =
+      case SendPrivateMessage(friendNumber, message) => state.copy(friends =
         state.friends.updated(
-          state.friends.indexOf(friend),
-          friend.copy(conversation = friend.conversation.copy(
-            messages = friend.conversation.messages :+ message
-          ))
+          friendNumber,
+          state.friends.apply(friendNumber).copy(conversation =
+            state.friends.apply(friendNumber).conversation.copy(messages =
+              state.friends.apply(friendNumber).conversation.messages + ((0, message))))
         ))
       //  Send a text message to a group conversation
-      case SendPublicMessage(group, message) => state.copy(groups =
+      case SendPublicMessage(groupNumber, message) => state.copy(groups =
         state.groups.updated(
-          state.groups.indexOf(group),
-          group.copy(conversation = group.conversation.copy(
-            messages = group.conversation.messages :+ message
-          ))
+          groupNumber,
+          state.groups.apply(groupNumber).copy(conversation =
+            state.groups.apply(groupNumber).conversation.copy(messages =
+              state.groups.apply(groupNumber).conversation.messages + ((0, message))))
+
         ))
       //  Star/unstar a friend
-      case ChangeFriendStarStatus(friend) => state.copy(friends =
+      case ChangeFriendStarStatus(friendNumber) => state.copy(friends =
         state.friends.updated(
-          state.friends.indexOf(friend),
-          friend.copy(isStarred = "Star/unstar")
+          friendNumber,
+          state.friends.apply(friendNumber).copy(isStarred = "Star/unstar")
         ))
       // Star/unstar a group
-      case ChangeGroupStarStatus(group) => state.copy(groups =
+      case ChangeGroupStarStatus(groupNumber) => state.copy(groups =
         state.groups.updated(
-          state.groups.indexOf(group),
-          group.copy(isStarred = "Star/unstar")
+          groupNumber,
+          state.groups.apply(groupNumber).copy(isStarred = "Star/unstar")
         ))
       //  Block/unblock a friend
-      case ChangeFriendBlockStatus(friend) => state.copy(friends =
+      case ChangeFriendBlockStatus(friendNumber) => state.copy(friends =
         state.friends.updated(
-          state.friends.indexOf(friend),
-          friend.copy(isBlocked = "block/unblock")
+          friendNumber,
+          state.friends.apply(friendNumber).copy(isBlocked = "block/unblock")
         ))
       //  Mute/unmute a private conversation
-      case ChangeFriendConversationMuteStatus(friend) => state.copy(friends =
+      case ChangeFriendConversationMuteStatus(friendNumber) => state.copy(friends =
         state.friends.updated(
-          state.friends.indexOf(friend),
-          friend.copy(conversation = friend.conversation.copy(isMuted = "Mute/Unmute"))
+          friendNumber,
+          state.friends.apply(friendNumber).copy(conversation =
+            state.friends.apply(friendNumber).conversation.copy(isMuted = "mute/unmute"))
         ))
       //  Mute/unmute a group conversation
-      case ChangeGroupConversationMuteStatus(group) => state.copy(groups =
+      case ChangeGroupConversationMuteStatus(groupNumber) => state.copy(groups =
         state.groups.updated(
-          state.groups.indexOf(group),
-          group.copy(conversation = group.conversation.copy(isMuted = "Mute/Unmute"))
+          groupNumber,
+          state.groups.apply(groupNumber).copy(conversation =
+            state.groups.apply(groupNumber).conversation.copy(isMuted = "mute/unmute"))
         ))
 
       case SendFriendRequest(friendId, request) => state.copy()

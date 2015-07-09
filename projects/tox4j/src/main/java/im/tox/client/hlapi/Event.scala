@@ -31,7 +31,7 @@ object Event {
   //  Receive a friend request
   final case class ReceiveFriendRequest() extends NetworkEvent
   //  A friend’s user status changes
-  final case class ReceiveFriendUserStatusChange() extends NetworkEvent
+  final case class ReceiveFriendStatus(friendNumber: Int, status: String) extends NetworkEvent
   //  A friend’s status message changes
   final case class ReceiveFriendStatusMessageChange() extends NetworkEvent
   //  A friend typing status changes
@@ -49,15 +49,15 @@ object Event {
   //  Send a friend request
   final case class SendFriendRequest(friendId: String, request: String) extends UiEvent
   //  Delete a friend
-  final case class DeleteFriend(friend: Friend) extends UiEvent
+  final case class DeleteFriend(friendNumber: Int) extends UiEvent
   //  See the details of a friend’s profile
   final case class RequestFriendProfile(friendId: String) extends UiEvent
   //  Change user nickname
   final case class ChangeNickname(nickname: String) extends UiEvent
   //  Change a friend’s alias
-  final case class ChangeFriendAlias(friend: Friend, newAlias: String) extends UiEvent
+  final case class ChangeFriendAlias(friendId: Int, newAlias: String) extends UiEvent
   //  Change a group conversation’s alias
-  final case class ChangeGroupAlias(group: Group, newAlias: String) extends UiEvent
+  final case class ChangeGroupAlias(groupNumber: Int, newAlias: String) extends UiEvent
   //  Send a request to join a group
   final case class SendJoinGroupConversationRequest(groupId: String, request: String) extends UiEvent
   //  Invite a friend to a group chat
@@ -69,7 +69,7 @@ object Event {
   //  Initiate a group conversation
   final case class CreateGroupConversation(groupId: String) extends UiEvent
   //  Remove a member from a group chat
-  final case class RemoveMemberFromGroupConversation(group: Group, user: User) extends UiEvent
+  final case class RemoveMemberFromGroupConversation(groupNumber: Int, friendNumber: Int) extends UiEvent
   //  Dismiss a group
   final case class DismissGroupConversation(groupId: String) extends UiEvent
   //  Leave a group conversation
@@ -77,9 +77,9 @@ object Event {
   //  Delete a conversation
   final case class DeleteConversation(conversationId: String) extends UiEvent
   //  Send a text message to a private conversation
-  final case class SendPrivateMessage(friend: Friend, message: Message) extends UiEvent
+  final case class SendPrivateMessage(friendNumber: Int, message: Message) extends UiEvent
   //  Send a text message to a group conversation
-  final case class SendPublicMessage(group: Group, message: Message) extends UiEvent
+  final case class SendPublicMessage(groupNumber: Int, message: Message) extends UiEvent
   //  Initiate a file transmission request to a friend
   final case class SendFileTransmissionRequest(friendId: String, fileDescription: String) extends UiEvent
   //  Get all conversations
@@ -101,13 +101,13 @@ object Event {
   //  Change self connection status
   final case class ChangeConnectionStatus(status: String) extends UiEvent
   //  Block/unblock a friend
-  final case class ChangeFriendBlockStatus(friend: Friend) extends UiEvent
+  final case class ChangeFriendBlockStatus(friend: Int) extends UiEvent
   //  Mute/unmute a private conversation
-  final case class ChangeFriendConversationMuteStatus(friend: Friend) extends UiEvent
+  final case class ChangeFriendConversationMuteStatus(friendNumber: Int) extends UiEvent
   //  Mute/unmute a group conversation
-  final case class ChangeGroupConversationMuteStatus(group: Group) extends UiEvent
+  final case class ChangeGroupConversationMuteStatus(groupNumber: Int) extends UiEvent
   //  Star/unstar a friend
-  final case class ChangeFriendStarStatus(friend: Friend) extends UiEvent
+  final case class ChangeFriendStarStatus(friendNumber: Int) extends UiEvent
   //  Start/unstar a group
-  final case class ChangeGroupStarStatus(group: Group) extends UiEvent
+  final case class ChangeGroupStarStatus(groupNumber: Int) extends UiEvent
 }
