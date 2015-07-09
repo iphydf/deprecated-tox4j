@@ -13,15 +13,6 @@ final class PseudoToxClient {
     }
   }
 
-  private def StatusEventHandler(state: ToxState, e: UiStatusEvent): ToxState = {
-    state.copy(status = {
-      e match {
-        case ChangeConnectionStatus(status) => state.status.copy(connectionStatus = "blah")
-        case ChangeUserStatus(status)       => state.status.copy(userStatus = "blah")
-      }
-    })
-  }
-
   private def handleNetworkEvent(state: ToxState, e: NetworkEvent): ToxState = {
     state
     /*e match {
@@ -62,16 +53,17 @@ final class PseudoToxClient {
   private def handleUiEvent(state: ToxState, e: UiEvent): ToxState = {
     e match {
 
-      case e: UiStatusEvent => StatusEventHandler(state, e)
-      case _                => state
+      case ChangeConnectionStatus(status)        => ConnectionStatusHandler(state, e)
+      case ChangeUserStatus(status)              => UserStatusHandler(state, e)
+      case ChangeStatusMessage(newStatusMessage) => StatusMessageHandler(state, e)
+      case ChangeNickname(nickname)              => NicknameHandler(state, e)
+      case _                                     => state
       /*
       case SendFriendRequest(friendId, request) =>
       //  Delete a friend
       case DeleteFriend(friendId) =>
       //  See the details of a friend’s profile
       case RequestFriendProfile(friendId) =>
-      //  Change personal profile information
-      case UpdateSelfProfile(profile) =>
       //  Change a friend’s alias
       case ChangeFriendAlias(friendId, newAlias) =>
       //  Change a group conversation’s alias
@@ -110,8 +102,6 @@ final class PseudoToxClient {
       case Login(username, password) =>
       // Logout
       case Logout() =>
-      //  Set status message
-      case ChangeStatusMessage(newStatusMessage) =>
       //  Block/unblock a friend
       case ChangeFriendBlockStatus(friendId) =>
       //  Mute/unmute a conversation
@@ -122,4 +112,19 @@ final class PseudoToxClient {
     }
   }
 
+  private def ConnectionStatusHandler(toxState: ToxState, e: UiEvent): ToxState = {
+    toxState.copy(connectionStatus = "blah")
+  }
+
+  private def UserStatusHandler(toxState: ToxState, e: UiEvent): ToxState = {
+    toxState.copy(userStatus = "blah")
+  }
+
+  private def NicknameHandler(toxState: ToxState, e: UiEvent): ToxState = {
+    toxState.copy(userProfile = toxState.userProfile.copy(nickName = "blah"))
+  }
+
+  private def StatusMessageHandler(toxState: ToxState, e: UiEvent): ToxState = {
+    toxState.copy(userProfile = toxState.userProfile.copy(statusMessage = "blah"))
+  }
 }

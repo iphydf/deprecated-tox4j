@@ -6,7 +6,7 @@ object Event {
 
   sealed abstract class NetworkEvent extends Event
   sealed abstract class UiEvent extends Event
-  sealed abstract class UiStatusEvent extends UiEvent
+
   /**
    * Network Events
    */
@@ -50,8 +50,8 @@ object Event {
   final case class DeleteFriend(friendId: String) extends UiEvent
   //  See the details of a friend’s profile
   final case class RequestFriendProfile(friendId: String) extends UiEvent
-  //  Change personal profile information
-  final case class UpdateSelfProfile(profile: String) extends UiEvent
+  //  Change user nickname
+  final case class ChangeNickname(nickname: String) extends UiEvent
   //  Change a friend’s alias
   final case class ChangeFriendAlias(friendId: String, newAlias: String) extends UiEvent
   //  Change a group conversation’s alias
@@ -93,9 +93,9 @@ object Event {
   //  Set status message
   final case class ChangeStatusMessage(newStatusMessage: String) extends UiEvent
   //  Change self user status
-  final case class ChangeUserStatus(status: String) extends UiStatusEvent
+  final case class ChangeUserStatus(status: String) extends UiEvent
   //  Change self connection status
-  final case class ChangeConnectionStatus(status: String) extends UiStatusEvent
+  final case class ChangeConnectionStatus(status: String) extends UiEvent
   //  Block/unblock a friend
   final case class ChangeFriendBlockStatus(friendId: String) extends UiEvent
   //  Mute/unmute a conversation
