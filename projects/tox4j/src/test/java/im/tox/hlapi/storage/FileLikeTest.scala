@@ -104,7 +104,7 @@ private object FileLikeSpec extends Commands {
   }
 
   private final case class Read(position: Long, size: Int) extends SuccessCommand {
-    type Result = GenTraversable[Byte]
+    type Result = \/[IOError, GenTraversable[Byte]]
     def nextState(state: State): State = state
 
     def preCondition(state: State): Boolean = {
@@ -113,13 +113,15 @@ private object FileLikeSpec extends Commands {
     }
 
     def postCondition(state: State, result: Result): Prop = {
-      result.toIterable.zipWithIndex.forall {
-        case (byte, i) =>
-          state.get(position + i) match {
-            case None       => true
-            case Some(data) => data == byte
-          }
-      }
+      result.map {
+        _.toIterable.zipWithIndex.forall {
+          case (byte, i) =>
+            state.get(position + i) match {
+              case None       => true
+              case Some(data) => data == byte
+            }
+        }
+      }.map(Prop(_)).getOrElse(Prop(false))
     }
 
     def run(file: Sut): Result = {
