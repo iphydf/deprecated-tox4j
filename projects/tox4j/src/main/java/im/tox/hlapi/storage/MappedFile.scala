@@ -106,7 +106,7 @@ final class MappedFile(file: RandomAccessFile) extends FileLike {
   private class SliceIterator(slice: Slice) extends Iterator[Byte] {
     private var index = 0 // scalastyle:ignore var.field
     override def hasNext: Boolean = index < slice.size
-    override def next: Byte = {
+    override def next(): Byte = {
       val x = slice.buffer.get(index)
       if (hasNext) {
         index = index + 1
