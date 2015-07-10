@@ -30,7 +30,8 @@ final case class Exception(exn: IOException) extends IOError
 
 /** Helper functions to work with the `\/[IOError, _]` monad. */
 final object IOError {
-  /** Intercept exceptions and converts them to IOError.
+  /**
+   * Intercept exceptions and converts them to IOError.
    *
    * @returns `-\/(Exception(_))` if an [[IOException]] is intercepted,
    *  else returns `-\/(UnknownFailure)` when intercepting another exception.
@@ -56,13 +57,13 @@ final object IOError {
    * Defaults to [[InvalidArgument]]
    * @param The expression which is evaluated when [[condition]] is `true`.
    *
-   * @return `-\/(alt)` if the condition is falsified, `\/-(value)` otherwise.
+   * @return `-\/(error)` if the condition is falsified, `\/-(value)` otherwise.
    */
-  def condition[A](condition: Boolean, alt: IOError = InvalidArgument)(value: => A): \/[IOError, A] = {
-    if (cond) {
+  def condition[A](condition: Boolean, error: IOError = InvalidArgument)(value: => A): \/[IOError, A] = {
+    if (condition) {
       \/-(value)
     } else {
-      -\/(alt)
+      -\/(error)
     }
   }
 
@@ -75,14 +76,14 @@ final object IOError {
    * Defaults to [[InvalidArgument]]
    * @param The expression which is evaluated when [[condition]] is `true`.
    *
-   * @return `\/-(alt)` if the condition is falsified, `value` if the evaluation
+   * @return `\/-(error)` if the condition is falsified, `value` if the evaluation
    * didn't throw, and otherwise converts the exception to an [[IOError]].
    */
-  def conditionWrap[A](cond: Boolean, alt: IOError = InvalidArgument)(value: => \/[IOError, A]): \/[IOError, A] = {
-    if (cond) {
+  def conditionWrap[A](condition: Boolean, error: IOError = InvalidArgument)(value: => \/[IOError, A]): \/[IOError, A] = {
+    if (condition) {
       recover(Try(value))
     } else {
-      -\/(alt)
+      -\/(error)
     }
   }
 }
