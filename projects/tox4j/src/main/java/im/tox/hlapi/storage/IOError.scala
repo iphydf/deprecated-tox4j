@@ -7,6 +7,15 @@ import scalaz._
 sealed trait IOError
 
 final case object InvalidArgument extends IOError
+
+/**
+ * Denotes an attempt to use a slice invalidated by `file.unsafeResize`.
+ *
+ * If the slice was invalidated, then the size extended to a larger size,
+ * whether this error is returned is implementation-defined.
+ */
+final case object InvalidSlice extends IOError
+
 final case object UnknownFailure extends IOError
 
 final case class Exception(exn: IOException) extends IOError

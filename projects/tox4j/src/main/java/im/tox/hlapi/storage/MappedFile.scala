@@ -67,31 +67,39 @@ final class MappedFile(file: RandomAccessFile) extends FileLike {
 
   override def writeSeq(slice: Slice)(offset: Int, data: Seq[Byte]): \/[IOError, Unit] = {
     // TODO(nbraud) Proper overflow checking
-    IOError.condition(offset >= 0 && offset + data.size <= slice.size) {
-      data.zipWithIndex.foreach {
-        case (byte, i) => slice.buffer.put(offset + i, byte)
+    IOError.conditionWrap(offset >= 0 && offset + data.size <= slice.size) {
+      IOError.condition(slice.offset + slice.size <= size, InvalidSlice) {
+        data.zipWithIndex.foreach {
+          case (byte, i) => slice.buffer.put(offset + i, byte)
+        }
       }
     }
   }
 
   override def readByte(slice: Slice)(offset: Int): \/[IOError, Byte] = {
-    IOError.condition(offset < slice.size && offset >= 0) {
-      slice.buffer.get(offset)
+    IOError.conditionWrap(offset < slice.size && offset >= 0) {
+      IOError.condition(slice.offset + slice.size <= size, InvalidSlice) {
+        slice.buffer.get(offset)
+      }
     }
   }
 
   override def writeByte(slice: Slice)(offset: Int, value: Byte): \/[IOError, Unit] = {
-    IOError.condition(offset < slice.size && offset >= 0) {
-      slice.buffer.put(offset, value)
-      \/-(())
+    IOError.conditionWrap(offset < slice.size && offset >= 0) {
+      IOError.condition(slice.offset + slice.size <= size, InvalidSlice) {
+        slice.buffer.put(offset, value)
+        ()
+      }
     }
   }
 
-  override def readSeq(slice: Slice): GenTraversable[Byte] = {
-    val fileSlice = slice // Required to avoid name shadowing
-    new Iterable[Byte] {
-      override def iterator = new SliceIterator(fileSlice)
-      override def size = fileSlice.size
+  override def readSeq(slice: Slice): \/[IOError, GenTraversable[Byte]] = {
+    IOError.condition(slice.offset + slice.size <= size, InvalidSlice) {
+      val fileSlice = slice // Required to avoid name shadowing
+      new Iterable[Byte] {
+        override def iterator = new SliceIterator(fileSlice)
+        override def size = fileSlice.size
+      }
     }
   }
 
@@ -112,5 +120,4 @@ final class MappedFile(file: RandomAccessFile) extends FileLike {
       .wrap { file.setLength(size): Unit }
       .flatMap { _ => IOError.condition(this.size == size, UnknownFailure) {} }
   }
-
 }
