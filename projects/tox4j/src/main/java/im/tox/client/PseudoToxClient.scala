@@ -4,7 +4,7 @@ import im.tox.client.hlapi.Event
 import im.tox.client.hlapi.Event._
 import im.tox.client.hlapi.State._
 
-final class PseudoToxClient {
+object PseudoToxClient {
 
   def acceptEvent(state: ToxState, e: Event): ToxState = {
     e match {
@@ -14,8 +14,8 @@ final class PseudoToxClient {
   }
 
   private def handleNetworkEvent(state: ToxState, e: NetworkEvent): ToxState = {
-    e match {
 
+    e match {
       case ReceiveSelfConnectionStatus(status) => state.copy(connectionStatus = status)
       //  Receive file transmission control from friends
       case ReceiveFileTransmissionControl()    => state
@@ -27,7 +27,7 @@ final class PseudoToxClient {
       case ReceiveFriendConnectionStatus(friendNumber, status) => state.copy(friends =
         state.friends.updated(
           friendNumber,
-          state.friends(friendNumber).copy(status = status)
+          state.friends(friendNumber).copy(connectionStatus = status)
         ))
       //  Receive a message from a friend
       case ReceiveFriendMessage(friendNumber, messageType, timeStamp, content) => state.copy(friends =
@@ -36,7 +36,10 @@ final class PseudoToxClient {
           state.friends(friendNumber).copy(conversation =
             state.friends(friendNumber).conversation.copy(messages =
               state.friends(friendNumber).conversation.messages
-                + ((0, Message("new id", messageType, timeStamp, content, "received")))))
+                + ((
+                  state.friends(friendNumber).conversation.messages.size,
+                  Message(messageType, timeStamp, content, "received")
+                ))))
         ))
       //  A friend’s name changes
       case ReceiveFriendName(friendNumber: Int, name: String) => state.copy(friends =
@@ -51,7 +54,7 @@ final class PseudoToxClient {
       case ReceiveFriendStatus(friendNumber, status) => state.copy(friends =
         state.friends.updated(
           friendNumber,
-          state.friends(friendNumber).copy(status = status)
+          state.friends(friendNumber).copy(userStatus = status)
         ))
       //  A friend’s status message changes
       case ReceiveFriendStatusMessageChange() => state
@@ -120,7 +123,9 @@ final class PseudoToxClient {
           friendNumber,
           state.friends(friendNumber).copy(conversation =
             state.friends(friendNumber).conversation.copy(messages =
-              state.friends(friendNumber).conversation.messages + ((0, message))))
+              state.friends(friendNumber).conversation.messages + ((
+                state.friends(friendNumber).conversation.messages.size, message
+              ))))
         ))
       //  Send a text message to a group conversation
       case SendPublicMessage(groupNumber, message) => state.copy(groups =
@@ -128,7 +133,9 @@ final class PseudoToxClient {
           groupNumber,
           state.groups(groupNumber).copy(conversation =
             state.groups(groupNumber).conversation.copy(messages =
-              state.groups(groupNumber).conversation.messages + ((0, message))))
+              state.groups(groupNumber).conversation.messages + ((
+                state.groups(groupNumber).conversation.messages.size, message
+              ))))
 
         ))
       //  Star/unstar a friend

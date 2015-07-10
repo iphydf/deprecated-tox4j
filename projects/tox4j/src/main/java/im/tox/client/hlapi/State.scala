@@ -11,13 +11,13 @@ object State {
   final case class PrivateConversation(isMuted: String, isTyping: Boolean, messages: Map[Int, Message], fileSentRecord: Seq[File])
   final case class PublicConversation(isMuted: String, messages: Map[Int, Message])
 
-  final case class Friend(userProfile: UserProfile, conversation: PrivateConversation, status: String,
-    alias: String, isBlocked: String, isStarred: String)
+  final case class Friend(userProfile: UserProfile, conversation: PrivateConversation,
+    alias: String, isBlocked: String, isStarred: String, connectionStatus: String, userStatus: String)
 
   final case class Group(groupProfile: GroupProfile, conversation: PublicConversation,
     alias: String, isStarred: String, option: String)
 
   final case class File(status: String)
 
-  final case class Message(Id: String, messageType: String, timestamp: Int, content: String, status: String)
+  final case class Message(messageType: String, timestamp: Int, content: String, status: String)
 }
