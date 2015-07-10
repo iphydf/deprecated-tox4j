@@ -6,6 +6,7 @@ import scalaz._
 
 sealed trait IOError
 
+/** Denotes an invalid argument documented by the method that returned it. */
 final case object InvalidArgument extends IOError
 
 /**
@@ -16,8 +17,15 @@ final case object InvalidArgument extends IOError
  */
 final case object InvalidSlice extends IOError
 
+/**
+ * Default error, in case no error more relevant was found.
+ *
+ * In particular, this is returned when an exception
+ * that is not an [[IOException]] was thrown.
+ */
 final case object UnknownFailure extends IOError
 
+/** Wraps an [[IOException]] as an [[IOError]] */
 final case class Exception(exn: IOException) extends IOError
 
 /** Helper functions to work with the `\/[IOError, _]` monad. */
