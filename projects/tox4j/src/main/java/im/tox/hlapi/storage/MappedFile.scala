@@ -115,7 +115,7 @@ final class MappedFile(file: RandomAccessFile) extends FileLike {
     }
   }
 
-  override def unsafeTruncate(size: Long): \/[IOError, Unit] = {
+  override def unsafeResize(size: Long): \/[IOError, Unit] = {
     IOError
       .wrap { file.setLength(size): Unit }
       .flatMap { _ => IOError.condition(this.size == size, UnknownFailure) {} }
