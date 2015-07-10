@@ -18,7 +18,7 @@ object MappedFile {
    *
    * @param The file path, expressed as a [[String]].
    * @param The new size in bytes, expressed as a [[Long]].
-   *  It must be positive (incl. zero).
+   * It must be positive (incl. zero).
    */
   def apply(path: String, size: Long): \/[IOError, MappedFile] = {
     IOError.wrap {
