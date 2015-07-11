@@ -2,6 +2,8 @@ package im.tox.tox4j.core
 
 import java.io.Closeable
 
+import im.tox.annotations.constraint.{ LengthConstraint, RangeConstraint }
+import im.tox.tox4j.apidsl.NativeApi
 import im.tox.tox4j.core.callbacks._
 import im.tox.tox4j.core.enums.{ ToxFileControl, ToxMessageType, ToxUserStatus }
 import im.tox.tox4j.core.exceptions._
@@ -18,7 +20,23 @@ import org.jetbrains.annotations.NotNull
  * should be stopped or stop using the instance before one thread invokes [[ToxCore.close]] on it, or appropriate
  * exception handlers should be installed in all threads.
  */
+@NativeApi
 trait ToxCore[ToxCoreState] extends Closeable {
+
+  @RangeConstraint(low = 0, high = 65535)
+  private type Port = Int
+
+  @LengthConstraint(ToxCoreConstants.PUBLIC_KEY_SIZE)
+  private type PublicKey = Array[Byte]
+
+  @LengthConstraint(ToxCoreConstants.SECRET_KEY_SIZE)
+  private type SecretKey = Array[Byte]
+
+  @LengthConstraint(ToxCoreConstants.TOX_ADDRESS_SIZE)
+  private type ToxAddress = Array[Byte]
+
+  @LengthConstraint(ToxCoreConstants.FILE_ID_LENGTH)
+  private type FileId = Array[Byte]
 
   /**
    * Store all information associated with the tox instance to a byte array.
@@ -78,7 +96,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @param publicKey the public key of the node.
    */
   @throws[ToxBootstrapException]
-  def bootstrap(@NotNull address: String, port: Int, @NotNull publicKey: Array[Byte]): Unit
+  def bootstrap(@NotNull address: String, port: Port, @NotNull publicKey: PublicKey): Unit
 
   /**
    * Connect to a TCP relay to forward traffic.
@@ -92,7 +110,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @param publicKey the public key of the node.
    */
   @throws[ToxBootstrapException]
-  def addTcpRelay(@NotNull address: String, port: Int, @NotNull publicKey: Array[Byte]): Unit
+  def addTcpRelay(@NotNull address: String, port: Port, @NotNull publicKey: PublicKey): Unit
 
   /**
    * Get the UDP port this instance is bound to.
@@ -100,7 +118,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return a port number between 1 and 65535.
    */
   @throws[ToxGetPortException]
-  def getUdpPort: Int
+  def getUdpPort: Port
 
   /**
    * Return the TCP port this Tox instance is bound to. This is only relevant if
@@ -109,7 +127,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return a port number between 1 and 65535.
    */
   @throws[ToxGetPortException]
-  def getTcpPort: Int
+  def getTcpPort: Port
 
   /**
    * Writes the temporary DHT public key of this instance to a byte array.
@@ -123,7 +141,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return a byte array of size [[ToxCoreConstants.PUBLIC_KEY_SIZE]]
    */
   @NotNull
-  def getDhtId: Array[Byte]
+  def getDhtId: PublicKey
 
   /**
    * Get the time in milliseconds until [[iterate]] should be called again for optimal performance.
@@ -144,14 +162,14 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return a byte array of size [[ToxCoreConstants.PUBLIC_KEY_SIZE]]
    */
   @NotNull
-  def getPublicKey: Array[Byte]
+  def getPublicKey: PublicKey
 
   /**
    * Copy the Tox Secret Key from the Tox object.
    * @return a byte array of size [[ToxCoreConstants.SECRET_KEY_SIZE]]
    */
   @NotNull
-  def getSecretKey: Array[Byte]
+  def getSecretKey: SecretKey
 
   /**
    * Set the 4-byte noSpam part of the address.
@@ -180,7 +198,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return a byte array of size [[ToxCoreConstants.TOX_ADDRESS_SIZE]]
    */
   @NotNull
-  def getAddress: Array[Byte]
+  def getAddress: ToxAddress
 
   /**
    * Set the nickname for the Tox client.
@@ -250,7 +268,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    */
   @throws[ToxFriendAddException]
   @throws[IllegalArgumentException]("if the Friend Address was not the right length.")
-  def addFriend(@NotNull address: Array[Byte], @NotNull message: Array[Byte]): Int
+  def addFriend(@NotNull address: ToxAddress, @NotNull message: Array[Byte]): Int
 
   /**
    * Add a friend without sending a friend request.
@@ -269,7 +287,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    */
   @throws[ToxFriendAddException]
   @throws[IllegalArgumentException]("if the Public Key was not the right length.")
-  def addFriendNoRequest(@NotNull publicKey: Array[Byte]): Int
+  def addFriendNoRequest(@NotNull publicKey: PublicKey): Int
 
   /**
    * Remove a friend from the friend list.
@@ -290,7 +308,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return the friend number that is associated with the Public Key.
    */
   @throws[ToxFriendByPublicKeyException]
-  def getFriendByPublicKey(@NotNull publicKey: Array[Byte]): Int
+  def getFriendByPublicKey(@NotNull publicKey: PublicKey): Int
 
   /**
    * Gets the Public Key for the specified friend number.
@@ -300,7 +318,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    */
   @NotNull
   @throws[ToxFriendGetPublicKeyException]
-  def getFriendPublicKey(friendNumber: Int): Array[Byte]
+  def getFriendPublicKey(friendNumber: Int): PublicKey
 
   /**
    * Checks whether a friend with the specified friend number exists.
@@ -394,7 +412,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @param fileNumber The friend-specific identifier for the file transfer.
    */
   @throws[ToxFileGetException]
-  def fileGetFileId(friendNumber: Int, fileNumber: Int): Array[Byte]
+  def fileGetFileId(friendNumber: Int, fileNumber: Int): FileId
 
   /**
    * Send a file transmission request.
@@ -451,7 +469,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    *         Any pattern in file numbers should not be relied on.
    */
   @throws[ToxFileSendException]
-  def fileSend(friendNumber: Int, kind: Int, fileSize: Long, @NotNull fileId: Array[Byte], @NotNull filename: Array[Byte]): Int
+  def fileSend(friendNumber: Int, kind: Int, fileSize: Long, @NotNull fileId: FileId, @NotNull filename: Array[Byte]): Int
 
   /**
    * Send a chunk of file data to a friend.

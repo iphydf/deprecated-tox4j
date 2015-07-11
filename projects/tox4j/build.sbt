@@ -26,6 +26,7 @@ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repos
 libraryDependencies ++= Seq(
   "com.intellij" % "annotations" % "12.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+  "im.tox" %% "codegen" % version.value,
   "org.json" % "json" % "20131018",
   "org.scalaz" %% "scalaz-core" % "7.2.0-M1"
 )
@@ -85,6 +86,9 @@ coverageMinimum := 78
 
 // Tox4j-specific style checkers.
 addCompilerPlugin("im.tox" %% "linters" % "0.1-SNAPSHOT")
+
+// Support for annotation macros.
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
 
 // Override Scalastyle configuration for test.
 scalastyleConfigUrl in Test := None

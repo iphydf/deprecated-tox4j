@@ -33,6 +33,7 @@ install:
 	cd projects/build-basic  && sbt -batch publishLocal coverage test
 	cd projects/build-extra  && sbt -batch $(COMMANDS)
 	cd projects/linters      && sbt -batch $(COMMANDS)
+	cd projects/codegen      && sbt -batch $(COMMANDS)
 	cd projects/tox4j        && sbt -batch $(COMMANDS)
 	git diff --exit-code
 
