@@ -15,7 +15,7 @@ object ToxCoreFactory {
     try {
       new ToxCoreImpl[ToxCoreState](options)
     } catch {
-      case e: ToxNewException if e.code == ToxNewException.Code.PORT_ALLOC =>
+      case ToxNewException(ToxNewException.PORT_ALLOC, _) =>
         System.gc()
         new ToxCoreImpl[ToxCoreState](options)
     }

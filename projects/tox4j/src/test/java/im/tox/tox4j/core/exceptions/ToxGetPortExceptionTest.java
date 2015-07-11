@@ -15,7 +15,7 @@ public class ToxGetPortExceptionTest extends ToxCoreTestBase {
       tox.getTcpPort();
       fail();
     } catch (ToxGetPortException e) {
-      assertEquals(ToxGetPortException.Code.NOT_BOUND, e.code());
+      assertEquals(ToxGetPortException.NOT_BOUND$.MODULE$, e.code());
     }
   }
 

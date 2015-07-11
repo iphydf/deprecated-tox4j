@@ -9,17 +9,17 @@ import org.junit.Assert._
 
 trait ToxTestMixin {
 
-  protected def intercept(code: Enum[_])(f: => Unit) = {
+  protected def intercept(code: ToxException.Code)(f: => Unit) = {
     try {
       f
-      fail("Expected exception with code " + code.name())
+      fail("Expected exception with code " + code)
     } catch {
       case e: ToxException[_] =>
         assertEquals(code, e.code)
     }
   }
 
-  protected def interceptWithTox(code: Enum[_])(f: ToxCore[Unit] => Unit) = {
+  protected def interceptWithTox(code: ToxException.Code)(f: ToxCore[Unit] => Unit) = {
     intercept(code) {
       ToxCoreFactory.withTox(f)
     }

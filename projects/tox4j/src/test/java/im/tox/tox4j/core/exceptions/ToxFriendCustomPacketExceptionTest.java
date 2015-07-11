@@ -17,7 +17,7 @@ public class ToxFriendCustomPacketExceptionTest extends ToxCoreTestBase {
         tox.sendLossyPacket(friendNumber, new byte[]{(byte) 200, 0, 1, 2, 3});
         fail();
       } catch (ToxFriendCustomPacketException e) {
-        assertEquals(ToxFriendCustomPacketException.Code.FRIEND_NOT_CONNECTED, e.code());
+        assertEquals(ToxFriendCustomPacketException.FRIEND_NOT_CONNECTED$.MODULE$, e.code());
       }
     }
   }
@@ -30,7 +30,7 @@ public class ToxFriendCustomPacketExceptionTest extends ToxCoreTestBase {
         tox.sendLosslessPacket(friendNumber, new byte[]{(byte) 160, 0, 1, 2, 3});
         fail();
       } catch (ToxFriendCustomPacketException e) {
-        assertEquals(ToxFriendCustomPacketException.Code.FRIEND_NOT_CONNECTED, e.code());
+        assertEquals(ToxFriendCustomPacketException.FRIEND_NOT_CONNECTED$.MODULE$, e.code());
       }
     }
   }
@@ -42,7 +42,7 @@ public class ToxFriendCustomPacketExceptionTest extends ToxCoreTestBase {
         tox.sendLossyPacket(0, new byte[]{(byte) 200, 0, 1, 2, 3});
         fail();
       } catch (ToxFriendCustomPacketException e) {
-        assertEquals(ToxFriendCustomPacketException.Code.FRIEND_NOT_FOUND, e.code());
+        assertEquals(ToxFriendCustomPacketException.FRIEND_NOT_FOUND$.MODULE$, e.code());
       }
     }
   }
@@ -54,7 +54,7 @@ public class ToxFriendCustomPacketExceptionTest extends ToxCoreTestBase {
         tox.sendLosslessPacket(0, new byte[]{(byte) 160, 0, 1, 2, 3});
         fail();
       } catch (ToxFriendCustomPacketException e) {
-        assertEquals(ToxFriendCustomPacketException.Code.FRIEND_NOT_FOUND, e.code());
+        assertEquals(ToxFriendCustomPacketException.FRIEND_NOT_FOUND$.MODULE$, e.code());
       }
     }
   }

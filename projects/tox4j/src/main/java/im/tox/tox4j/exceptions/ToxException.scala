@@ -2,16 +2,20 @@ package im.tox.tox4j.exceptions
 
 import org.jetbrains.annotations.NotNull
 
-abstract class ToxException[E <: Enum[E]](errorCode: E, message: String) extends Exception(message) {
+object ToxException {
+  trait Code
+}
+
+abstract class ToxException[Code](message: String) extends Exception(message) {
+
+  def code: Code
 
   @NotNull
   final override def getMessage: String = {
     message match {
-      case "" => "Error code: " + errorCode.name
-      case _  => message + ", error code: " + errorCode.name
+      case "" => "Error code: " + code
+      case _  => message + ", error code: " + code
     }
   }
-
-  final def code: E = errorCode
 
 }

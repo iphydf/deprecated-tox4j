@@ -8,56 +8,56 @@ class ToxBootstrapExceptionTest extends ToxCoreTestBase {
 
   @Test
   def testBootstrapBadPort1(): Unit = {
-    interceptWithTox(ToxBootstrapException.Code.BAD_PORT)(
+    interceptWithTox(ToxBootstrapException.BAD_PORT)(
       _.bootstrap("192.254.75.98", 0, new Array[Byte](ToxCoreConstants.PUBLIC_KEY_SIZE))
     )
   }
 
   @Test
   def testBootstrapBadPort2(): Unit = {
-    interceptWithTox(ToxBootstrapException.Code.BAD_PORT)(
+    interceptWithTox(ToxBootstrapException.BAD_PORT)(
       _.bootstrap("192.254.75.98", -10, new Array[Byte](ToxCoreConstants.PUBLIC_KEY_SIZE))
     )
   }
 
   @Test
   def testBootstrapBadPort3(): Unit = {
-    interceptWithTox(ToxBootstrapException.Code.BAD_PORT)(
+    interceptWithTox(ToxBootstrapException.BAD_PORT)(
       _.bootstrap("192.254.75.98", 65536, new Array[Byte](ToxCoreConstants.PUBLIC_KEY_SIZE))
     )
   }
 
   @Test
   def testBootstrapBadHost(): Unit = {
-    interceptWithTox(ToxBootstrapException.Code.BAD_HOST)(
+    interceptWithTox(ToxBootstrapException.BAD_HOST)(
       _.bootstrap(".", 33445, new Array[Byte](ToxCoreConstants.PUBLIC_KEY_SIZE))
     )
   }
 
   @Test
   def testBootstrapNullHost(): Unit = {
-    interceptWithTox(ToxBootstrapException.Code.NULL)(
+    interceptWithTox(ToxBootstrapException.NULL)(
       _.bootstrap(null, 33445, new Array[Byte](ToxCoreConstants.PUBLIC_KEY_SIZE))
     )
   }
 
   @Test
   def testBootstrapNullKey(): Unit = {
-    interceptWithTox(ToxBootstrapException.Code.NULL)(
+    interceptWithTox(ToxBootstrapException.NULL)(
       _.bootstrap("localhost", 33445, null)
     )
   }
 
   @Test
   def testBootstrapKeyTooShort(): Unit = {
-    interceptWithTox(ToxBootstrapException.Code.BAD_KEY)(
+    interceptWithTox(ToxBootstrapException.BAD_KEY)(
       _.bootstrap("localhost", 33445, new Array[Byte](ToxCoreConstants.PUBLIC_KEY_SIZE - 1))
     )
   }
 
   @Test
   def testBootstrapKeyTooLong(): Unit = {
-    interceptWithTox(ToxBootstrapException.Code.BAD_KEY)(
+    interceptWithTox(ToxBootstrapException.BAD_KEY)(
       _.bootstrap("localhost", 33445, new Array[Byte](ToxCoreConstants.PUBLIC_KEY_SIZE + 1))
     )
   }

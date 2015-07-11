@@ -14,7 +14,7 @@ public class ToxFriendGetPublicKeyExceptionTest extends ToxCoreTestBase {
     try (ToxCore<BoxedUnit> tox = newTox()) {
       tox.getFriendPublicKey(0);
     } catch (ToxFriendGetPublicKeyException e) {
-      assertEquals(ToxFriendGetPublicKeyException.Code.FRIEND_NOT_FOUND, e.code());
+      assertEquals(ToxFriendGetPublicKeyException.FRIEND_NOT_FOUND$.MODULE$, e.code());
     }
   }
 

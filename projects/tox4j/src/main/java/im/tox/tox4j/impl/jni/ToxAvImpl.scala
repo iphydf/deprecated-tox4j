@@ -54,7 +54,7 @@ final class ToxAvImpl[ToxCoreState](@NotNull private val tox: ToxCoreImpl[ToxCor
       new ToxAvImpl(tox.asInstanceOf[ToxCoreImpl[ToxCoreState]])
     } catch {
       case _: ClassCastException =>
-        throw new ToxAvNewException(ToxAvNewException.Code.INCOMPATIBLE, tox.getClass.getCanonicalName)
+        throw ToxAvNewException(ToxAvNewException.INCOMPATIBLE, tox.getClass.getCanonicalName)
     }
   }
 

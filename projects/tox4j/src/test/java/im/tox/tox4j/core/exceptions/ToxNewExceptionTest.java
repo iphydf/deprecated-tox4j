@@ -19,7 +19,7 @@ public class ToxNewExceptionTest extends ToxCoreTestBase {
       newTox(true, true, new ProxyOptions.Socks5(null, 1)).close();
       fail();
     } catch (ToxNewException e) {
-      assertEquals(ToxNewException.Code.PROXY_BAD_HOST, e.code());
+      assertEquals(ToxNewException.PROXY_BAD_HOST$.MODULE$, e.code());
     }
   }
 
@@ -29,7 +29,7 @@ public class ToxNewExceptionTest extends ToxCoreTestBase {
       newTox(true, true, new ProxyOptions.Socks5("", 1)).close();
       fail();
     } catch (ToxNewException e) {
-      assertEquals(ToxNewException.Code.PROXY_BAD_HOST, e.code());
+      assertEquals(ToxNewException.PROXY_BAD_HOST$.MODULE$, e.code());
     }
   }
 
@@ -39,7 +39,7 @@ public class ToxNewExceptionTest extends ToxCoreTestBase {
       newTox(true, true, new ProxyOptions.Socks5("localhost", 0)).close();
       fail();
     } catch (ToxNewException e) {
-      assertEquals(ToxNewException.Code.PROXY_BAD_PORT, e.code());
+      assertEquals(ToxNewException.PROXY_BAD_PORT$.MODULE$, e.code());
     }
   }
 
@@ -60,7 +60,7 @@ public class ToxNewExceptionTest extends ToxCoreTestBase {
       newTox(true, true, new ProxyOptions.Socks5("\u2639", 1)).close();
       fail();
     } catch (ToxNewException e) {
-      assertEquals(ToxNewException.Code.PROXY_BAD_HOST, e.code());
+      assertEquals(ToxNewException.PROXY_BAD_HOST$.MODULE$, e.code());
     }
   }
 
@@ -70,7 +70,7 @@ public class ToxNewExceptionTest extends ToxCoreTestBase {
       newTox(true, true, new ProxyOptions.Socks5(".", 1)).close();
       fail();
     } catch (ToxNewException e) {
-      assertEquals(ToxNewException.Code.PROXY_BAD_HOST, e.code());
+      assertEquals(ToxNewException.PROXY_BAD_HOST$.MODULE$, e.code());
     }
   }
 
@@ -88,7 +88,7 @@ public class ToxNewExceptionTest extends ToxCoreTestBase {
       }
       fail();
     } catch (ToxNewException e) {
-      assertEquals(ToxNewException.Code.PORT_ALLOC, e.code());
+      assertEquals(ToxNewException.PORT_ALLOC$.MODULE$, e.code());
     }
   }
 
@@ -97,7 +97,7 @@ public class ToxNewExceptionTest extends ToxCoreTestBase {
     try (ToxCore<BoxedUnit> tox = newTox("toxEsave blah blah blah".getBytes())) {
       fail();
     } catch (ToxNewException e) {
-      assertEquals(ToxNewException.Code.LOAD_ENCRYPTED, e.code());
+      assertEquals(ToxNewException.LOAD_ENCRYPTED$.MODULE$, e.code());
     }
   }
 
@@ -106,7 +106,7 @@ public class ToxNewExceptionTest extends ToxCoreTestBase {
     try (ToxCore<BoxedUnit> tox = newTox("blah blah blah".getBytes())) {
       fail();
     } catch (ToxNewException e) {
-      assertEquals(ToxNewException.Code.LOAD_BAD_FORMAT, e.code());
+      assertEquals(ToxNewException.LOAD_BAD_FORMAT$.MODULE$, e.code());
     }
   }
 

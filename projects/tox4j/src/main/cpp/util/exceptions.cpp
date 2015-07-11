@@ -50,48 +50,48 @@ throw_illegal_state_exception (JNIEnv *env, jint instance_number, std::string co
 void
 throw_tox_exception (JNIEnv *env, char const *module, char const *prefix, char const *method, char const *code)
 {
-  std::string className = "im/tox/tox4j/";
+  std::string exceptionClassName = "im/tox/tox4j/";
+  exceptionClassName += module;
+  exceptionClassName += "/exceptions/Tox";
+  exceptionClassName += prefix;
+  exceptionClassName += method;
+  exceptionClassName += "Exception";
 
-  className += module;
-  className += "/exceptions/Tox";
-  className += prefix;
-  className += method;
-  className += "Exception";
-  jclass exClass = env->FindClass (className.c_str ());
-  if (!exClass)
-    {
-      throw_exception (env, 0, "java/lang/NoClassDefFoundError", className.c_str ());
-      return;
-    }
+  jclass exceptionClass = env->FindClass (exceptionClassName.c_str ());
+  if (!exceptionClass)
+    return;
 
-  std::string enumName = className + "$Code";
-  jclass enumClass = env->FindClass (enumName.c_str ());
+  std::string enumClassName = exceptionClassName + "$" + code + "$";
+  jclass enumClass = env->FindClass (enumClassName.c_str ());
   if (!enumClass)
-    {
-      throw_exception (env, 0, "java/lang/NoClassDefFoundError", enumName.c_str ());
-      return;
-    }
+    return;
 
-  std::string valueOfSig = "(Ljava/lang/String;)L" + enumName + ";";
-  jmethodID valueOf = env->GetStaticMethodID (enumClass, "valueOf", valueOfSig.c_str ());
-  if (!valueOf)
-    {
-      throw_exception (env, 0, "java/lang/NoSuchMethodException", ("valueOf" + valueOfSig).c_str ());
-      return;
-    }
+  jfieldID enumCodeId = env->GetStaticFieldID (
+    enumClass,
+    "MODULE$",
+    ("L" + enumClassName + ";").c_str ()
+  );
+  if (!enumCodeId)
+    return;
 
-  std::string constructorSig = "(L" + enumName + ";)V";
-  jmethodID constructor = env->GetMethodID (exClass, "<init>", constructorSig.c_str ());
+  jobject enumCode = env->GetStaticObjectField (enumClass, enumCodeId);
+  if (!enumCode)
+    return;
+
+  jmethodID constructor = env->GetStaticMethodID (
+    exceptionClass,
+    "apply",
+    ("(L" + exceptionClassName + "$Code;Ljava/lang/String;)L" + exceptionClassName + ";").c_str ()
+  );
   if (!constructor)
-    {
-      throw_exception (env, 0, "java/lang/NoSuchMethodException", ("<init>" + constructorSig).c_str ());
-      return;
-    }
+    return;
 
-  jobject enumCode = env->CallStaticObjectMethod (enumClass, valueOf, env->NewStringUTF (code));
-  tox4j_assert (enumCode);
-
-  jobject exception = env->NewObject (exClass, constructor, enumCode);
+  jobject exception = env->CallStaticObjectMethod (
+    exceptionClass,
+    constructor,
+    enumCode,
+    env->NewStringUTF ("")
+  );
   tox4j_assert (exception);
 
   env->Throw ((jthrowable)exception);
