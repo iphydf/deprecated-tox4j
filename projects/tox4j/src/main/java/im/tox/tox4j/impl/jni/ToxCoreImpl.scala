@@ -24,17 +24,17 @@ private object ToxCoreImpl {
   @throws[ToxBootstrapException]
   private def checkBootstrapArguments(port: Int, @Nullable publicKey: Array[Byte]): Unit = {
     if (port < 0) {
-      throw new ToxBootstrapException(ToxBootstrapException.Code.BAD_PORT, "Port cannot be negative")
+      throw ToxBootstrapException(ToxBootstrapException.BAD_PORT, "Port cannot be negative")
     }
     if (port > 65535) {
-      throw new ToxBootstrapException(ToxBootstrapException.Code.BAD_PORT, "Port cannot exceed 65535")
+      throw ToxBootstrapException(ToxBootstrapException.BAD_PORT, "Port cannot exceed 65535")
     }
     if (publicKey ne null) {
       if (publicKey.length < ToxCoreConstants.PUBLIC_KEY_SIZE) {
-        throw new ToxBootstrapException(ToxBootstrapException.Code.BAD_KEY, "Key too short")
+        throw ToxBootstrapException(ToxBootstrapException.BAD_KEY, "Key too short")
       }
       if (publicKey.length > ToxCoreConstants.PUBLIC_KEY_SIZE) {
-        throw new ToxBootstrapException(ToxBootstrapException.Code.BAD_KEY, "Key too long")
+        throw ToxBootstrapException(ToxBootstrapException.BAD_KEY, "Key too long")
       }
     }
   }
@@ -88,7 +88,7 @@ private object ToxCoreImpl {
   @throws[ToxSetInfoException]
   private def checkInfoNotNull(info: Array[Byte]): Unit = {
     if (info eq null) {
-      throw new ToxSetInfoException(ToxSetInfoException.Code.NULL)
+      throw ToxSetInfoException(ToxSetInfoException.NULL)
     }
   }
 

@@ -6,23 +6,30 @@ import org.scalatest.prop.PropertyChecks
 
 final class ToxExceptionTest extends FlatSpec with PropertyChecks {
 
+  val bootstrapExceptionCodes = Seq[ToxBootstrapException.Code](
+    ToxBootstrapException.BAD_HOST,
+    ToxBootstrapException.BAD_KEY,
+    ToxBootstrapException.BAD_PORT,
+    ToxBootstrapException.NULL
+  )
+
   "getMessage" should "contain the error code name" in {
-    ToxBootstrapException.Code.values().foreach { code =>
-      val exn = new ToxBootstrapException(code)
-      assert(exn.getMessage.contains(code.name()))
+    bootstrapExceptionCodes.foreach { code =>
+      val exn = ToxBootstrapException(code)
+      assert(exn.getMessage.contains(code.toString))
     }
   }
 
   it should "contain the exception message" in {
     forAll { (message: String) =>
-      val exn = new ToxBootstrapException(ToxBootstrapException.Code.NULL, message)
+      val exn = ToxBootstrapException(ToxBootstrapException.NULL, message)
       assert(exn.getMessage.contains(message))
     }
   }
 
   "code" should "be the passed code" in {
-    ToxBootstrapException.Code.values().foreach { code =>
-      val exn = new ToxBootstrapException(code)
+    bootstrapExceptionCodes.foreach { code =>
+      val exn = ToxBootstrapException(code)
       assert(exn.code == code)
     }
   }

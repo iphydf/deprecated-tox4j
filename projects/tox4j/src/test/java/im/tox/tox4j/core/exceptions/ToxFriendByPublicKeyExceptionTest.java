@@ -15,7 +15,7 @@ public class ToxFriendByPublicKeyExceptionTest extends ToxCoreTestBase {
       tox.getFriendByPublicKey(null);
       fail();
     } catch (ToxFriendByPublicKeyException e) {
-      assertEquals(ToxFriendByPublicKeyException.Code.NULL, e.code());
+      assertEquals(ToxFriendByPublicKeyException.NULL$.MODULE$, e.code());
     }
   }
 
@@ -25,7 +25,7 @@ public class ToxFriendByPublicKeyExceptionTest extends ToxCoreTestBase {
       tox.getFriendByPublicKey(tox.getPublicKey());
       fail();
     } catch (ToxFriendByPublicKeyException e) {
-      assertEquals(ToxFriendByPublicKeyException.Code.NOT_FOUND, e.code());
+      assertEquals(ToxFriendByPublicKeyException.NOT_FOUND$.MODULE$, e.code());
     }
   }
 

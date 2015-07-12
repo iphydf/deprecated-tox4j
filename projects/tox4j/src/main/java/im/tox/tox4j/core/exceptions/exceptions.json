@@ -12,12 +12,12 @@
     "FRIEND_NOT_FOUND": ["The friendNumber passed did not designate a valid friend."],
     "FRIEND_NOT_CONNECTED": ["This client is currently not connected to the friend."],
     "NOT_FOUND": ["No file transfer with the given file number was found for the given friend."],
-    "NOT_PAUSED": ["A {@link ToxFileControl#RESUME} control was sent, but the file transfer is running normally."],
+    "NOT_PAUSED": ["A [[ToxFileControl.RESUME]] control was sent, but the file transfer is running normally."],
     "DENIED": [
-      "A {@link ToxFileControl#RESUME} control was sent, but the file transfer was paused by the other",
+      "A [[ToxFileControl.RESUME]] control was sent, but the file transfer was paused by the other",
       "party. Only the party that paused the transfer can resume it."
     ],
-    "ALREADY_PAUSED": ["A {@link ToxFileControl#PAUSE} control was sent, but the file transfer was already paused."],
+    "ALREADY_PAUSED": ["A [[ToxFileControl.PAUSE]] control was sent, but the file transfer was already paused."],
     "SENDQ": ["An allocation error occurred while increasing the send queue size."]
   },
   "FileSeek": {
@@ -49,7 +49,7 @@
     "NULL": ["An argument was null."],
     "FRIEND_NOT_FOUND": ["The friendNumber passed did not designate a valid friend."],
     "FRIEND_NOT_CONNECTED": ["This client is currently not connected to the friend."],
-    "NAME_TOO_LONG": ["Filename length exceeded {@link ToxCoreConstants#MAX_FILENAME_LENGTH} bytes."],
+    "NAME_TOO_LONG": ["Filename length exceeded [[ToxCoreConstants.MAX_FILENAME_LENGTH]] bytes."],
     "TOO_MANY": [
       "Too many ongoing transfers. The maximum number of concurrent file transfers",
       "is 256 per friend per direction (sending and receiving, so 512 total)."
@@ -62,10 +62,10 @@
   },
   "FriendAdd": {
     "NULL": ["An argument was null."],
-    "TOO_LONG": ["The length of the friend request message exceeded {@link ToxCoreConstants#MAX_FRIEND_REQUEST_LENGTH}."],
+    "TOO_LONG": ["The length of the friend request message exceeded [[ToxCoreConstants.MAX_FRIEND_REQUEST_LENGTH]]."],
     "NO_MESSAGE": [
       "The friend request message was empty. This, and the TOO_LONG code will",
-      "never be returned from {@link ToxCore#addFriendNoRequest}."
+      "never be returned from [[ToxCore.addFriendNoRequest]]."
     ],
     "OWN_KEY": ["The friend address belongs to the sending client."],
     "ALREADY_SENT": [
@@ -101,14 +101,14 @@
       "have already been bound, e.g. by other Tox instances, or it may mean",
       "a permission error. You may be able to gather more information from errno."
     ],
-    "PROXY_BAD_TYPE": ["{@link im.tox.tox4j.core.ToxOptions#proxyType} was invalid."],
+    "PROXY_BAD_TYPE": ["[[ToxOptions.proxyType]] was invalid."],
     "PROXY_BAD_HOST": [
-      "{@link im.tox.tox4j.core.ToxOptions#proxyType} was valid,",
-      "but the {@link im.tox.tox4j.core.ToxOptions#proxyAddress} passed had an invalid format."
+      "[[ToxOptions.proxyType]] was valid,",
+      "but the [[ToxOptions.proxyAddress]] passed had an invalid format."
     ],
     "PROXY_BAD_PORT": [
-      "{@link im.tox.tox4j.core.ToxOptions#proxyType} was valid,",
-      "but the {@link im.tox.tox4j.core.ToxOptions#proxyPort} was invalid."
+      "[[ToxOptions.proxyType]] was valid,",
+      "but the [[ToxOptions.proxyPort]] was invalid."
     ],
     "PROXY_NOT_FOUND": ["The proxy address passed could not be resolved."],
     "LOAD_ENCRYPTED": ["The byte array to be loaded contained an encrypted save."],
@@ -130,7 +130,7 @@
       "This range is 200-254 for lossy, and 160-191 for lossless packets."
     ],
     "EMPTY": ["Attempted to send an empty packet."],
-    "TOO_LONG": ["Packet data length exceeded {@link ToxCoreConstants#MAX_CUSTOM_PACKET_SIZE}."],
+    "TOO_LONG": ["Packet data length exceeded [[ToxCoreConstants.MAX_CUSTOM_PACKET_SIZE]]."],
     "SENDQ": ["An allocation error occurred while increasing the send queue size."]
   },
   "FriendSendMessage": {
@@ -138,7 +138,7 @@
     "FRIEND_NOT_FOUND": ["The friend number did not designate a valid friend."],
     "FRIEND_NOT_CONNECTED": ["This client is currently not connected to the friend."],
     "SENDQ": ["An allocation error occurred while increasing the send queue size."],
-    "TOO_LONG": ["Message length exceeded {@link ToxCoreConstants#MAX_MESSAGE_LENGTH}."],
+    "TOO_LONG": ["Message length exceeded [[ToxCoreConstants.MAX_MESSAGE_LENGTH]]."],
     "EMPTY": ["Attempted to send a zero-length message."]
   },
   "SetInfo": {

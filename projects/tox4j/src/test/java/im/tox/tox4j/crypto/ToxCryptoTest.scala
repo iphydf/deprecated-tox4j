@@ -41,7 +41,7 @@ abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec 
     Arbitrary(arbitrary[Array[Byte]].map(x => toxCrypto.deriveKeyFromPass(x)))
 
   "encryption with a PassKey" should {
-    import ToxEncryptionException.Code._
+    import ToxEncryptionException._
 
     "produce high entropy results (> 0.7)" in {
       val passKey = toxCrypto.deriveKeyFromPass(Array.ofDim(0))
@@ -89,7 +89,7 @@ abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec 
   }
 
   "key derivation" should {
-    import ToxKeyDerivationException.Code._
+    import ToxKeyDerivationException._
 
     s"fail with $INVALID_LENGTH for salt of wrong size" in {
       forAll { (salt: Array[Byte]) =>
@@ -127,7 +127,7 @@ abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec 
   }
 
   "decryption" should {
-    import ToxDecryptionException.Code._
+    import ToxDecryptionException._
 
     s"fail with $INVALID_LENGTH for zero-length data" in {
       val passKey = toxCrypto.deriveKeyFromPass(Array.ofDim(0))

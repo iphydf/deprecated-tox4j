@@ -64,7 +64,7 @@ public class ToxCoreTest extends ToxCoreTestBase {
 
   @Test
   public void testToxCreationAndImmediateDestruction() throws Exception {
-    for (int i = 0; i < ITERATIONS; i++) {
+    for (int i = 0; i < ITERATIONS(); i++) {
       newTox().close();
     }
   }
@@ -144,7 +144,7 @@ public class ToxCoreTest extends ToxCoreTestBase {
 
   @Test
   public void testPublicKeyEntropy() throws Exception {
-    for (int i = 0; i < ITERATIONS; i++) {
+    for (int i = 0; i < ITERATIONS(); i++) {
       try (ToxCore<BoxedUnit> tox = newTox()) {
         double entropy = ToxCoreTestBase$.MODULE$.entropy(tox.getPublicKey());
         assertTrue("Entropy of public key should be >= 0.5, but was " + entropy, entropy >= 0.5);
@@ -154,7 +154,7 @@ public class ToxCoreTest extends ToxCoreTestBase {
 
   @Test
   public void testSecretKeyEntropy() throws Exception {
-    for (int i = 0; i < ITERATIONS; i++) {
+    for (int i = 0; i < ITERATIONS(); i++) {
       try (ToxCore<BoxedUnit> tox = newTox()) {
         double entropy = ToxCoreTestBase$.MODULE$.entropy(tox.getSecretKey());
         assertTrue("Entropy of secret key should be >= 0.5, but was " + entropy, entropy >= 0.5);
@@ -316,7 +316,7 @@ public class ToxCoreTest extends ToxCoreTestBase {
   @Test
   public void testAddFriend() throws Exception {
     try (ToxCore<BoxedUnit> tox = newTox()) {
-      for (int i = 0; i < ITERATIONS; i++) {
+      for (int i = 0; i < ITERATIONS(); i++) {
         try (ToxCore friend = newTox()) {
           int friendNumber = tox.addFriend(friend.getAddress(), "heyo".getBytes());
           assertEquals(i, friendNumber);
@@ -328,21 +328,21 @@ public class ToxCoreTest extends ToxCoreTestBase {
   @Test
   public void testAddFriendNoRequest() throws Exception {
     try (ToxCore<BoxedUnit> tox = newTox()) {
-      for (int i = 0; i < ITERATIONS; i++) {
+      for (int i = 0; i < ITERATIONS(); i++) {
         try (ToxCore friend = newTox()) {
           int friendNumber = tox.addFriendNoRequest(friend.getPublicKey());
           assertEquals(i, friendNumber);
         }
       }
-      assertEquals(ITERATIONS, tox.getFriendList().length);
+      assertEquals(ITERATIONS(), tox.getFriendList().length);
     }
   }
 
   @Test
   public void testFriendListSize() throws Exception {
     try (ToxCore<BoxedUnit> tox = newTox()) {
-      addFriends(tox, ITERATIONS);
-      assertEquals(ITERATIONS, tox.getFriendList().length);
+      addFriends(tox, ITERATIONS());
+      assertEquals(ITERATIONS(), tox.getFriendList().length);
     }
   }
 
@@ -469,7 +469,7 @@ public class ToxCoreTest extends ToxCoreTestBase {
 
   @Test
   public void testDhtIdEntropy() throws Exception {
-    for (int i = 0; i < ITERATIONS; i++) {
+    for (int i = 0; i < ITERATIONS(); i++) {
       try (ToxCore<BoxedUnit> tox = newTox()) {
         double entropy = ToxCoreTestBase$.MODULE$.entropy(tox.getDhtId());
         assertTrue("Entropy of public key should be >= 0.5, but was " + entropy, entropy >= 0.5);
