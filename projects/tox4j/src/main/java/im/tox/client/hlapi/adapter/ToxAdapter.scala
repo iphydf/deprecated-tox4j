@@ -15,7 +15,7 @@ object ToxAdapter {
 
   def acceptEvent(e: Event): State[ToxState, Option[Gettable]] = {
     val decision = parseEvent(e)
-    decision.flatMap(performNetworkAction)
+    decision.flatMap(parseAction)
   }
 
   def parseEvent(e: Event): State[ToxState, Option[Action]] = {
