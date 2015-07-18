@@ -1,6 +1,6 @@
 package im.tox.client.hlapi.adapter
 
-import im.tox.client.hlapi.adapter.ToxAdapter._
+import im.tox.client.hlapi.adapter.NetworkActionPerformer.tox
 import im.tox.client.hlapi.entity.{ CoreState, Event }
 import Event.{ AddToFriendList, GetSelfPublicKeyEvent }
 import CoreState._
@@ -34,9 +34,9 @@ object InitiateConnection {
         }
         tox = new ToxCoreImpl[Unit](toxOption)
         for (friendNumber <- tox.getFriendList) {
-          ToxAdapter.parseSelfEvent(state, AddToFriendList(friendNumber))
+          ToxAdapter.acceptEvent(AddToFriendList(friendNumber, Friend()))
         }
-        ToxAdapter.parseSelfEvent(state, GetSelfPublicKeyEvent())
+        ToxAdapter.acceptEvent(GetSelfPublicKeyEvent())
         eventLoop = new Thread(new Runnable() {
           @tailrec
           override def run(): Unit = {

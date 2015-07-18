@@ -15,7 +15,7 @@ object CoreState {
   )
 
   val publicKeyL = Lens.lensu[ToxState, PublicKey](
-    (a, value) => a.copy(publicKey = PublicKey),
+    (a, value) => a.copy(publicKey = value),
     _.publicKey
   )
 
@@ -75,7 +75,7 @@ object CoreState {
   )
 
   val friendPublicKeyL = Lens.lensu[Friend, PublicKey](
-    (a, value) => a.copy(publicKey = PublicKey),
+    (a, value) => a.copy(publicKey = value),
     _.publicKey
   )
 
@@ -91,7 +91,8 @@ object CoreState {
 
   val stateNicknameL = userProfileL >=> nicknameL
   val stateStatusMessageL = userProfileL >=> statusMessageL
-  val friendMessagesL = friendConversationL >=> ConversationMessageListL >=> MessageListMessagesL
+  val friendMessageListL = friendConversationL >=> ConversationMessageListL
+  val friendMessagesL = friendMessageListL >=> MessageListMessagesL
   val friendNameL = friendProfileL >=> nicknameL
   val friendIsTypingL = friendConversationL >=> conversationIsTypingL
   val friendsL = friendListL >=> friendListFriendsL
@@ -108,12 +109,16 @@ object CoreState {
 
   final case class UserProfile(nickname: String = "", statusMessage: String = "")
 
-  final case class FriendConversation(isTyping: Boolean = false, messageList: MessageList = Map[Int, Message](), fileSentRecord: Map[Int, File] = Map[Int, File]())
+  final case class FriendConversation(
+    isTyping: Boolean = false,
+    messageList: MessageList = MessageList(),
+    fileSentList: Map[Int, File] = Map[Int, File]()
+  )
 
   final case class Friend(
     userProfile: UserProfile = UserProfile(),
-    userStatus: UserStatus,
-    connectionStatus: ConnectionStatus,
+    userStatus: UserStatus = Offline(),
+    connectionStatus: ConnectionStatus = Disconnect(),
     conversation: FriendConversation = FriendConversation(),
     publicKey: PublicKey = PublicKey()
   )

@@ -73,7 +73,7 @@ object Event {
   final case class SetConnectionStatusEvent(status: ConnectionStatus) extends UiEvent
 
   /**
-   * Self Events
+   * Self Events, only can be called by HLAPI
    */
   final case class AddToFriendList(friendNumber: Int, friend: Friend) extends SelfEvent
   final case class GetSelfPublicKeyEvent() extends SelfEvent
