@@ -2,7 +2,7 @@ package im.tox.client.hlapi.adapter
 
 import im.tox.client.hlapi.adapter.ToxAdapter._
 import im.tox.client.hlapi.entity.{ CoreState, Event }
-import Event.{ AddFriendInfo, GetSelfPublicKeyEvent }
+import Event.{ AddToFriendList, GetSelfPublicKeyEvent }
 import CoreState._
 import im.tox.tox4j.core.options.{ ProxyOptions, SaveDataOptions, ToxOptions }
 import im.tox.tox4j.impl.jni.ToxCoreImpl
@@ -34,7 +34,7 @@ object InitiateConnection {
         }
         tox = new ToxCoreImpl[Unit](toxOption)
         for (friendNumber <- tox.getFriendList) {
-          ToxAdapter.parseSelfEvent(state, AddFriendInfo(friendNumber))
+          ToxAdapter.parseSelfEvent(state, AddToFriendList(friendNumber))
         }
         ToxAdapter.parseSelfEvent(state, GetSelfPublicKeyEvent())
         eventLoop = new Thread(new Runnable() {

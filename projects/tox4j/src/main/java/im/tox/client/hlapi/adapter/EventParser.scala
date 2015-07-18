@@ -117,9 +117,11 @@ object EventParser {
   }
 
   def parseSelfEvent(e: SelfEvent): State[ToxState, Option[Action]] = {
+
     e match {
-      case AddFriendInfo(friendNumber) => State[ToxState, Option[Action]] {
-        state => (state.copy(friends = state.friends + ((friendNumber, null))), Some(GetFriendPublicKeyAction(friendNumber)))
+
+      case AddToFriendList(friendNumber, friend) => State[ToxState, Option[Action]] {
+        state => (friendsL.set(state, friendsL.get(state) + ((friendNumber, friend))), None)
       }
       case GetSelfPublicKeyEvent() => State[ToxState, Option[Action]] {
         state => (state, Some(GetSelfPublicKeyAction()))

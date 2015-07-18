@@ -65,8 +65,8 @@ final class ConnectButtonOnAction(toxGui: MainView) extends ActionListener {
   }
 
   private def connect(): Unit = {
-    acceptEvent(state, SetConnectionStatusEvent(Connect(toxOptions)))
-    acceptEvent(state, RegisterEventListener(toxGui.toxEvents))
+    acceptEvent(SetConnectionStatusEvent(Connect(toxOptions)))
+    acceptEvent(RegisterEventListener(toxGui.toxEvents))
     toxGui.selfPublicKey.setText(readablePublicKey(state.publicKey))
     toxGui.connectButton.setText("Disconnect")
     setConnectSettingsEnabled(false)

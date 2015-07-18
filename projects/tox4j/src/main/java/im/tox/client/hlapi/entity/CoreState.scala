@@ -34,7 +34,12 @@ object CoreState {
     _.userStatus
   )
 
-  val friendsL = Lens.lensu[ToxState, Map[Int, Friend]](
+  val friendListL = Lens.lensu[ToxState, FriendList](
+    (a, value) => a.copy(friendList = value),
+    _.friendList
+  )
+
+  val friendListFriendsL = Lens.lensu[FriendList, Map[Int, Friend]](
     (a, value) => a.copy(friends = value),
     _.friends
   )
@@ -44,7 +49,12 @@ object CoreState {
     _.conversation
   )
 
-  val friendConversationMessagesL = Lens.lensu[FriendConversation, Map[Int, Message]](
+  val ConversationMessageListL = Lens.lensu[FriendConversation, MessageList](
+    (a, value) => a.copy(messageList = value),
+    _.messageList
+  )
+
+  val MessageListMessagesL = Lens.lensu[MessageList, Map[Int, Message]](
     (a, value) => a.copy(messages = value),
     _.messages
   )
@@ -81,18 +91,24 @@ object CoreState {
 
   val stateNicknameL = userProfileL >=> nicknameL
   val stateStatusMessageL = userProfileL >=> statusMessageL
-  val friendMessagesL = friendConversationL >=> friendConversationMessagesL
+  val friendMessagesL = friendConversationL >=> ConversationMessageListL >=> MessageListMessagesL
   val friendNameL = friendProfileL >=> nicknameL
   val friendIsTypingL = friendConversationL >=> conversationIsTypingL
+  val friendsL = friendListL >=> friendListFriendsL
 
-  final case class ToxState(userProfile: UserProfile = UserProfile(), connectionStatus: ConnectionStatus = Disconnect(),
+  trait Gettable
+
+  final case class ToxState(
+    userProfile: UserProfile = UserProfile(),
+    connectionStatus: ConnectionStatus = Disconnect(),
     userStatus: UserStatus = Offline(),
-    friends: Map[Int, Friend] = Map[Int, Friend](), publicKey: PublicKey = PublicKey())
+    friendList: FriendList = FriendList(),
+    publicKey: PublicKey = PublicKey()
+  )
 
   final case class UserProfile(nickname: String = "", statusMessage: String = "")
 
-  final case class FriendConversation(isTyping: Boolean = false, messages: Map[Int, Message] = Map[Int, Message](),
-    fileSentRecord: Map[Int, File] = Map[Int, File]())
+  final case class FriendConversation(isTyping: Boolean = false, messageList: MessageList = Map[Int, Message](), fileSentRecord: Map[Int, File] = Map[Int, File]())
 
   final case class Friend(
     userProfile: UserProfile = UserProfile(),
@@ -103,6 +119,10 @@ object CoreState {
   )
 
   final case class File(status: String)
+
+  final case class FriendList(friends: Map[Int, Friend] = Map[Int, Friend]()) extends Gettable
+  final case class MessageList(messages: Map[Int, Message] = Map[Int, Message]()) extends Gettable
+  final case class FileList(files: Map[Int, File] = Map[Int, File]()) extends Gettable
 
   final case class Message(messageType: MessageType, timeDelta: Int, content: Array[Byte], messageStatus: MessageStatus)
 

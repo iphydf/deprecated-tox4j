@@ -75,7 +75,7 @@ object Event {
   /**
    * Self Events
    */
-  final case class AddFriendInfo(friendNumber: Int) extends SelfEvent
+  final case class AddToFriendList(friendNumber: Int, friend: Friend) extends SelfEvent
   final case class GetSelfPublicKeyEvent() extends SelfEvent
 
   /**
