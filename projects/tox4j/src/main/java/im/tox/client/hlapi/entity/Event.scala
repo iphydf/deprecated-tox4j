@@ -1,6 +1,6 @@
 package im.tox.client.hlapi.entity
 
-import im.tox.tox4j.core.callbacks.ToxEventListener
+import im.tox.client.hlapi.adapter.ToxClientListener
 import im.tox.client.hlapi.entity.CoreState._
 
 sealed trait Event
@@ -15,44 +15,44 @@ object Event {
    * Network Events
    */
   //  Self connection status (connected/disconnected)
-  final case class ReceiveSelfConnectionStatus(connectionStatus: ConnectionStatus) extends NetworkEvent
+  final case class ReceiveSelfConnectionStatusEvent(connectionStatus: ConnectionStatus) extends NetworkEvent
   //  Receive file transmission control from friends
-  final case class ReceiveFileTransmissionControl() extends NetworkEvent
+  final case class ReceiveFileTransmissionControlEvent() extends NetworkEvent
   //  Receive file transmission request from friends
-  final case class ReceiveFileTransmissionRequest() extends NetworkEvent
+  final case class ReceiveFileTransmissionRequestEvent() extends NetworkEvent
   //  Receive a chunk of file under transmission from friends
-  final case class ReceiveFileChunk() extends NetworkEvent
+  final case class ReceiveFileChunkEvent() extends NetworkEvent
   //  A friend’s connection status changes (online/offline)
-  final case class ReceiveFriendConnectionStatus(friendNumber: Int, connectionStatus: ConnectionStatus) extends NetworkEvent
+  final case class ReceiveFriendConnectionStatusEvent(friendNumber: Int, connectionStatus: ConnectionStatus) extends NetworkEvent
   //  Receive a message from a friend
-  final case class ReceiveFriendMessage(friendNumber: Int, messageType: MessageType, timeDelta: Int, content: Array[Byte]) extends NetworkEvent
+  final case class ReceiveFriendMessageEvent(friendNumber: Int, messageType: MessageType, timeDelta: Int, content: Array[Byte]) extends NetworkEvent
   //  A friend’s name changes
-  final case class ReceiveFriendName(friendNumber: Int, name: Array[Byte]) extends NetworkEvent
+  final case class ReceiveFriendNameEvent(friendNumber: Int, name: Array[Byte]) extends NetworkEvent
   //  Receive a friend request
-  final case class ReceiveFriendRequest() extends NetworkEvent
+  final case class ReceiveFriendRequestEvent() extends NetworkEvent
   //  A friend’s user status changes
-  final case class ReceiveFriendStatus(friendNumber: Int, userStatus: UserStatus) extends NetworkEvent
+  final case class ReceiveFriendStatusEvent(friendNumber: Int, userStatus: UserStatus) extends NetworkEvent
   //  A friend’s status message changes
-  final case class ReceiveFriendStatusMessageChange() extends NetworkEvent
+  final case class ReceiveFriendStatusMessageEvent(friendNumber: Int, statusMessage: Array[Byte]) extends NetworkEvent
   //  A friend typing status changes
-  final case class ReceiveFriendTyping(friendNumber: Int, isTyping: Boolean) extends NetworkEvent
+  final case class ReceiveFriendTypingEvent(friendNumber: Int, isTyping: Boolean) extends NetworkEvent
   //  A lossy packet arrives
-  final case class ReceiveLossyPacket() extends NetworkEvent
+  final case class ReceiveLossyPacketEvent() extends NetworkEvent
   //  A lossless packet arrives
-  final case class ReceiveLosslessPacket() extends NetworkEvent
+  final case class ReceiveLosslessPacketEvent() extends NetworkEvent
   //  Receive the read receipt of a message
-  final case class ReceiveReadReceipt(friendNumber: Int, messageId: Int) extends NetworkEvent
+  final case class ReceiveFriendReadReceiptEvent(friendNumber: Int, messageId: Int) extends NetworkEvent
 
   /**
    * GUI Events
    */
-  final case class RegisterEventListener(toxEventListener: ToxEventListener[Unit]) extends UiEvent
+  final case class RegisterEventListener(toxClientListener: ToxClientListener) extends UiEvent
   //  Send a friend request
   final case class SendFriendRequestEvent(publicKey: Array[Byte], request: Option[Array[Byte]]) extends UiEvent
   //  Delete a friend
   final case class DeleteFriendEvent(friendNumber: Int) extends UiEvent
   //  Change user nickname
-  final case class SetNicknameEvent(nickname: String) extends UiEvent
+  final case class SetNicknameEvent(nickname: Array[Byte]) extends UiEvent
   //  Send a text message to a private conversation
   final case class SendFriendMessageEvent(friendNumber: Int, message: Message) extends UiEvent
   //  Initiate a file transmission request to a friend
@@ -66,10 +66,10 @@ object Event {
   //  Get the file sent history with a friend
   final case class GetFileSentList(friendNumber: Int) extends UiEvent
   //  Set status message
-  final case class SetStatusMessageEvent(newStatusMessage: String) extends UiEvent
+  final case class SetStatusMessageEvent(statusMessage: Array[Byte]) extends UiEvent
   //  Change self user status
   final case class SetUserStatusEvent(status: UserStatus) extends UiEvent
-  //  Change self connection status
+  //  Change self connection statusfacceptEvent(SetConnectionStatusEvent(Connect(Cone))
   final case class SetConnectionStatusEvent(status: ConnectionStatus) extends UiEvent
 
   /**

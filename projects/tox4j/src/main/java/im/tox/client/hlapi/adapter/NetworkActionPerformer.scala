@@ -22,11 +22,11 @@ object NetworkActionPerformer {
       {
         action match {
           case Some(SetNameAction(nickname)) => {
-            tox.setName(nickname.getBytes)
+            tox.setName(nickname)
             (state, None)
           }
           case Some(SetStatusMessageAction(statusMessage)) => {
-            tox.setStatusMessage(statusMessage.getBytes)
+            tox.setStatusMessage(statusMessage)
             (state, None)
           }
           case Some(SetUserStatusAction(status)) => {
@@ -47,7 +47,7 @@ object NetworkActionPerformer {
             (publicKeyL.set(state, PublicKey(publicKey)), None)
           }
           case Some(RegisterEventListenerAction(eventListener)) => {
-            tox.callback(eventListener)
+            tox.callback(new ToxCoreListener[Unit](eventListener))
             (state, None)
           }
           case Some(SetConnectionStatusAction(status)) => {

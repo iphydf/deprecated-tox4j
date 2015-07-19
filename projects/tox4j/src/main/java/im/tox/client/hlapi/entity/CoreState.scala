@@ -9,7 +9,7 @@ object CoreState {
     _.userProfile
   )
 
-  val nicknameL = Lens.lensu[UserProfile, String](
+  val nicknameL = Lens.lensu[UserProfile, Array[Byte]](
     (a, value) => a.copy(nickname = value),
     _.nickname
   )
@@ -19,7 +19,7 @@ object CoreState {
     _.publicKey
   )
 
-  val statusMessageL = Lens.lensu[UserProfile, String](
+  val statusMessageL = Lens.lensu[UserProfile, Array[Byte]](
     (a, value) => a.copy(statusMessage = value),
     _.statusMessage
   )
@@ -27,6 +27,21 @@ object CoreState {
   val connectionStatusL = Lens.lensu[ToxState, ConnectionStatus](
     (a, value) => a.copy(connectionStatus = value),
     _.connectionStatus
+  )
+
+  val connectL = Lens.lensu[ToxState, Connect](
+    (a, value) => a.copy(connectionStatus = value),
+    _.connectionStatus.asInstanceOf[Connect]
+  )
+
+  val connectConnectionOptionsL = Lens.lensu[Connect, ConnectionOptions](
+    (a, value) => a.copy(connectionOptions = value),
+    _.connectionOptions
+  )
+
+  val connectionOptionsEnableUdpL = Lens.lensu[ConnectionOptions, Boolean](
+    (a, value) => a.copy(enableUdp = value),
+    _.enableUdp
   )
 
   val userStatusL = Lens.lensu[ToxState, UserStatus](
@@ -94,8 +109,11 @@ object CoreState {
   val friendMessageListL = friendConversationL >=> ConversationMessageListL
   val friendMessagesL = friendMessageListL >=> MessageListMessagesL
   val friendNameL = friendProfileL >=> nicknameL
+  val friendStatusMessageL = friendProfileL >=> statusMessageL
   val friendIsTypingL = friendConversationL >=> conversationIsTypingL
   val friendsL = friendListL >=> friendListFriendsL
+  val connectionOptionsL = connectL >=> connectConnectionOptionsL
+  val enableUdpL = connectionOptionsL >=> connectionOptionsEnableUdpL
 
   trait Gettable
 
@@ -107,7 +125,7 @@ object CoreState {
     publicKey: PublicKey = PublicKey()
   )
 
-  final case class UserProfile(nickname: String = "", statusMessage: String = "")
+  final case class UserProfile(nickname: Array[Byte] = Array.ofDim(0), statusMessage: Array[Byte] = Array.ofDim(0))
 
   final case class FriendConversation(
     isTyping: Boolean = false,
@@ -150,8 +168,12 @@ object CoreState {
   final case class Busy() extends UserStatus
   final case class Offline() extends UserStatus
 
-  final case class ConnectionOptions(enableIPv6: Boolean, enableUdp: Boolean,
-    proxyOption: ProxyOption, saveDataOption: SaveDataOption)
+  final case class ConnectionOptions(
+    enableIPv6: Boolean = true,
+    enableUdp: Boolean = true,
+    proxyOption: ProxyOption = NoProxy(),
+    saveDataOption: SaveDataOption = NoSaveData()
+  )
 
   sealed abstract class ProxyOption
   final case class Http(proxyHost: String, proxyPort: Int) extends ProxyOption
@@ -163,5 +185,4 @@ object CoreState {
   final case class ToxSave(data: Array[Byte]) extends SaveDataOption
 
   final case class PublicKey(key: Array[Byte] = Array.ofDim[Byte](0))
-  final case class Nickname(name: String = "")
 }

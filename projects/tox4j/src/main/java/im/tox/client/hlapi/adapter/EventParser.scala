@@ -53,22 +53,22 @@ object EventParser {
   def parseNetworkEvent(e: NetworkEvent): State[ToxState, Option[Action]] = {
 
     e match {
-      case ReceiveSelfConnectionStatus(status) => State[ToxState, Option[Action]] {
+      case ReceiveSelfConnectionStatusEvent(status) => State[ToxState, Option[Action]] {
         state => (connectionStatusL.set(state, status), Some(SetConnectionStatusAction(status)))
       }
-      case ReceiveFileTransmissionControl() => State[ToxState, Option[Action]] {
+      case ReceiveFileTransmissionControlEvent() => State[ToxState, Option[Action]] {
         state => (state, None)
       }
-      case ReceiveFileTransmissionRequest() => State[ToxState, Option[Action]] {
+      case ReceiveFileTransmissionRequestEvent() => State[ToxState, Option[Action]] {
         state => (state, None)
       }
-      case ReceiveFileChunk() => State[ToxState, Option[Action]] {
+      case ReceiveFileChunkEvent() => State[ToxState, Option[Action]] {
         state => (state, None)
       }
-      case ReceiveFriendConnectionStatus(friendNumber, status) => State[ToxState, Option[Action]] {
+      case ReceiveFriendConnectionStatusEvent(friendNumber, status) => State[ToxState, Option[Action]] {
         state => (friendEventHandler[ConnectionStatus](friendNumber, state, friendConnectionStatusL, status), None)
       }
-      case ReceiveFriendMessage(friendNumber, messageType, timeDelta, content) => State[ToxState, Option[Action]] {
+      case ReceiveFriendMessageEvent(friendNumber, messageType, timeDelta, content) => State[ToxState, Option[Action]] {
         state =>
           {
             val friend = friendsL.get(state)(friendNumber)
@@ -81,28 +81,28 @@ object EventParser {
           }
       }
 
-      case ReceiveFriendName(friendNumber, name) => State[ToxState, Option[Action]] {
-        state => (friendEventHandler[String](friendNumber, state, friendNameL, name.toString), None)
+      case ReceiveFriendNameEvent(friendNumber, name) => State[ToxState, Option[Action]] {
+        state => (friendEventHandler[Array[Byte]](friendNumber, state, friendNameL, name), None)
       }
-      case ReceiveFriendRequest() => State[ToxState, Option[Action]] {
+      case ReceiveFriendRequestEvent() => State[ToxState, Option[Action]] {
         state => (state, None)
       }
-      case ReceiveFriendStatus(friendNumber, status) => State[ToxState, Option[Action]] {
+      case ReceiveFriendStatusEvent(friendNumber, status) => State[ToxState, Option[Action]] {
         state => (friendEventHandler[UserStatus](friendNumber, state, friendUserStatusL, status), None)
       }
-      case ReceiveFriendStatusMessageChange() => State[ToxState, Option[Action]] {
-        state => (state, None)
+      case ReceiveFriendStatusMessageEvent(friendNumber, statusMessage) => State[ToxState, Option[Action]] {
+        state => (friendEventHandler[Array[Byte]](friendNumber, state, friendStatusMessageL, statusMessage), None)
       }
-      case ReceiveFriendTyping(friendNumber, isTyping) => State[ToxState, Option[Action]] {
+      case ReceiveFriendTypingEvent(friendNumber, isTyping) => State[ToxState, Option[Action]] {
         state => (friendEventHandler[Boolean](friendNumber, state, friendIsTypingL, isTyping), None)
       }
-      case ReceiveLossyPacket() => State[ToxState, Option[Action]] {
+      case ReceiveLossyPacketEvent() => State[ToxState, Option[Action]] {
         state => (state, None)
       }
-      case ReceiveLosslessPacket() => State[ToxState, Option[Action]] {
+      case ReceiveLosslessPacketEvent() => State[ToxState, Option[Action]] {
         state => (state, None)
       }
-      case ReceiveReadReceipt(friendNumber, messageId) => State[ToxState, Option[Action]] {
+      case ReceiveFriendReadReceiptEvent(friendNumber, messageId) => State[ToxState, Option[Action]] {
         state =>
           {
             val friend = friendsL.get(state)(friendNumber)
