@@ -29,21 +29,6 @@ object CoreState {
     _.connectionStatus
   )
 
-  val connectL = Lens.lensu[ToxState, Connect](
-    (a, value) => a.copy(connectionStatus = value),
-    _.connectionStatus.asInstanceOf[Connect]
-  )
-
-  val connectConnectionOptionsL = Lens.lensu[Connect, ConnectionOptions](
-    (a, value) => a.copy(connectionOptions = value),
-    _.connectionOptions
-  )
-
-  val connectionOptionsEnableUdpL = Lens.lensu[ConnectionOptions, Boolean](
-    (a, value) => a.copy(enableUdp = value),
-    _.enableUdp
-  )
-
   val userStatusL = Lens.lensu[ToxState, UserStatus](
     (a, value) => a.copy(userStatus = value),
     _.userStatus
@@ -112,8 +97,6 @@ object CoreState {
   val friendStatusMessageL = friendProfileL >=> statusMessageL
   val friendIsTypingL = friendConversationL >=> conversationIsTypingL
   val friendsL = friendListL >=> friendListFriendsL
-  val connectionOptionsL = connectL >=> connectConnectionOptionsL
-  val enableUdpL = connectionOptionsL >=> connectionOptionsEnableUdpL
 
   trait Gettable
 

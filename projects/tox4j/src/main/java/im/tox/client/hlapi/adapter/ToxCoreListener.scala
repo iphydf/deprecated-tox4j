@@ -1,6 +1,5 @@
 package im.tox.client.hlapi.adapter
 
-import im.tox.client.hlapi.adapter.ToxClientListener
 import im.tox.client.hlapi.adapter.ToxAdapter.acceptEvent
 import im.tox.client.hlapi.entity.CoreState._
 import im.tox.client.hlapi.entity.Event._
@@ -8,17 +7,16 @@ import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.enums.{ ToxUserStatus, ToxMessageType, ToxConnection, ToxFileControl }
 import org.jetbrains.annotations.NotNull
 
-class ToxCoreListener[State](toxClientListener: ToxClientListener) extends ToxEventListener[State] {
+class ToxCoreListener(toxClientListener: ToxClientListener) extends ToxEventListener[ToxState] {
 
   override def selfConnectionStatus(
     @NotNull connectionStatus: ToxConnection
-  )(state: State): State = {
-    val toxState = state.asInstanceOf[ToxState]
+  )(state: ToxState): ToxState = {
     val status = {
       if (connectionStatus == ToxConnection.NONE) {
         Disconnect()
       } else if (connectionStatus == ToxConnection.TCP) {
-        Connect(connectionOptionsEnableUdpL.set(ConnectionOptions(), false))
+        Connect(ConnectionOptions().copy(enableUdp = false))
       } else {
         Connect(ConnectionOptions())
       }
@@ -31,32 +29,32 @@ class ToxCoreListener[State](toxClientListener: ToxClientListener) extends ToxEv
   override def fileRecvControl(
     friendNumber: Int,
     fileNumber: Int, @NotNull control: ToxFileControl
-  )(state: State): State = state
+  )(state: ToxState): ToxState = state
 
   override def fileRecv(
     friendNumber: Int, fileNumber: Int,
     kind: Int, fileSize: Long, @NotNull filename: Array[Byte]
-  )(state: State): State = state
+  )(state: ToxState): ToxState = state
 
   override def fileRecvChunk(
     friendNumber: Int, fileNumber: Int,
     position: Long, @NotNull data: Array[Byte]
-  )(state: State): State = state
+  )(state: ToxState): ToxState = state
 
   override def fileChunkRequest(
     friendNumber: Int, fileNumber: Int,
     position: Long, length: Int
-  )(state: State): State = state
+  )(state: ToxState): ToxState = state
 
   override def friendConnectionStatus(
     friendNumber: Int,
     @NotNull connectionStatus: ToxConnection
-  )(state: State): State = {
+  )(state: ToxState): ToxState = {
     val status = {
       if (connectionStatus == ToxConnection.NONE) {
         Disconnect()
       } else if (connectionStatus == ToxConnection.TCP) {
-        Connect(connectionOptionsEnableUdpL.set(ConnectionOptions(), false))
+        Connect(connectionOptions = ConnectionOptions().copy(enableUdp = true))
       } else {
         Connect(ConnectionOptions())
       }
@@ -69,7 +67,7 @@ class ToxCoreListener[State](toxClientListener: ToxClientListener) extends ToxEv
   override def friendMessage(
     friendNumber: Int,
     @NotNull messageType: ToxMessageType, timeDelta: Int, @NotNull message: Array[Byte]
-  )(state: State): State = {
+  )(state: ToxState): ToxState = {
     val mtype = {
       if (messageType == ToxMessageType.ACTION) {
         ActionMessage()
@@ -85,7 +83,7 @@ class ToxCoreListener[State](toxClientListener: ToxClientListener) extends ToxEv
   override def friendName(
     friendNumber: Int,
     @NotNull name: Array[Byte]
-  )(state: State): State = {
+  )(state: ToxState): ToxState = {
     acceptEvent(ReceiveFriendNameEvent(friendNumber, name))
     toxClientListener.receiveFriendName(friendNumber, name)
     state
@@ -94,12 +92,12 @@ class ToxCoreListener[State](toxClientListener: ToxClientListener) extends ToxEv
   override def friendRequest(
     @NotNull publicKey: Array[Byte],
     timeDelta: Int, @NotNull message: Array[Byte]
-  )(state: State): State = state
+  )(state: ToxState): ToxState = state
 
   override def friendStatus(
     friendNumber: Int,
     @NotNull status: ToxUserStatus
-  )(state: State): State = {
+  )(state: ToxState): ToxState = {
     val userStatus = {
       if (status == ToxUserStatus.AWAY) {
         Away()
@@ -117,7 +115,7 @@ class ToxCoreListener[State](toxClientListener: ToxClientListener) extends ToxEv
   override def friendStatusMessage(
     friendNumber: Int,
     @NotNull message: Array[Byte]
-  )(state: State): State = {
+  )(state: ToxState): ToxState = {
     acceptEvent(ReceiveFriendStatusMessageEvent(friendNumber, message))
     toxClientListener.receiveFriendStatusMessage(friendNumber, message)
     state
@@ -126,7 +124,7 @@ class ToxCoreListener[State](toxClientListener: ToxClientListener) extends ToxEv
   override def friendTyping(
     friendNumber: Int,
     isTyping: Boolean
-  )(state: State): State = {
+  )(state: ToxState): ToxState = {
     acceptEvent(ReceiveFriendTypingEvent(friendNumber, isTyping))
     toxClientListener.receiveFriendTyping(friendNumber, isTyping)
     state
@@ -135,17 +133,17 @@ class ToxCoreListener[State](toxClientListener: ToxClientListener) extends ToxEv
   override def friendLosslessPacket(
     friendNumber: Int,
     @NotNull data: Array[Byte]
-  )(state: State): State = state
+  )(state: ToxState): ToxState = state
 
   override def friendLossyPacket(
     friendNumber: Int,
     @NotNull data: Array[Byte]
-  )(state: State): State = state
+  )(state: ToxState): ToxState = state
 
   override def friendReadReceipt(
     friendNumber: Int,
     messageId: Int
-  )(state: State): State = {
+  )(state: ToxState): ToxState = {
     acceptEvent(ReceiveFriendReadReceiptEvent(friendNumber, messageId))
     toxClientListener.receiveFriendReadReceipt(friendNumber, messageId)
     state

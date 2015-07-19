@@ -14,7 +14,7 @@ import scalaz._
 
 object NetworkActionPerformer {
 
-  var tox: ToxCoreImpl[Unit] = new ToxCoreImpl[Unit](ToxOptions())
+  var tox: ToxCoreImpl[ToxState] = new ToxCoreImpl[ToxState](ToxOptions())
 
   def performNetworkAction(action: Option[Action]): State[ToxState, Option[Gettable]] = State {
 
@@ -47,7 +47,7 @@ object NetworkActionPerformer {
             (publicKeyL.set(state, PublicKey(publicKey)), None)
           }
           case Some(RegisterEventListenerAction(eventListener)) => {
-            tox.callback(new ToxCoreListener[Unit](eventListener))
+            tox.callback(new ToxCoreListener(eventListener))
             (state, None)
           }
           case Some(SetConnectionStatusAction(status)) => {

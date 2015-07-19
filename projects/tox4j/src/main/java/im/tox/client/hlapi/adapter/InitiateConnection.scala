@@ -12,6 +12,7 @@ import scala.annotation.tailrec
 object InitiateConnection {
 
   var eventLoop: Thread = new Thread()
+  val state: ToxState = ToxState()
 
   def acceptConnectionAction(state: ToxState, status: ConnectionStatus): ToxState = {
     status match {
@@ -32,7 +33,7 @@ object InitiateConnection {
           }
           ToxOptions(connectionOptions.enableIPv6, connectionOptions.enableUdp, proxy, saveData = saveData)
         }
-        tox = new ToxCoreImpl[Unit](toxOption)
+        tox = new ToxCoreImpl[ToxState](toxOption)
         for (friendNumber <- tox.getFriendList) {
           ToxAdapter.acceptEvent(AddToFriendList(friendNumber, Friend()))
         }
@@ -41,7 +42,7 @@ object InitiateConnection {
           @tailrec
           override def run(): Unit = {
             Thread.sleep(tox.iterationInterval)
-            tox.iterate(())
+            tox.iterate((state))
             run()
           }
         })

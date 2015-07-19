@@ -49,7 +49,7 @@ final class MainView extends MainViewBase {
   var messageModel = new DefaultListModel[String]
   var friendListModel = new FriendList
   val fileModel = new FileTransferModel
-  val toxEvents = new InvokeLaterToxEventListener[Unit](new GuiToxEventListener(this))
+  val toxEvents = new GuiToxEventListener(this)
 
   def addMessage(args: Any*): Unit = {
     val str = new StringBuilder
