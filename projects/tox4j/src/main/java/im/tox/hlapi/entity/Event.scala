@@ -1,7 +1,7 @@
-package im.tox.client.hlapi.entity
+package im.tox.hlapi.entity
 
-import im.tox.client.hlapi.adapter.ToxClientListener
-import im.tox.client.hlapi.entity.CoreState._
+import im.tox.hlapi.adapter.ToxClientListener
+import im.tox.hlapi.entity.CoreState._
 
 sealed trait Event
 
@@ -10,6 +10,7 @@ object Event {
   sealed abstract class NetworkEvent extends Event
   sealed abstract class UiEvent extends Event
   sealed abstract class SelfEvent extends Event
+  sealed abstract class ReplyEvent extends Event
 
   /**
    * Network Events
@@ -48,7 +49,7 @@ object Event {
    */
   final case class RegisterEventListener(toxClientListener: ToxClientListener) extends UiEvent
   //  Send a friend request
-  final case class SendFriendRequestEvent(publicKey: Array[Byte], request: Option[Array[Byte]]) extends UiEvent
+  final case class SendFriendRequestEvent(publicKey: PublicKey, request: Option[FriendRequestMessage]) extends UiEvent
   //  Delete a friend
   final case class DeleteFriendEvent(friendNumber: Int) extends UiEvent
   //  Change user nickname
@@ -61,22 +62,31 @@ object Event {
   final case class GetPrivateConversationList() extends UiEvent
   //  Get all friends
   final case class GetFriendList() extends UiEvent
-  //  Get the messages associated with a conversation
-  final case class GetMessageList(friendNumber: Int) extends UiEvent
-  //  Get the file sent history with a friend
-  final case class GetFileSentList(friendNumber: Int) extends UiEvent
   //  Set status message
   final case class SetStatusMessageEvent(statusMessage: Array[Byte]) extends UiEvent
   //  Change self user status
   final case class SetUserStatusEvent(status: UserStatus) extends UiEvent
-  //  Change self connection statusfacceptEvent(SetConnectionStatusEvent(Connect(Cone))
+  //  Change self connection
   final case class SetConnectionStatusEvent(status: ConnectionStatus) extends UiEvent
-
+  //  Get the messages associated with a conversation
+  final case class GetMessageList(friendNumber: Int) extends UiEvent
+  //  Get the file sent history with a friend
+  final case class GetFileSentList(friendNumber: Int) extends UiEvent
+  final case class GetPublicKeyEvent() extends UiEvent
   /**
    * Self Events, only can be called by HLAPI
    */
   final case class AddToFriendList(friendNumber: Int, friend: Friend) extends SelfEvent
   final case class GetSelfPublicKeyEvent() extends SelfEvent
+
+  /**
+   * Reply Events
+   */
+  final case class RequestSuccess() extends ReplyEvent()
+  final case class Error() extends ReplyEvent()
+  final case class ReplyGetFriendListRequest(friendList: FriendList) extends ReplyEvent()
+  final case class ReplyGetFriendMessageListRequest(messageList: MessageList) extends ReplyEvent()
+  final case class ReplyGetPublicKeyRequest(publicKey: Array[Byte]) extends ReplyEvent()
 
   /**
    * Not handleable event now

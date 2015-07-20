@@ -1,8 +1,8 @@
-package im.tox.client.hlapi.adapter
+package im.tox.hlapi.adapter
 
-import im.tox.client.hlapi.adapter.ToxAdapter.acceptEvent
-import im.tox.client.hlapi.entity.CoreState._
-import im.tox.client.hlapi.entity.Event._
+import im.tox.hlapi.adapter.ToxAdapter.acceptEvent
+import im.tox.hlapi.entity.CoreState._
+import im.tox.hlapi.entity.Event._
 import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.enums.{ ToxUserStatus, ToxMessageType, ToxConnection, ToxFileControl }
 import org.jetbrains.annotations.NotNull

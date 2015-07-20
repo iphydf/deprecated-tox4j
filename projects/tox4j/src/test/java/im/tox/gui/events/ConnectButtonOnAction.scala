@@ -1,12 +1,10 @@
 package im.tox.gui.events
 
 import java.awt.event.{ ActionEvent, ActionListener }
-import im.tox.client.hlapi.adapter.ToxAdapter
-import im.tox.client.hlapi.entity.{CoreState, Event}
-import im.tox.gui.util.InvokeLaterToxEventListener
+import im.tox.hlapi.adapter.ToxAdapter
+import im.tox.hlapi.entity.{CoreState, Event}
 import im.tox.tox4j.ToxCoreTestBase.readablePublicKey
-import im.tox.gui.{GuiToxEventListener, MainView}
-import im.tox.gui.MainView.state
+import im.tox.gui.MainView
 import ToxAdapter._
 import Event._
 import CoreState._
@@ -67,14 +65,19 @@ final class ConnectButtonOnAction(toxGui: MainView) extends ActionListener {
   private def connect(): Unit = {
     acceptEvent(SetConnectionStatusEvent(Connect(toxOptions)))
     acceptEvent(RegisterEventListener(toxGui.toxEvents))
-    toxGui.selfPublicKey.setText(readablePublicKey(state.publicKey))
+    val reply = acceptEvent(GetPublicKeyEvent())
+    reply match {
+      case reply: ReplyGetPublicKeyRequest => {
+        toxGui.selfPublicKey.setText(readablePublicKey(reply.publicKey))
+      }
+    }
     toxGui.connectButton.setText("Disconnect")
     setConnectSettingsEnabled(false)
     toxGui.addMessage("Created Tox instance; started event loop")
   }
 
   private def disconnect(): Unit = {
-    acceptEvent(state, SetConnectionStatusEvent(Disconnect()))
+    acceptEvent(SetConnectionStatusEvent(Disconnect()))
     setConnectSettingsEnabled(true)
     toxGui.connectButton.setText("Connect")
     toxGui.addMessage("Disconnected")

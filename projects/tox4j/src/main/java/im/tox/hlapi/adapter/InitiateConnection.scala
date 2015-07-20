@@ -1,7 +1,7 @@
-package im.tox.client.hlapi.adapter
+package im.tox.hlapi.adapter
 
-import im.tox.client.hlapi.adapter.NetworkActionPerformer.tox
-import im.tox.client.hlapi.entity.{ CoreState, Event }
+import im.tox.hlapi.adapter.NetworkActionPerformer.tox
+import im.tox.hlapi.entity.{ CoreState, Event }
 import Event.{ AddToFriendList, GetSelfPublicKeyEvent }
 import CoreState._
 import im.tox.tox4j.core.options.{ ProxyOptions, SaveDataOptions, ToxOptions }
@@ -12,7 +12,6 @@ import scala.annotation.tailrec
 object InitiateConnection {
 
   var eventLoop: Thread = new Thread()
-  val state: ToxState = ToxState()
 
   def acceptConnectionAction(state: ToxState, status: ConnectionStatus): ToxState = {
     status match {

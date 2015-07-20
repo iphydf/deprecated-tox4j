@@ -1,11 +1,11 @@
-package im.tox.client.hlapi.adapter
+package im.tox.hlapi.adapter
 
-import im.tox.client.hlapi.adapter.ToxAdapter.acceptEvent
-import im.tox.client.hlapi.adapter.EventParser._
-import im.tox.client.hlapi.entity.Action
-import im.tox.client.hlapi.entity.Action._
-import im.tox.client.hlapi.entity.CoreState._
-import im.tox.client.hlapi.entity.Event.SetConnectionStatusEvent
+import im.tox.hlapi.adapter.ToxAdapter.acceptEvent
+import im.tox.hlapi.adapter.EventParser._
+import im.tox.hlapi.entity.Action
+import im.tox.hlapi.entity.Action._
+import im.tox.hlapi.entity.CoreState._
+import im.tox.hlapi.entity.Event.{ RequestSuccess, ReplyEvent, SetConnectionStatusEvent }
 import im.tox.tox4j.core.enums.{ ToxUserStatus, ToxMessageType }
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.ToxCoreImpl
@@ -16,62 +16,62 @@ object NetworkActionPerformer {
 
   var tox: ToxCoreImpl[ToxState] = new ToxCoreImpl[ToxState](ToxOptions())
 
-  def performNetworkAction(action: Option[Action]): State[ToxState, Option[Gettable]] = State {
+  def performNetworkAction(action: Action): State[ToxState, ReplyEvent] = State {
 
     state =>
       {
         action match {
-          case Some(SetNameAction(nickname)) => {
+          case SetNameAction(nickname) => {
             tox.setName(nickname)
-            (state, None)
+            (state, RequestSuccess())
           }
-          case Some(SetStatusMessageAction(statusMessage)) => {
+          case SetStatusMessageAction(statusMessage) => {
             tox.setStatusMessage(statusMessage)
-            (state, None)
+            (state, RequestSuccess())
           }
-          case Some(SetUserStatusAction(status)) => {
+          case SetUserStatusAction(status) => {
             status match {
               case Online()  => tox.setStatus(ToxUserStatus.NONE)
               case Away()    => tox.setStatus(ToxUserStatus.AWAY)
               case Busy()    => tox.setStatus(ToxUserStatus.BUSY)
               case Offline() => acceptEvent(SetConnectionStatusEvent(Disconnect()))
             }
-            (state, None)
+            (state, RequestSuccess())
           }
-          case Some(GetFriendPublicKeyAction(friendNumber)) => {
+          case GetFriendPublicKeyAction(friendNumber) => {
             val publicKey = tox.getFriendPublicKey(friendNumber)
-            (friendEventHandler[PublicKey](friendNumber, state, friendPublicKeyL, PublicKey(publicKey)), None)
+            (friendEventHandler[PublicKey](friendNumber, state, friendPublicKeyL, PublicKey(publicKey)), RequestSuccess())
           }
-          case Some(GetSelfPublicKeyAction()) => {
+          case GetSelfPublicKeyAction() => {
             val publicKey = tox.getAddress
-            (publicKeyL.set(state, PublicKey(publicKey)), None)
+            (publicKeyL.set(state, PublicKey(publicKey)), RequestSuccess())
           }
-          case Some(RegisterEventListenerAction(eventListener)) => {
+          case RegisterEventListenerAction(eventListener) => {
             tox.callback(new ToxCoreListener(eventListener))
-            (state, None)
+            (state, RequestSuccess())
           }
-          case Some(SetConnectionStatusAction(status)) => {
+          case SetConnectionStatusAction(status) => {
             InitiateConnection.acceptConnectionAction(state, status)
-            (state, None)
+            (state, RequestSuccess())
           }
-          case Some(SendFriendRequestAction(publicKey, request)) => {
+          case SendFriendRequestAction(publicKey, request) => {
             val friendNumber = {
               request match {
-                case Some(request: Array[Byte]) => {
-                  tox.addFriend(publicKey, request)
+                case Some(requestMessage) => {
+                  tox.addFriend(publicKey.key, requestMessage.request)
                 }
                 case None => {
-                  tox.addFriendNorequest(publicKey)
+                  tox.addFriendNorequest(publicKey.key)
                 }
               }
             }
-            (state, None)
+            (state, RequestSuccess())
           }
-          case Some(deleteFriend(friendNumber)) => {
+          case deleteFriend(friendNumber) => {
             tox.deleteFriend(friendNumber)
-            (state, None)
+            (state, RequestSuccess())
           }
-          case Some(SendFriendMessageAction(friendNumber, message)) => {
+          case SendFriendMessageAction(friendNumber, message) => {
             message.messageType match {
               case NormalMessage() => {
                 tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, message.timeDelta, message.content)
@@ -80,7 +80,7 @@ object NetworkActionPerformer {
                 tox.friendSendMessage(friendNumber, ToxMessageType.ACTION, message.timeDelta, message.content)
               }
             }
-            (state, None)
+            (state, RequestSuccess())
           }
 
         }

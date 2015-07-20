@@ -5,9 +5,9 @@ import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.Date
 import javax.swing._
-import im.tox.client.hlapi.entity.CoreState
+import im.tox.hlapi.entity.CoreState
 import CoreState.ToxState
-import im.tox.client.hlapi.adapter.ToxAdapter
+import im.tox.hlapi.adapter.ToxAdapter
 import im.tox.gui.domain.{ FileTransferModel, FriendList }
 import im.tox.gui.events._
 import im.tox.gui.forms.MainViewBase
@@ -18,7 +18,6 @@ import org.slf4j.{ Logger, LoggerFactory }
 
 object MainView {
 
-  var state: ToxState = ToxState()
   private val logger: Logger = LoggerFactory.getLogger(classOf[MainView])
   private val MAX_MESSAGES: Int = 1000
   private val DATE_FORMAT: SimpleDateFormat = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss.SSS]")

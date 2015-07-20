@@ -1,7 +1,7 @@
-package im.tox.client.hlapi.entity
+package im.tox.hlapi.entity
 
-import im.tox.client.hlapi.adapter.ToxClientListener
-import im.tox.client.hlapi.entity.CoreState._
+import im.tox.hlapi.adapter.ToxClientListener
+import im.tox.hlapi.entity.CoreState._
 
 sealed trait Action
 
@@ -12,7 +12,7 @@ object Action {
   final case class SetStatusMessageAction(statusMessage: Array[Byte]) extends NetworkAction
   final case class SetUserStatusAction(userStatus: UserStatus) extends NetworkAction
   final case class SetConnectionStatusAction(connectionStatus: ConnectionStatus) extends NetworkAction
-  final case class SendFriendRequestAction(publicKey: Array[Byte], requestMessage: Option[Array[Byte]]) extends NetworkAction
+  final case class SendFriendRequestAction(publicKey: PublicKey, requestMessage: Option[FriendRequestMessage]) extends NetworkAction
   final case class deleteFriend(friendNumber: Int) extends NetworkAction
   final case class SendFriendMessageAction(friendNumber: Int, message: Message) extends NetworkAction
   final case class GetFriendPublicKeyAction(friendNumber: Int) extends NetworkAction
@@ -23,5 +23,8 @@ object Action {
   final case class GetFriendListSelfAction() extends SelfAction
   final case class GetMessageListSelfAction(friendNumber: Int) extends SelfAction
   final case class GetFileSentListSelfAction(friendNumber: Int) extends SelfAction
+  final case class GetPublicKeySelfAction() extends SelfAction
+
+  final case class NoAction() extends Action
 
 }

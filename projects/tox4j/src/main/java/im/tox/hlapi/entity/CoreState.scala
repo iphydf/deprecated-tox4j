@@ -1,4 +1,4 @@
-package im.tox.client.hlapi.entity
+package im.tox.hlapi.entity
 
 import scalaz.Lens
 
@@ -98,8 +98,6 @@ object CoreState {
   val friendIsTypingL = friendConversationL >=> conversationIsTypingL
   val friendsL = friendListL >=> friendListFriendsL
 
-  trait Gettable
-
   final case class ToxState(
     userProfile: UserProfile = UserProfile(),
     connectionStatus: ConnectionStatus = Disconnect(),
@@ -126,9 +124,9 @@ object CoreState {
 
   final case class File(status: String)
 
-  final case class FriendList(friends: Map[Int, Friend] = Map[Int, Friend]()) extends Gettable
-  final case class MessageList(messages: Map[Int, Message] = Map[Int, Message]()) extends Gettable
-  final case class FileList(files: Map[Int, File] = Map[Int, File]()) extends Gettable
+  final case class FriendList(friends: Map[Int, Friend] = Map[Int, Friend]())
+  final case class MessageList(messages: Map[Int, Message] = Map[Int, Message]())
+  final case class FileList(files: Map[Int, File] = Map[Int, File]())
 
   final case class Message(messageType: MessageType, timeDelta: Int, content: Array[Byte], messageStatus: MessageStatus)
 
@@ -168,4 +166,5 @@ object CoreState {
   final case class ToxSave(data: Array[Byte]) extends SaveDataOption
 
   final case class PublicKey(key: Array[Byte] = Array.ofDim[Byte](0))
+  final case class FriendRequestMessage(request: Array[Byte] = Array.ofDim[Byte](0))
 }

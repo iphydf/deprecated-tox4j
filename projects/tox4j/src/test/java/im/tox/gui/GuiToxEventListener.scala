@@ -2,8 +2,8 @@ package im.tox.gui
 
 import javax.swing._
 
-import im.tox.client.hlapi.adapter.ToxClientListener
-import im.tox.client.hlapi.entity.CoreState._
+import im.tox.hlapi.adapter.ToxClientListener
+import im.tox.hlapi.entity.CoreState._
 
 final class GuiToxEventListener(toxGui: MainView) extends ToxClientListener {
 

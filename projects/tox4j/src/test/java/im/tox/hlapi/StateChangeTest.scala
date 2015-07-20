@@ -1,8 +1,8 @@
-package im.tox.client.hlapi
+package im.tox.hlapi
 
 //import Core.acceptEvent
 
-import im.tox.client.hlapi.entity.{CoreState, Event}
+import im.tox.hlapi.entity.{CoreState, Event}
 import Event._
 import CoreState._
 
