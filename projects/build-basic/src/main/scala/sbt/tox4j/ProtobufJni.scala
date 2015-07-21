@@ -32,6 +32,7 @@ object ProtobufJni extends OptionalPlugin {
     ) map sourceGeneratorTask
 
   )) ++ ScalaPbPlugin.protobufSettings ++ Seq(
+    ScalaPbPlugin.scalapbVersion in ScalaPbPlugin.protobufConfig := "0.5.10-SNAPSHOT",
     version in ScalaPbPlugin.protobufConfig := "3.0.0-alpha-3",
 
     sourceGenerators in Compile <+= generate in Protobuf,
