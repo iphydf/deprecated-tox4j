@@ -18,6 +18,7 @@ object Action {
   final case class GetFriendPublicKeyAction(friendNumber: Int) extends NetworkAction
   final case class GetSelfPublicKeyAction() extends NetworkAction
   final case class RegisterEventListenerAction(eventListener: ToxClientListener) extends NetworkAction
+  final case class SendFileTransmissionRequestAction(friendNumber: Int, file: File) extends NetworkAction
 
   sealed abstract class SelfAction extends Action
   final case class GetFriendListSelfAction() extends SelfAction

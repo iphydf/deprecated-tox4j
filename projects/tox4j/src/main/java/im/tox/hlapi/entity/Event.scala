@@ -10,7 +10,6 @@ object Event {
   sealed abstract class NetworkEvent extends Event
   sealed abstract class UiEvent extends Event
   sealed abstract class SelfEvent extends Event
-  sealed abstract class ReplyEvent extends Event
 
   /**
    * Network Events
@@ -57,7 +56,7 @@ object Event {
   //  Send a text message to a private conversation
   final case class SendFriendMessageEvent(friendNumber: Int, message: Message) extends UiEvent
   //  Initiate a file transmission request to a friend
-  final case class SendFileTransmissionRequest(friendId: String, fileDescription: String) extends UiEvent
+  final case class SendFileTransmissionRequestEvent(friend: Int, file: File) extends UiEvent
   //  Get all conversations
   final case class GetPrivateConversationList() extends UiEvent
   //  Get all friends
@@ -71,22 +70,13 @@ object Event {
   //  Get the messages associated with a conversation
   final case class GetMessageList(friendNumber: Int) extends UiEvent
   //  Get the file sent history with a friend
-  final case class GetFileSentList(friendNumber: Int) extends UiEvent
+  final case class GetFileList(friendNumber: Int) extends UiEvent
   final case class GetPublicKeyEvent() extends UiEvent
   /**
    * Self Events, only can be called by HLAPI
    */
   final case class AddToFriendList(friendNumber: Int, friend: Friend) extends SelfEvent
   final case class GetSelfPublicKeyEvent() extends SelfEvent
-
-  /**
-   * Reply Events
-   */
-  final case class RequestSuccess() extends ReplyEvent()
-  final case class Error() extends ReplyEvent()
-  final case class ReplyGetFriendListRequest(friendList: FriendList) extends ReplyEvent()
-  final case class ReplyGetFriendMessageListRequest(messageList: MessageList) extends ReplyEvent()
-  final case class ReplyGetPublicKeyRequest(publicKey: Array[Byte]) extends ReplyEvent()
 
   /**
    * Not handleable event now

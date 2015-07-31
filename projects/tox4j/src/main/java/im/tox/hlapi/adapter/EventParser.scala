@@ -31,13 +31,19 @@ object EventParser {
         state => (friendsL.set(state, friendsL.get(state) - friendNumber), deleteFriend(friendNumber))
       }
       case SendFriendMessageEvent(friendNumber, message) => State[ToxState, Action] {
-        state => (state, SendFriendMessageAction(friendNumber, message))
+        state => {
+          val friend = friendsL.get(state)(friendNumber)
+          ( friendEventHandler[Map[Int, Message]](friendNumber, state, friendMessagesL,
+              friendMessagesL.get(friend)
+                + ((friendMessagesL.get(friend).size, message)))
+            , SendFriendMessageAction(friendNumber, message))
+        }
       }
       case SendFriendRequestEvent(publicKey, requestMessage) => State[ToxState, Action] {
         state => (state, SendFriendRequestAction(publicKey, requestMessage))
       }
-      case SendFileTransmissionRequest(friendId, fileDescription) => State[ToxState, Action] {
-        state => (state, NoAction())
+      case SendFileTransmissionRequestEvent(friendNumber, fileDescription) => State[ToxState, Action] {
+        state => (state, SendFileTransmissionRequestAction(friendNumber, fileDescription))
       }
       case GetFriendList() => State[ToxState, Action] {
         state => (state, GetFriendListSelfAction())
@@ -45,7 +51,7 @@ object EventParser {
       case GetMessageList(friendNumber) => State[ToxState, Action] {
         state => (state, GetMessageListSelfAction(friendNumber))
       }
-      case GetFileSentList(friendNumber) => State[ToxState, Action] {
+      case GetFileList(friendNumber) => State[ToxState, Action] {
         state => (state, GetFileSentListSelfAction(friendNumber))
       }
       case GetPublicKeyEvent() => State[ToxState, Action] {
@@ -79,7 +85,7 @@ object EventParser {
             (
               friendEventHandler[Map[Int, Message]](friendNumber, state, friendMessagesL,
                 friendMessagesL.get(friend)
-                  + ((friendMessagesL.get(friend).size, Message(messageType, timeDelta, content, Received())))),
+                  + ((friendMessagesL.get(friend).size, Message(messageType, timeDelta, content, MessageReceived())))),
                 NoAction()
             )
           }
@@ -113,7 +119,7 @@ object EventParser {
             (friendEventHandler[Map[Int, Message]](friendNumber, state, friendMessagesL,
               friendMessagesL.get(friend).updated(
                 messageId,
-                messageStatusL.set(friendMessagesL.get(friend)(messageId), Read())
+                messageStatusL.set(friendMessagesL.get(friend)(messageId), MessageRead())
               )), NoAction())
           }
       }

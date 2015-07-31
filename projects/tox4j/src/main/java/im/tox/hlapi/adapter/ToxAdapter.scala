@@ -2,7 +2,7 @@ package im.tox.hlapi.adapter
 
 import scalaz.State
 
-import im.tox.hlapi.entity.{ CoreState, Action, Event }
+import im.tox.hlapi.entity.{ Response, CoreState, Action, Event }
 import Event._
 import Action.SelfAction
 import Action.NetworkAction
@@ -15,7 +15,7 @@ object ToxAdapter {
 
   val state: ToxState = ToxState()
 
-  def acceptEvent(e: Event): ReplyEvent = {
+  def acceptEvent(e: Event): Response = {
     val decision = parseEvent(e)
     decision.flatMap(parseAction).eval(state)
   }
@@ -28,7 +28,7 @@ object ToxAdapter {
     }
   }
 
-  def parseAction(action: Action): State[ToxState, ReplyEvent] = {
+  def parseAction(action: Action): State[ToxState, Response] = {
     action match {
       case action: NetworkAction => performNetworkAction(action)
       case action: SelfAction    => performSelfAction(action)

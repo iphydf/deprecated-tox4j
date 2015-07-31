@@ -76,7 +76,7 @@ class ToxCoreListener(toxClientListener: ToxClientListener) extends ToxEventList
       }
     }
     acceptEvent(ReceiveFriendMessageEvent(friendNumber, mtype, timeDelta, message))
-    toxClientListener.receiveFriendMessage(friendNumber, Message(mtype, timeDelta, message, Received()))
+    toxClientListener.receiveFriendMessage(friendNumber, Message(mtype, timeDelta, message, MessageReceived()))
     state
   }
 

@@ -89,6 +89,21 @@ object CoreState {
     _.messageStatus
   )
 
+  val conversationFileSentListL = Lens.lensu[FriendConversation, FileList](
+    (a, value) => a.copy(fileList = value),
+  _.fileList
+  )
+
+  val fileListFilesL = Lens.lensu[FileList, Map[Int, File]](
+    (a, value) => a.copy(files = value),
+  _.files
+  )
+
+  val fileFileStatusL = Lens.lensu[File, FileStatus](
+    (a, value) => a.copy(fileSendStatus = value),
+  _.fileSendStatus
+  )
+
   val stateNicknameL = userProfileL >=> nicknameL
   val stateStatusMessageL = userProfileL >=> statusMessageL
   val friendMessageListL = friendConversationL >=> ConversationMessageListL
@@ -97,6 +112,7 @@ object CoreState {
   val friendStatusMessageL = friendProfileL >=> statusMessageL
   val friendIsTypingL = friendConversationL >=> conversationIsTypingL
   val friendsL = friendListL >=> friendListFriendsL
+  val friendFilesL = friendConversationL >=> conversationFileSentListL >=> fileListFilesL
 
   final case class ToxState(
     userProfile: UserProfile = UserProfile(),
@@ -111,7 +127,7 @@ object CoreState {
   final case class FriendConversation(
     isTyping: Boolean = false,
     messageList: MessageList = MessageList(),
-    fileSentList: Map[Int, File] = Map[Int, File]()
+    fileList: FileList = FileList()
   )
 
   final case class Friend(
@@ -122,7 +138,10 @@ object CoreState {
     publicKey: PublicKey = PublicKey()
   )
 
-  final case class File(status: String)
+  final case class File(fileName: String,
+                        fileData: Array[Byte],
+                        fileKind: FileKind,
+                        fileSendStatus: FileStatus = RequestInitiated())
 
   final case class FriendList(friends: Map[Int, Friend] = Map[Int, Friend]())
   final case class MessageList(messages: Map[Int, Message] = Map[Int, Message]())
@@ -131,9 +150,9 @@ object CoreState {
   final case class Message(messageType: MessageType, timeDelta: Int, content: Array[Byte], messageStatus: MessageStatus)
 
   sealed abstract class MessageStatus
-  final case class Sent() extends MessageStatus
-  final case class Read() extends MessageStatus
-  final case class Received() extends MessageStatus
+  final case class MessageSent() extends MessageStatus
+  final case class MessageRead() extends MessageStatus
+  final case class MessageReceived() extends MessageStatus
 
   sealed abstract class MessageType
   final case class NormalMessage() extends MessageType
@@ -164,6 +183,19 @@ object CoreState {
   sealed abstract class SaveDataOption
   final case class NoSaveData() extends SaveDataOption
   final case class ToxSave(data: Array[Byte]) extends SaveDataOption
+
+  sealed abstract class FileKind
+  final case class Data() extends FileKind
+  final case class Avatar() extends FileKind
+
+  sealed abstract class FileStatus
+  final case class RequestInitiated() extends FileStatus
+  final case class RequestSent() extends FileStatus
+  final case class RequestAccepted() extends FileStatus
+  final case class InTransmission() extends FileStatus
+  final case class Paused() extends FileStatus
+  final case class FileReceived() extends FileStatus
+  final case class FileSent() extends FileStatus
 
   final case class PublicKey(key: Array[Byte] = Array.ofDim[Byte](0))
   final case class FriendRequestMessage(request: Array[Byte] = Array.ofDim[Byte](0))

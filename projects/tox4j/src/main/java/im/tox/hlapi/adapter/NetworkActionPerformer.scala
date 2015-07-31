@@ -2,11 +2,12 @@ package im.tox.hlapi.adapter
 
 import im.tox.hlapi.adapter.ToxAdapter.acceptEvent
 import im.tox.hlapi.adapter.EventParser._
-import im.tox.hlapi.entity.Action
+import im.tox.hlapi.entity.Event.SetConnectionStatusEvent
+import im.tox.hlapi.entity.{ Response, Action }
 import im.tox.hlapi.entity.Action._
 import im.tox.hlapi.entity.CoreState._
-import im.tox.hlapi.entity.Event.{ RequestSuccess, ReplyEvent, SetConnectionStatusEvent }
-import im.tox.tox4j.core.enums.{ ToxUserStatus, ToxMessageType }
+import im.tox.hlapi.entity.Response._
+import im.tox.tox4j.core.enums.{ToxFileKind, ToxUserStatus, ToxMessageType}
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.ToxCoreImpl
 
@@ -16,18 +17,18 @@ object NetworkActionPerformer {
 
   var tox: ToxCoreImpl[ToxState] = new ToxCoreImpl[ToxState](ToxOptions())
 
-  def performNetworkAction(action: Action): State[ToxState, ReplyEvent] = State {
+  def performNetworkAction(action: Action): State[ToxState, Response] = State {
 
     state =>
       {
         action match {
           case SetNameAction(nickname) => {
             tox.setName(nickname)
-            (state, RequestSuccess())
+            (state, Success())
           }
           case SetStatusMessageAction(statusMessage) => {
             tox.setStatusMessage(statusMessage)
-            (state, RequestSuccess())
+            (state, Success())
           }
           case SetUserStatusAction(status) => {
             status match {
@@ -36,23 +37,23 @@ object NetworkActionPerformer {
               case Busy()    => tox.setStatus(ToxUserStatus.BUSY)
               case Offline() => acceptEvent(SetConnectionStatusEvent(Disconnect()))
             }
-            (state, RequestSuccess())
+            (state, Success())
           }
           case GetFriendPublicKeyAction(friendNumber) => {
             val publicKey = tox.getFriendPublicKey(friendNumber)
-            (friendEventHandler[PublicKey](friendNumber, state, friendPublicKeyL, PublicKey(publicKey)), RequestSuccess())
+            (friendEventHandler[PublicKey](friendNumber, state, friendPublicKeyL, PublicKey(publicKey)), Success())
           }
           case GetSelfPublicKeyAction() => {
             val publicKey = tox.getAddress
-            (publicKeyL.set(state, PublicKey(publicKey)), RequestSuccess())
+            (publicKeyL.set(state, PublicKey(publicKey)), Success())
           }
           case RegisterEventListenerAction(eventListener) => {
             tox.callback(new ToxCoreListener(eventListener))
-            (state, RequestSuccess())
+            (state, Success())
           }
           case SetConnectionStatusAction(status) => {
             InitiateConnection.acceptConnectionAction(state, status)
-            (state, RequestSuccess())
+            (state, Success())
           }
           case SendFriendRequestAction(publicKey, request) => {
             val friendNumber = {
@@ -65,11 +66,11 @@ object NetworkActionPerformer {
                 }
               }
             }
-            (state, RequestSuccess())
+            (state, Success())
           }
           case deleteFriend(friendNumber) => {
             tox.deleteFriend(friendNumber)
-            (state, RequestSuccess())
+            (state, Success())
           }
           case SendFriendMessageAction(friendNumber, message) => {
             message.messageType match {
@@ -80,9 +81,23 @@ object NetworkActionPerformer {
                 tox.friendSendMessage(friendNumber, ToxMessageType.ACTION, message.timeDelta, message.content)
               }
             }
-            (state, RequestSuccess())
+            (state, Success())
           }
-
+          case SendFileTransmissionRequestAction(friendNumber, file) => {
+            val fileKind = {
+              file.fileKind match {
+                case Data => ToxFileKind.DATA
+                case Avatar => ToxFileKind.AVATAR
+              }
+            }
+            val fileId = tox.fileSend(friendNumber, fileKind, file.fileData.length, Array.ofDim[Byte](0), file.fileData)
+            val friend = friendsL.get(state)(friendNumber)
+            (
+            friendEventHandler[Map[Int, File]](friendNumber, state, friendFilesL,
+            friendFilesL.get(friend) +
+              ((fileId, fileFileStatusL.set(file, FileSent()))))
+            , Success())
+          }
         }
       }
   }
