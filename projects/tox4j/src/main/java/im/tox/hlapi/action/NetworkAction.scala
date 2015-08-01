@@ -1,13 +1,17 @@
-package im.tox.hlapi.entity
+package im.tox.hlapi.action
 
-import im.tox.hlapi.adapter.ToxClientListener
-import im.tox.hlapi.entity.CoreState._
+import im.tox.hlapi.listener.ToxClientListener
+import im.tox.hlapi.state.ConnectionState.ConnectionStatus
+import im.tox.hlapi.state.FileState.File
+import im.tox.hlapi.state.FriendState.FriendRequestMessage
+import im.tox.hlapi.state.MessageState.Message
+import im.tox.hlapi.state.PublicKeyState.PublicKey
+import im.tox.hlapi.state.UserStatusState.UserStatus
 
-sealed trait Action
+sealed trait NetworkAction
 
-object Action {
+object NetworkAction {
 
-  sealed abstract class NetworkAction extends Action
   final case class SetNameAction(nickname: Array[Byte]) extends NetworkAction
   final case class SetStatusMessageAction(statusMessage: Array[Byte]) extends NetworkAction
   final case class SetUserStatusAction(userStatus: UserStatus) extends NetworkAction
@@ -19,13 +23,5 @@ object Action {
   final case class GetSelfPublicKeyAction() extends NetworkAction
   final case class RegisterEventListenerAction(eventListener: ToxClientListener) extends NetworkAction
   final case class SendFileTransmissionRequestAction(friendNumber: Int, file: File) extends NetworkAction
-
-  sealed abstract class SelfAction extends Action
-  final case class GetFriendListSelfAction() extends SelfAction
-  final case class GetMessageListSelfAction(friendNumber: Int) extends SelfAction
-  final case class GetFileSentListSelfAction(friendNumber: Int) extends SelfAction
-  final case class GetPublicKeySelfAction() extends SelfAction
-
-  final case class NoAction() extends Action
 
 }

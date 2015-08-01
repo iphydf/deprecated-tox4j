@@ -1,13 +1,24 @@
 package im.tox.hlapi.adapter
 
+import im.tox.hlapi.action.Action
+import im.tox.hlapi.action.Action.NetworkActionType
+import im.tox.hlapi.action.NetworkAction._
 import im.tox.hlapi.adapter.ToxAdapter.acceptEvent
 import im.tox.hlapi.adapter.EventParser._
-import im.tox.hlapi.entity.Event.SetConnectionStatusEvent
-import im.tox.hlapi.entity.{ Response, Action }
-import im.tox.hlapi.entity.Action._
-import im.tox.hlapi.entity.CoreState._
-import im.tox.hlapi.entity.Response._
-import im.tox.tox4j.core.enums.{ToxFileKind, ToxUserStatus, ToxMessageType}
+import im.tox.hlapi.event.Event.UiEventType
+import im.tox.hlapi.event.UiEvent.SetConnectionStatusEvent
+import im.tox.hlapi.listener.ToxCoreListener
+import im.tox.hlapi.response.Response
+import im.tox.hlapi.response.Response.RequestSuccessResponse
+import im.tox.hlapi.response.SuccessResponse.RequestSuccess
+import im.tox.hlapi.state.ConnectionState.Disconnect
+import im.tox.hlapi.state.CoreState.ToxState
+import im.tox.hlapi.state.FileState.{ File, FileSent, Avatar, Data }
+import im.tox.hlapi.state.MessageState.{ ActionMessage, NormalMessage }
+import im.tox.hlapi.state.{ FileState, CoreState, FriendState }
+import im.tox.hlapi.state.PublicKeyState.PublicKey
+import im.tox.hlapi.state.UserStatusState.{ Offline, Busy, Away, Online }
+import im.tox.tox4j.core.enums.{ ToxFileKind, ToxUserStatus, ToxMessageType }
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.ToxCoreImpl
 
@@ -17,43 +28,43 @@ object NetworkActionPerformer {
 
   var tox: ToxCoreImpl[ToxState] = new ToxCoreImpl[ToxState](ToxOptions())
 
-  def performNetworkAction(action: Action): State[ToxState, Response] = State {
+  def performNetworkAction(action: NetworkActionType): State[ToxState, Response] = State {
 
     state =>
       {
-        action match {
+        action.networkAction match {
           case SetNameAction(nickname) => {
             tox.setName(nickname)
-            (state, Success())
+            (state, RequestSuccessResponse(RequestSuccess()))
           }
           case SetStatusMessageAction(statusMessage) => {
             tox.setStatusMessage(statusMessage)
-            (state, Success())
+            (state, RequestSuccessResponse(RequestSuccess()))
           }
           case SetUserStatusAction(status) => {
             status match {
               case Online()  => tox.setStatus(ToxUserStatus.NONE)
               case Away()    => tox.setStatus(ToxUserStatus.AWAY)
               case Busy()    => tox.setStatus(ToxUserStatus.BUSY)
-              case Offline() => acceptEvent(SetConnectionStatusEvent(Disconnect()))
+              case Offline() => acceptEvent(UiEventType(SetConnectionStatusEvent(Disconnect())))
             }
-            (state, Success())
+            (state, RequestSuccessResponse(RequestSuccess()))
           }
           case GetFriendPublicKeyAction(friendNumber) => {
             val publicKey = tox.getFriendPublicKey(friendNumber)
-            (friendEventHandler[PublicKey](friendNumber, state, friendPublicKeyL, PublicKey(publicKey)), Success())
+            (friendEventHandler[PublicKey](friendNumber, state, FriendState.friendPublicKeyL, PublicKey(publicKey)), RequestSuccessResponse(RequestSuccess()))
           }
           case GetSelfPublicKeyAction() => {
             val publicKey = tox.getAddress
-            (publicKeyL.set(state, PublicKey(publicKey)), Success())
+            (CoreState.publicKeyL.set(state, PublicKey(publicKey)), RequestSuccessResponse(RequestSuccess()))
           }
           case RegisterEventListenerAction(eventListener) => {
             tox.callback(new ToxCoreListener(eventListener))
-            (state, Success())
+            (state, RequestSuccessResponse(RequestSuccess()))
           }
           case SetConnectionStatusAction(status) => {
             InitiateConnection.acceptConnectionAction(state, status)
-            (state, Success())
+            (state, RequestSuccessResponse(RequestSuccess()))
           }
           case SendFriendRequestAction(publicKey, request) => {
             val friendNumber = {
@@ -66,11 +77,11 @@ object NetworkActionPerformer {
                 }
               }
             }
-            (state, Success())
+            (state, RequestSuccessResponse(RequestSuccess()))
           }
           case deleteFriend(friendNumber) => {
             tox.deleteFriend(friendNumber)
-            (state, Success())
+            (state, RequestSuccessResponse(RequestSuccess()))
           }
           case SendFriendMessageAction(friendNumber, message) => {
             message.messageType match {
@@ -81,22 +92,22 @@ object NetworkActionPerformer {
                 tox.friendSendMessage(friendNumber, ToxMessageType.ACTION, message.timeDelta, message.content)
               }
             }
-            (state, Success())
+            (state, RequestSuccessResponse(RequestSuccess()))
           }
           case SendFileTransmissionRequestAction(friendNumber, file) => {
             val fileKind = {
               file.fileKind match {
-                case Data => ToxFileKind.DATA
-                case Avatar => ToxFileKind.AVATAR
+                case Data()   => ToxFileKind.DATA
+                case Avatar() => ToxFileKind.AVATAR
               }
             }
             val fileId = tox.fileSend(friendNumber, fileKind, file.fileData.length, Array.ofDim[Byte](0), file.fileData)
-            val friend = friendsL.get(state)(friendNumber)
+            val friend = CoreState.friendsL.get(state)(friendNumber)
             (
-            friendEventHandler[Map[Int, File]](friendNumber, state, friendFilesL,
-            friendFilesL.get(friend) +
-              ((fileId, fileFileStatusL.set(file, FileSent()))))
-            , Success())
+              friendEventHandler[Map[Int, File]](friendNumber, state, FriendState.friendFilesL,
+                FriendState.friendFilesL.get(friend) +
+                  ((fileId, FileState.fileFileStatusL.set(file, FileSent())))), RequestSuccessResponse(RequestSuccess())
+            )
           }
         }
       }

@@ -1,6 +1,7 @@
 package im.tox.gui.events
 
-import im.tox.hlapi.entity.{CoreState, Event}
+import im.tox.hlapi.entity.CoreState
+import im.tox.hlapi.event.Event
 import Event.SendFriendMessageEvent
 import im.tox.hlapi.adapter.ToxAdapter
 import im.tox.gui.MainView

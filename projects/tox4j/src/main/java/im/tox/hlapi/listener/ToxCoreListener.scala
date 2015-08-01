@@ -1,10 +1,14 @@
-package im.tox.hlapi.adapter
+package im.tox.hlapi.listener
 
 import im.tox.hlapi.adapter.ToxAdapter.acceptEvent
-import im.tox.hlapi.entity.CoreState._
-import im.tox.hlapi.entity.Event._
+import im.tox.hlapi.event.Event.NetworkEventType
+import im.tox.hlapi.event.NetworkEvent._
+import im.tox.hlapi.state.ConnectionState.{ Connect, ConnectionOptions, Disconnect }
+import im.tox.hlapi.state.CoreState.ToxState
+import im.tox.hlapi.state.MessageState.{ ActionMessage, Message, MessageReceived, NormalMessage }
+import im.tox.hlapi.state.UserStatusState.{ Away, Busy, Online }
 import im.tox.tox4j.core.callbacks.ToxEventListener
-import im.tox.tox4j.core.enums.{ ToxUserStatus, ToxMessageType, ToxConnection, ToxFileControl }
+import im.tox.tox4j.core.enums.{ ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus }
 import org.jetbrains.annotations.NotNull
 
 class ToxCoreListener(toxClientListener: ToxClientListener) extends ToxEventListener[ToxState] {
@@ -21,7 +25,7 @@ class ToxCoreListener(toxClientListener: ToxClientListener) extends ToxEventList
         Connect(ConnectionOptions())
       }
     }
-    acceptEvent(ReceiveSelfConnectionStatusEvent(status))
+    acceptEvent(NetworkEventType(ReceiveSelfConnectionStatusEvent(status)))
     toxClientListener.receiveSelfConnectionStatus(status)
     state
   }
@@ -59,7 +63,7 @@ class ToxCoreListener(toxClientListener: ToxClientListener) extends ToxEventList
         Connect(ConnectionOptions())
       }
     }
-    acceptEvent(ReceiveFriendConnectionStatusEvent(friendNumber, status))
+    acceptEvent(NetworkEventType(ReceiveFriendConnectionStatusEvent(friendNumber, status)))
     toxClientListener.receiveFriendConnectionStatus(friendNumber, status)
     state
   }
@@ -75,7 +79,7 @@ class ToxCoreListener(toxClientListener: ToxClientListener) extends ToxEventList
         NormalMessage()
       }
     }
-    acceptEvent(ReceiveFriendMessageEvent(friendNumber, mtype, timeDelta, message))
+    acceptEvent(NetworkEventType(ReceiveFriendMessageEvent(friendNumber, mtype, timeDelta, message)))
     toxClientListener.receiveFriendMessage(friendNumber, Message(mtype, timeDelta, message, MessageReceived()))
     state
   }
@@ -84,7 +88,7 @@ class ToxCoreListener(toxClientListener: ToxClientListener) extends ToxEventList
     friendNumber: Int,
     @NotNull name: Array[Byte]
   )(state: ToxState): ToxState = {
-    acceptEvent(ReceiveFriendNameEvent(friendNumber, name))
+    acceptEvent(NetworkEventType(ReceiveFriendNameEvent(friendNumber, name)))
     toxClientListener.receiveFriendName(friendNumber, name)
     state
   }
@@ -107,7 +111,7 @@ class ToxCoreListener(toxClientListener: ToxClientListener) extends ToxEventList
         Online()
       }
     }
-    acceptEvent(ReceiveFriendStatusEvent(friendNumber, userStatus))
+    acceptEvent(NetworkEventType(ReceiveFriendStatusEvent(friendNumber, userStatus)))
     toxClientListener.receiveFriendStatus(friendNumber, userStatus)
     state
   }
@@ -116,7 +120,7 @@ class ToxCoreListener(toxClientListener: ToxClientListener) extends ToxEventList
     friendNumber: Int,
     @NotNull message: Array[Byte]
   )(state: ToxState): ToxState = {
-    acceptEvent(ReceiveFriendStatusMessageEvent(friendNumber, message))
+    acceptEvent(NetworkEventType(ReceiveFriendStatusMessageEvent(friendNumber, message)))
     toxClientListener.receiveFriendStatusMessage(friendNumber, message)
     state
   }
@@ -125,7 +129,7 @@ class ToxCoreListener(toxClientListener: ToxClientListener) extends ToxEventList
     friendNumber: Int,
     isTyping: Boolean
   )(state: ToxState): ToxState = {
-    acceptEvent(ReceiveFriendTypingEvent(friendNumber, isTyping))
+    acceptEvent(NetworkEventType(ReceiveFriendTypingEvent(friendNumber, isTyping)))
     toxClientListener.receiveFriendTyping(friendNumber, isTyping)
     state
   }
@@ -144,7 +148,7 @@ class ToxCoreListener(toxClientListener: ToxClientListener) extends ToxEventList
     friendNumber: Int,
     messageId: Int
   )(state: ToxState): ToxState = {
-    acceptEvent(ReceiveFriendReadReceiptEvent(friendNumber, messageId))
+    acceptEvent(NetworkEventType(ReceiveFriendReadReceiptEvent(friendNumber, messageId)))
     toxClientListener.receiveFriendReadReceipt(friendNumber, messageId)
     state
   }

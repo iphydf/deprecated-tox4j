@@ -2,7 +2,8 @@ package im.tox.gui.events
 
 import java.awt.event.{ ActionEvent, ActionListener }
 import im.tox.hlapi.adapter.ToxAdapter
-import im.tox.hlapi.entity.{CoreState, Event}
+import im.tox.hlapi.entity.CoreState
+import im.tox.hlapi.event.Event
 import im.tox.tox4j.ToxCoreTestBase.readablePublicKey
 import im.tox.gui.MainView
 import ToxAdapter._

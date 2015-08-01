@@ -3,11 +3,12 @@ package im.tox.gui.events
 import java.awt.event.{ ActionEvent, ActionListener }
 import javax.swing._
 import im.tox.hlapi.entity.CoreState.{FriendRequestMessage, PublicKey}
-import im.tox.hlapi.entity.Event
+import im.tox.hlapi.event.Event
 import Event.SendFriendRequestEvent
 import im.tox.hlapi.adapter.ToxAdapter
 import im.tox.gui.MainView
 import im.tox.gui.MainView._
+import im.tox.hlapi.event.Event
 import im.tox.tox4j.ToxCoreTestBase.parsePublicKey
 import ToxAdapter._
 

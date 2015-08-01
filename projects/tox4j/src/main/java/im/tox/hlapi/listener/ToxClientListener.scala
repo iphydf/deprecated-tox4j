@@ -1,6 +1,8 @@
-package im.tox.hlapi.adapter
+package im.tox.hlapi.listener
 
-import im.tox.hlapi.entity.CoreState.{ UserStatus, Message, ConnectionStatus }
+import im.tox.hlapi.state.ConnectionState.ConnectionStatus
+import im.tox.hlapi.state.MessageState.Message
+import im.tox.hlapi.state.UserStatusState.UserStatus
 
 /*
   Client should implement this
