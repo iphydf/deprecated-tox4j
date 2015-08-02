@@ -44,9 +44,7 @@ object InitiateConnection {
         eventLoop = new Thread(new Runnable() {
           @tailrec
           override def run(): Unit = {
-            Thread.sleep(tox.iterationInterval)
-            tox.iterate((state))
-            run()
+            mainLoop(state)
           }
         })
 
@@ -61,5 +59,11 @@ object InitiateConnection {
         state
       }
     }
+  }
+
+  def mainLoop(state: ToxState): Unit = {
+    Thread.sleep(tox.iterationInterval)
+    val nextState = tox.iterate(state)
+    mainLoop(nextState)
   }
 }
