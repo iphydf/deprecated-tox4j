@@ -117,7 +117,7 @@ object NetworkActionPerformer {
             }
             adapter.tox = new ToxCoreImpl[ToxState](toxOption)
             adapter.isInit = true
-            adapter.tox.callback(new ToxCoreListener(toxClientEventListener))
+            adapter.tox.callback(new ToxCoreListener(toxClientEventListener, adapter))
             adapter.eventLoop = new Thread(new Runnable() {
               override def run(): Unit = {
                 mainLoop(adapter.state)
