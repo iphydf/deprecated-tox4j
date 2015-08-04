@@ -5,6 +5,8 @@ import im.tox.hlapi.action.{ SelfAction, NetworkAction, Action }
 import im.tox.hlapi.event.Event
 import im.tox.hlapi.response.Response
 import im.tox.hlapi.state.CoreState.ToxState
+import im.tox.tox4j.core.options.ToxOptions
+import im.tox.tox4j.impl.jni.ToxCoreImpl
 
 import scalaz.State
 
@@ -13,9 +15,12 @@ import EventParser._
 import im.tox.hlapi.adapter.NetworkActionPerformer.performNetworkAction
 import im.tox.hlapi.adapter.SelfActionPerformer.performSelfAction
 
-object ToxAdapter {
+final class ToxAdapter {
 
-  val state: ToxState = ToxState()
+  var state: ToxState = ToxState()
+  var tox: ToxCoreImpl[ToxState] = new ToxCoreImpl[ToxState](ToxOptions())
+  var isInit: Boolean = false
+  var eventLoop: Thread = new Thread()
 
   def acceptEvent(e: Event): Response = {
     val decision = parseEvent(e)
@@ -32,7 +37,7 @@ object ToxAdapter {
 
   def parseAction(action: Action): State[ToxState, Response] = {
     action match {
-      case networkAction: NetworkActionType => performNetworkAction(networkAction)
+      case networkAction: NetworkActionType => performNetworkAction(networkAction, this)
       case selfAction: SelfActionType       => performSelfAction(selfAction)
     }
   }

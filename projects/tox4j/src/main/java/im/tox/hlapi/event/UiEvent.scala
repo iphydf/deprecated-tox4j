@@ -1,7 +1,7 @@
 package im.tox.hlapi.event
 
 import im.tox.hlapi.listener.ToxClientListener
-import im.tox.hlapi.state.ConnectionState.ConnectionStatus
+import im.tox.hlapi.state.ConnectionState.{ ConnectionOptions, ConnectionStatus }
 import im.tox.hlapi.state.FileState.File
 import im.tox.hlapi.state.FriendState.FriendRequestMessage
 import im.tox.hlapi.state.MessageState.Message
@@ -12,7 +12,6 @@ sealed trait UiEvent
 
 object UiEvent {
 
-  final case class RegisterEventListener(toxClientListener: ToxClientListener) extends UiEvent
   //  Send a friend request
   final case class SendFriendRequestEvent(publicKey: PublicKey, request: Option[FriendRequestMessage]) extends UiEvent
   //  Delete a friend
@@ -31,8 +30,10 @@ object UiEvent {
   final case class SetStatusMessageEvent(statusMessage: Array[Byte]) extends UiEvent
   //  Change self user status
   final case class SetUserStatusEvent(status: UserStatus) extends UiEvent
-  //  Change self connection
-  final case class SetConnectionStatusEvent(status: ConnectionStatus) extends UiEvent
+  // Initiate a tox session
+  final case class ToxInitEvent(options: ConnectionOptions, toxClientListener: ToxClientListener) extends UiEvent
+  // End a tox session
+  final case class ToxEndEvent() extends UiEvent
   //  Get the messages associated with a conversation
   final case class GetMessageList(friendNumber: Int) extends UiEvent
   //  Get the file sent history with a friend

@@ -9,7 +9,7 @@ import Event._
 import im.tox.hlapi.event.NetworkEvent._
 import im.tox.hlapi.event.SelfEvent.{ GetSelfPublicKeyEvent, AddToFriendList }
 import im.tox.hlapi.event.UiEvent._
-import im.tox.hlapi.state.ConnectionState.ConnectionStatus
+import im.tox.hlapi.state.ConnectionState.{ Disconnect, Connect, ConnectionStatus }
 import im.tox.hlapi.state.CoreState._
 import im.tox.hlapi.state.{ MessageState, FriendState }
 import im.tox.hlapi.state.FriendState.Friend
@@ -23,11 +23,11 @@ object EventParser {
   def parseUiEvent(e: UiEventType): State[ToxState, Action] = {
 
     e.uiEvent match {
-      case RegisterEventListener(eventListener) => State[ToxState, Action] {
-        state => (state, NetworkActionType(RegisterEventListenerAction(eventListener)))
+      case ToxInitEvent(connectionOptions, eventListener) => State[ToxState, Action] {
+        state => (connectionStatusL.set(state, Connect(connectionOptions)), NetworkActionType(ToxInitAction(connectionOptions, eventListener)))
       }
-      case SetConnectionStatusEvent(status) => State[ToxState, Action] {
-        state => (connectionStatusL.set(state, status), NetworkActionType(SetConnectionStatusAction(status)))
+      case ToxEndEvent() => State[ToxState, Action] {
+        state => (connectionStatusL.set(state, Disconnect()), NetworkActionType(ToxEndAction()))
       }
       case SetUserStatusEvent(status) => State[ToxState, Action] {
         state => (userStatusL.set(state, status), NetworkActionType(SetUserStatusAction(status)))

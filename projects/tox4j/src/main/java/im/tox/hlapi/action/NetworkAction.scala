@@ -1,7 +1,7 @@
 package im.tox.hlapi.action
 
 import im.tox.hlapi.listener.ToxClientListener
-import im.tox.hlapi.state.ConnectionState.ConnectionStatus
+import im.tox.hlapi.state.ConnectionState.{ ConnectionOptions, ConnectionStatus }
 import im.tox.hlapi.state.FileState.File
 import im.tox.hlapi.state.FriendState.FriendRequestMessage
 import im.tox.hlapi.state.MessageState.Message
@@ -21,6 +21,8 @@ object NetworkAction {
   final case class SendFriendMessageAction(friendNumber: Int, message: Message) extends NetworkAction
   final case class GetFriendPublicKeyAction(friendNumber: Int) extends NetworkAction
   final case class GetSelfPublicKeyAction() extends NetworkAction
+  final case class ToxInitAction(connectionOptions: ConnectionOptions, toxClientListener: ToxClientListener) extends NetworkAction
+  final case class ToxEndAction() extends NetworkAction
   final case class RegisterEventListenerAction(eventListener: ToxClientListener) extends NetworkAction
   final case class SendFileTransmissionRequestAction(friendNumber: Int, file: File) extends NetworkAction
 
