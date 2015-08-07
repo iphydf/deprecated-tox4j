@@ -12,12 +12,13 @@ sealed trait NetworkAction
 
 object NetworkAction {
 
+  final case class AddFriendNoRequestAction(publicKey: PublicKey) extends NetworkAction
   final case class SetNameAction(nickname: Array[Byte]) extends NetworkAction
   final case class SetStatusMessageAction(statusMessage: Array[Byte]) extends NetworkAction
   final case class SetUserStatusAction(userStatus: UserStatus) extends NetworkAction
   final case class SetConnectionStatusAction(connectionStatus: ConnectionStatus) extends NetworkAction
-  final case class SendFriendRequestAction(publicKey: PublicKey, requestMessage: Option[FriendRequestMessage]) extends NetworkAction
-  final case class deleteFriend(friendNumber: Int) extends NetworkAction
+  final case class SendFriendRequestAction(publicKey: PublicKey, requestMessage: FriendRequestMessage) extends NetworkAction
+  final case class DeleteFriend(friendNumber: Int) extends NetworkAction
   final case class SendFriendMessageAction(friendNumber: Int, message: Message) extends NetworkAction
   final case class GetFriendPublicKeyAction(friendNumber: Int) extends NetworkAction
   final case class GetSelfPublicKeyAction() extends NetworkAction

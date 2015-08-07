@@ -4,7 +4,9 @@ import im.tox.hlapi.adapter.ToxAdapter
 import im.tox.hlapi.event.Event.NetworkEventType
 import im.tox.hlapi.event.NetworkEvent._
 import im.tox.hlapi.state.ConnectionState.{ Connect, ConnectionOptions, Disconnect }
+import im.tox.hlapi.state.CoreState
 import im.tox.hlapi.state.CoreState.ToxState
+import im.tox.hlapi.state.FriendState.Friend
 import im.tox.hlapi.state.MessageState.{ ActionMessage, Message, MessageReceived, NormalMessage }
 import im.tox.hlapi.state.UserStatusState.{ Away, Busy, Online }
 import im.tox.tox4j.core.callbacks.ToxEventListener
@@ -63,9 +65,20 @@ class ToxCoreListener(toxClientListener: ToxClientListener, adapter: ToxAdapter)
         Connect(ConnectionOptions())
       }
     }
+    status match {
+      case Disconnect() =>
+      case Connect(connectionOptions) => {
+        if (!CoreState.friendsL.get(state).contains(friendNumber)) {
+          adapter.state = CoreState.friendsL.set(
+            state,
+            CoreState.friendsL.get(state) + ((friendNumber, Friend()))
+          )
+        }
+      }
+    }
     adapter.acceptEvent(NetworkEventType(ReceiveFriendConnectionStatusEvent(friendNumber, status)))
     toxClientListener.receiveFriendConnectionStatus(friendNumber, status)
-    state
+    adapter.state
   }
 
   override def friendMessage(

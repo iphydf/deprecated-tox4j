@@ -5,13 +5,14 @@ import im.tox.hlapi.action.NetworkAction._
 import im.tox.hlapi.adapter.EventParser._
 import im.tox.hlapi.event.Event.UiEventType
 import im.tox.hlapi.event.UiEvent.ToxEndEvent
-import im.tox.hlapi.listener.ToxCoreListener
+import im.tox.hlapi.listener.{ ToxClientListener, ToxCoreListener }
 import im.tox.hlapi.response.Response
 import im.tox.hlapi.response.Response.RequestSuccessResponse
 import im.tox.hlapi.response.SuccessResponse.RequestSuccess
 import im.tox.hlapi.state.ConnectionState._
 import im.tox.hlapi.state.CoreState.ToxState
 import im.tox.hlapi.state.FileState.{ File, FileSent, Avatar, Data }
+import im.tox.hlapi.state.FriendState.Friend
 import im.tox.hlapi.state.MessageState.{ ActionMessage, NormalMessage }
 import im.tox.hlapi.state.{ FileState, CoreState, FriendState }
 import im.tox.hlapi.state.PublicKeyState.PublicKey
@@ -46,28 +47,11 @@ object NetworkActionPerformer {
             }
             (state, RequestSuccessResponse(RequestSuccess()))
           }
-          case GetFriendPublicKeyAction(friendNumber) => {
-            val publicKey = adapter.tox.getFriendPublicKey(friendNumber)
-            (friendEventHandler[PublicKey](friendNumber, state, FriendState.friendPublicKeyL, PublicKey(publicKey)), RequestSuccessResponse(RequestSuccess()))
-          }
-          case GetSelfPublicKeyAction() => {
-            val publicKey = adapter.tox.getAddress
-            (CoreState.publicKeyL.set(state, PublicKey(publicKey)), RequestSuccessResponse(RequestSuccess()))
-          }
           case SendFriendRequestAction(publicKey, request) => {
-            val friendNumber = {
-              request match {
-                case Some(requestMessage) => {
-                  adapter.tox.addFriend(publicKey.key, requestMessage.request)
-                }
-                case None => {
-                  adapter.tox.addFriendNorequest(publicKey.key)
-                }
-              }
-            }
+            adapter.tox.addFriend(publicKey.key, request.request)
             (state, RequestSuccessResponse(RequestSuccess()))
           }
-          case deleteFriend(friendNumber) => {
+          case DeleteFriend(friendNumber) => {
             adapter.tox.deleteFriend(friendNumber)
             (state, RequestSuccessResponse(RequestSuccess()))
           }
@@ -97,39 +81,8 @@ object NetworkActionPerformer {
                   ((fileId, FileState.fileFileStatusL.set(file, FileSent())))), RequestSuccessResponse(RequestSuccess())
             )
           }
-          case ToxInitAction(connectionOptions, toxClientEventListener) => {
-
-            val toxOption: ToxOptions = {
-              val p = connectionOptions.proxyOption
-              val proxy = {
-                p match {
-                  case p: Http    => ProxyOptions.Http(p.proxyHost, p.proxyPort)
-                  case p: Socks5  => ProxyOptions.Socks5(p.proxyHost, p.proxyPort)
-                  case p: NoProxy => ProxyOptions.None
-                }
-              }
-              val s = connectionOptions.saveDataOption
-              val saveData = s match {
-                case s: NoSaveData => SaveDataOptions.None
-                case s: ToxSave    => SaveDataOptions.ToxSave(s.data)
-              }
-              ToxOptions(connectionOptions.enableIPv6, connectionOptions.enableUdp, proxy, saveData = saveData)
-            }
-            adapter.tox = new ToxCoreImpl[ToxState](toxOption)
-            adapter.isInit = true
-            adapter.tox.callback(new ToxCoreListener(toxClientEventListener, adapter))
-            adapter.eventLoop = new Thread(new Runnable() {
-              override def run(): Unit = {
-                mainLoop(adapter.state)
-              }
-              def mainLoop(toxState: ToxState): ToxState = {
-                Thread.sleep(adapter.tox.iterationInterval)
-                adapter.state = adapter.tox.iterate(adapter.state)
-                mainLoop(adapter.state)
-              }
-            })
-            adapter.eventLoop.start()
-            (state, RequestSuccessResponse(RequestSuccess()))
+          case ToxInitAction(connectionOptions, toxClientListener) => {
+            (initConnection(adapter, state, connectionOptions, toxClientListener), RequestSuccessResponse(RequestSuccess()))
           }
           case ToxEndAction() => {
             adapter.eventLoop.interrupt()
@@ -137,7 +90,58 @@ object NetworkActionPerformer {
             adapter.eventLoop.join()
             (state, RequestSuccessResponse(RequestSuccess()))
           }
+          case AddFriendNoRequestAction(publicKey) => {
+            val friendNumber = adapter.tox.addFriendNorequest(publicKey.key)
+            (CoreState.friendsL.set(
+              state,
+              CoreState.friendsL.get(state) + ((friendNumber, Friend(publicKey = publicKey)))
+            ), RequestSuccessResponse(RequestSuccess()))
+          }
         }
       }
+  }
+  def initConnection(adapter: ToxAdapter, state: ToxState, connectionOptions: ConnectionOptions, toxClientListener: ToxClientListener): ToxState = {
+    val toxOption: ToxOptions = {
+      val p = connectionOptions.proxyOption
+      val proxy = {
+        p match {
+          case p: Http    => ProxyOptions.Http(p.proxyHost, p.proxyPort)
+          case p: Socks5  => ProxyOptions.Socks5(p.proxyHost, p.proxyPort)
+          case p: NoProxy => ProxyOptions.None
+        }
+      }
+      val s = connectionOptions.saveDataOption
+      val saveData = s match {
+        case s: NoSaveData => SaveDataOptions.None
+        case s: ToxSave    => SaveDataOptions.ToxSave(s.data)
+      }
+      ToxOptions(connectionOptions.enableIPv6, connectionOptions.enableUdp, proxy, saveData = saveData)
+    }
+    adapter.tox = new ToxCoreImpl[ToxState](toxOption)
+    adapter.isInit = true
+    adapter.tox.callback(new ToxCoreListener(toxClientListener, adapter))
+    adapter.eventLoop = new Thread(new Runnable() {
+      override def run(): Unit = {
+        mainLoop(adapter.state)
+      }
+      def mainLoop(toxState: ToxState): ToxState = {
+        Thread.sleep(adapter.tox.iterationInterval)
+        adapter.state = adapter.tox.iterate(adapter.state)
+        mainLoop(adapter.state)
+      }
+    })
+    adapter.eventLoop.start()
+    var returnState = CoreState.publicKeyL.set(state, PublicKey(adapter.tox.getPublicKey))
+    returnState = CoreState.stateNicknameL.set(returnState, adapter.tox.getName)
+    returnState = CoreState.stateStatusMessageL.set(returnState, adapter.tox.getStatusMessage)
+    val friendList = adapter.tox.getFriendList
+    for (i <- 0 to friendList.length) {
+      val publicKey = adapter.tox.getFriendPublicKey(friendList(i))
+      returnState = CoreState.friendsL.set(
+        state,
+        CoreState.friendsL.get(returnState) + ((friendList(i), Friend(publicKey = PublicKey(publicKey))))
+      )
+    }
+    returnState
   }
 }

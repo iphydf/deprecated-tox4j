@@ -3,11 +3,9 @@ package im.tox.hlapi.adapter
 import im.tox.hlapi.action.Action
 import Action._
 import im.tox.hlapi.action.NetworkAction._
-import im.tox.hlapi.action.SelfAction.{ GetPublicKeySelfAction, GetFileSentListSelfAction, GetMessageListSelfAction, GetFriendListSelfAction }
 import im.tox.hlapi.event.Event
 import Event._
 import im.tox.hlapi.event.NetworkEvent._
-import im.tox.hlapi.event.SelfEvent.{ GetSelfPublicKeyEvent, AddToFriendList }
 import im.tox.hlapi.event.UiEvent._
 import im.tox.hlapi.state.ConnectionState.{ Disconnect, Connect, ConnectionStatus }
 import im.tox.hlapi.state.CoreState._
@@ -39,7 +37,7 @@ object EventParser {
         state => (stateNicknameL.set(state, name), NetworkActionType(SetNameAction(name)))
       }
       case DeleteFriendEvent(friendNumber) => State[ToxState, Action] {
-        state => (friendsL.set(state, friendsL.get(state) - friendNumber), NetworkActionType(deleteFriend(friendNumber)))
+        state => (friendsL.set(state, friendsL.get(state) - friendNumber), NetworkActionType(DeleteFriend(friendNumber)))
       }
       case SendFriendMessageEvent(friendNumber, message) => State[ToxState, Action] {
         state =>
@@ -56,17 +54,8 @@ object EventParser {
       case SendFileTransmissionRequestEvent(friendNumber, fileDescription) => State[ToxState, Action] {
         state => (state, NetworkActionType(SendFileTransmissionRequestAction(friendNumber, fileDescription)))
       }
-      case GetFriendList() => State[ToxState, Action] {
-        state => (state, SelfActionType(GetFriendListSelfAction()))
-      }
-      case GetMessageList(friendNumber) => State[ToxState, Action] {
-        state => (state, SelfActionType(GetMessageListSelfAction(friendNumber)))
-      }
-      case GetFileList(friendNumber) => State[ToxState, Action] {
-        state => (state, SelfActionType(GetFileSentListSelfAction(friendNumber)))
-      }
-      case GetPublicKeyEvent() => State[ToxState, Action] {
-        state => (state, SelfActionType(GetPublicKeySelfAction()))
+      case AddFriendNoRequestEvent(publicKey) => State[ToxState, Action] {
+        state => (state, NetworkActionType(AddFriendNoRequestAction(publicKey)))
       }
     }
   }
@@ -133,18 +122,6 @@ object EventParser {
                 MessageState.messageStatusL.set(FriendState.friendMessagesL.get(friend)(messageId), MessageRead())
               )), NoAction())
           }
-      }
-    }
-  }
-
-  def parseSelfEvent(e: SelfEventType): State[ToxState, Action] = {
-
-    e.selfEvent match {
-      case AddToFriendList(friendNumber, friend) => State[ToxState, Action] {
-        state => (friendsL.set(state, friendsL.get(state) + ((friendNumber, friend))), NoAction())
-      }
-      case GetSelfPublicKeyEvent() => State[ToxState, Action] {
-        state => (state, NetworkActionType(GetSelfPublicKeyAction()))
       }
     }
   }
