@@ -6,9 +6,6 @@ import im.tox.hlapi.adapter.EventParser._
 import im.tox.hlapi.event.Event.UiEventType
 import im.tox.hlapi.event.UiEvent.ToxEndEvent
 import im.tox.hlapi.listener.{ ToxClientListener, ToxCoreListener }
-import im.tox.hlapi.response.Response
-import im.tox.hlapi.response.Response.RequestSuccessResponse
-import im.tox.hlapi.response.SuccessResponse.RequestSuccess
 import im.tox.hlapi.state.ConnectionState._
 import im.tox.hlapi.state.CoreState.ToxState
 import im.tox.hlapi.state.FileState.{ File, FileSent, Avatar, Data }
@@ -25,18 +22,18 @@ import scalaz._
 
 object NetworkActionPerformer {
 
-  def performNetworkAction(action: NetworkActionType, adapter: ToxAdapter): State[ToxState, Response] = State {
+  def performNetworkAction(action: NetworkActionType, adapter: ToxAdapter): State[ToxState, Unit] = State {
 
     state =>
       {
         action.networkAction match {
           case SetNameAction(nickname) => {
             adapter.tox.setName(nickname)
-            (state, RequestSuccessResponse(RequestSuccess()))
+            (state, Unit)
           }
           case SetStatusMessageAction(statusMessage) => {
             adapter.tox.setStatusMessage(statusMessage)
-            (state, RequestSuccessResponse(RequestSuccess()))
+            (state, Unit)
           }
           case SetUserStatusAction(status) => {
             status match {
@@ -45,15 +42,15 @@ object NetworkActionPerformer {
               case Busy()    => adapter.tox.setStatus(ToxUserStatus.BUSY)
               case Offline() => adapter.acceptEvent(UiEventType(ToxEndEvent()))
             }
-            (state, RequestSuccessResponse(RequestSuccess()))
+            (state, Unit)
           }
           case SendFriendRequestAction(publicKey, request) => {
             adapter.tox.addFriend(publicKey.key, request.request)
-            (state, RequestSuccessResponse(RequestSuccess()))
+            (state, Unit)
           }
           case DeleteFriend(friendNumber) => {
             adapter.tox.deleteFriend(friendNumber)
-            (state, RequestSuccessResponse(RequestSuccess()))
+            (state, Unit)
           }
           case SendFriendMessageAction(friendNumber, message) => {
             message.messageType match {
@@ -64,7 +61,7 @@ object NetworkActionPerformer {
                 adapter.tox.friendSendMessage(friendNumber, ToxMessageType.ACTION, message.timeDelta, message.content)
               }
             }
-            (state, RequestSuccessResponse(RequestSuccess()))
+            (state, Unit)
           }
           case SendFileTransmissionRequestAction(friendNumber, file) => {
             val fileKind = {
@@ -78,24 +75,24 @@ object NetworkActionPerformer {
             (
               friendEventHandler[Map[Int, File]](friendNumber, state, FriendState.friendFilesL,
                 FriendState.friendFilesL.get(friend) +
-                  ((fileId, FileState.fileFileStatusL.set(file, FileSent())))), RequestSuccessResponse(RequestSuccess())
+                  ((fileId, FileState.fileFileStatusL.set(file, FileSent())))), Unit
             )
           }
           case ToxInitAction(connectionOptions, toxClientListener) => {
-            (initConnection(adapter, state, connectionOptions, toxClientListener), RequestSuccessResponse(RequestSuccess()))
+            (initConnection(adapter, state, connectionOptions, toxClientListener), Unit)
           }
           case ToxEndAction() => {
             adapter.eventLoop.interrupt()
             adapter.tox.close()
             adapter.eventLoop.join()
-            (state, RequestSuccessResponse(RequestSuccess()))
+            (state, Unit)
           }
           case AddFriendNoRequestAction(publicKey) => {
             val friendNumber = adapter.tox.addFriendNorequest(publicKey.key)
             (CoreState.friendsL.set(
               state,
               CoreState.friendsL.get(state) + ((friendNumber, Friend(publicKey = publicKey)))
-            ), RequestSuccessResponse(RequestSuccess()))
+            ), Unit)
           }
         }
       }
@@ -135,12 +132,14 @@ object NetworkActionPerformer {
     returnState = CoreState.stateNicknameL.set(returnState, adapter.tox.getName)
     returnState = CoreState.stateStatusMessageL.set(returnState, adapter.tox.getStatusMessage)
     val friendList = adapter.tox.getFriendList
-    for (i <- 0 to friendList.length) {
-      val publicKey = adapter.tox.getFriendPublicKey(friendList(i))
-      returnState = CoreState.friendsL.set(
-        state,
-        CoreState.friendsL.get(returnState) + ((friendList(i), Friend(publicKey = PublicKey(publicKey))))
-      )
+    if (friendList.length != 0) {
+      for (i <- 0 to friendList.length) {
+        val publicKey = adapter.tox.getFriendPublicKey(friendList(i))
+        returnState = CoreState.friendsL.set(
+          state,
+          CoreState.friendsL.get(returnState) + ((friendList(i), Friend(publicKey = PublicKey(publicKey))))
+        )
+      }
     }
     returnState
   }

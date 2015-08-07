@@ -4,7 +4,6 @@ import im.tox.hlapi.action.Action.NetworkActionType
 import im.tox.hlapi.action.Action
 import im.tox.hlapi.event.Event
 import im.tox.hlapi.request.{ Reply, Request }
-import im.tox.hlapi.response.Response
 import im.tox.hlapi.state.CoreState.ToxState
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.ToxCoreImpl
@@ -23,9 +22,8 @@ final class ToxAdapter {
   var isInit: Boolean = false
   var eventLoop: Thread = new Thread()
 
-  def acceptEvent(e: Event): Response = {
-    val decision = parseEvent(e)
-    decision.flatMap(parseAction).eval(state)
+  def acceptEvent(e: Event): Unit = {
+    parseEvent(e)
   }
 
   def acceptRequest(request: Request): Reply = {
@@ -39,7 +37,7 @@ final class ToxAdapter {
     }
   }
 
-  def parseAction(action: Action): State[ToxState, Response] = {
+  def parseAction(action: Action): State[ToxState, Unit] = {
     action match {
       case networkAction: NetworkActionType => performNetworkAction(networkAction, this)
     }
