@@ -18,110 +18,102 @@ import scalaz._
 
 object EventParser {
 
-  def parseUiEvent(e: UiEventType): State[ToxState, Action] = {
+  def parseUiEvent(e: UiEventType, state: ToxState): (ToxState, Action) = {
 
     e.uiEvent match {
-      case ToxInitEvent(connectionOptions, eventListener) => State[ToxState, Action] {
-        state => (connectionStatusL.set(state, Connect(connectionOptions)), NetworkActionType(ToxInitAction(connectionOptions, eventListener)))
+      case ToxInitEvent(connectionOptions, eventListener) => {
+        (connectionStatusL.set(state, Connect(connectionOptions)), NetworkActionType(ToxInitAction(connectionOptions, eventListener)))
       }
-      case ToxEndEvent() => State[ToxState, Action] {
-        state => (connectionStatusL.set(state, Disconnect()), NetworkActionType(ToxEndAction()))
+      case ToxEndEvent() => {
+        (connectionStatusL.set(state, Disconnect()), NetworkActionType(ToxEndAction()))
       }
-      case SetUserStatusEvent(status) => State[ToxState, Action] {
-        state => (userStatusL.set(state, status), NetworkActionType(SetUserStatusAction(status)))
+      case SetUserStatusEvent(status) => {
+        (userStatusL.set(state, status), NetworkActionType(SetUserStatusAction(status)))
       }
-      case SetStatusMessageEvent(message) => State[ToxState, Action] {
-        state => (stateStatusMessageL.set(state, message), NetworkActionType(SetStatusMessageAction(message)))
+      case SetStatusMessageEvent(message) => {
+        (stateStatusMessageL.set(state, message), NetworkActionType(SetStatusMessageAction(message)))
       }
-      case SetNicknameEvent(name) => State[ToxState, Action] {
-        state => (stateNicknameL.set(state, name), NetworkActionType(SetNameAction(name)))
+      case SetNicknameEvent(name) => {
+        (stateNicknameL.set(state, name), NetworkActionType(SetNameAction(name)))
       }
-      case DeleteFriendEvent(friendNumber) => State[ToxState, Action] {
-        state => (friendsL.set(state, friendsL.get(state) - friendNumber), NetworkActionType(DeleteFriend(friendNumber)))
+      case DeleteFriendEvent(friendNumber) => {
+        (friendsL.set(state, friendsL.get(state) - friendNumber), NetworkActionType(DeleteFriend(friendNumber)))
       }
-      case SendFriendMessageEvent(friendNumber, message) => State[ToxState, Action] {
-        state =>
-          {
-            val friend = friendsL.get(state)(friendNumber)
-            (friendEventHandler[Map[Int, Message]](friendNumber, state, FriendState.friendMessagesL,
-              FriendState.friendMessagesL.get(friend)
-                + ((FriendState.friendMessagesL.get(friend).size, message))), NetworkActionType(SendFriendMessageAction(friendNumber, message)))
-          }
+      case SendFriendMessageEvent(friendNumber, message) => {
+        val friend = friendsL.get(state)(friendNumber)
+        (friendEventHandler[Map[Int, Message]](friendNumber, state, FriendState.friendMessagesL,
+          FriendState.friendMessagesL.get(friend)
+            + ((FriendState.friendMessagesL.get(friend).size, message))), NetworkActionType(SendFriendMessageAction(friendNumber, message)))
       }
-      case SendFriendRequestEvent(publicKey, requestMessage) => State[ToxState, Action] {
-        state => (state, NetworkActionType(SendFriendRequestAction(publicKey, requestMessage)))
+      case SendFriendRequestEvent(publicKey, requestMessage) => {
+        (state, NetworkActionType(SendFriendRequestAction(publicKey, requestMessage)))
       }
-      case SendFileTransmissionRequestEvent(friendNumber, fileDescription) => State[ToxState, Action] {
-        state => (state, NetworkActionType(SendFileTransmissionRequestAction(friendNumber, fileDescription)))
+      case SendFileTransmissionRequestEvent(friendNumber, fileDescription) => {
+        (state, NetworkActionType(SendFileTransmissionRequestAction(friendNumber, fileDescription)))
       }
-      case AddFriendNoRequestEvent(publicKey) => State[ToxState, Action] {
-        state => (state, NetworkActionType(AddFriendNoRequestAction(publicKey)))
+      case AddFriendNoRequestEvent(publicKey) => {
+        (state, NetworkActionType(AddFriendNoRequestAction(publicKey)))
       }
     }
   }
 
-  def parseNetworkEvent(e: NetworkEventType): State[ToxState, Action] = {
+  def parseNetworkEvent(e: NetworkEventType, state: ToxState): (ToxState, Action) = {
 
     e.networkEvent match {
-      case ReceiveSelfConnectionStatusEvent(status) => State[ToxState, Action] {
-        state => (connectionStatusL.set(state, status), NoAction())
+      case ReceiveSelfConnectionStatusEvent(status) => {
+        (connectionStatusL.set(state, status), NoAction())
       }
-      case ReceiveFileTransmissionControlEvent() => State[ToxState, Action] {
-        state => (state, NoAction())
+      case ReceiveFileTransmissionControlEvent() => {
+        (state, NoAction())
       }
-      case ReceiveFileTransmissionRequestEvent() => State[ToxState, Action] {
-        state => (state, NoAction())
+      case ReceiveFileTransmissionRequestEvent() => {
+        (state, NoAction())
       }
-      case ReceiveFileChunkEvent() => State[ToxState, Action] {
-        state => (state, NoAction())
+      case ReceiveFileChunkEvent() => {
+        (state, NoAction())
       }
-      case ReceiveFriendConnectionStatusEvent(friendNumber, status) => State[ToxState, Action] {
-        state => (friendEventHandler[ConnectionStatus](friendNumber, state, FriendState.friendConnectionStatusL, status), NoAction())
+      case ReceiveFriendConnectionStatusEvent(friendNumber, status) => {
+        (friendEventHandler[ConnectionStatus](friendNumber, state, FriendState.friendConnectionStatusL, status), NoAction())
       }
-      case ReceiveFriendMessageEvent(friendNumber, messageType, timeDelta, content) => State[ToxState, Action] {
-        state =>
-          {
-            val friend = friendsL.get(state)(friendNumber)
-            (
-              friendEventHandler[Map[Int, Message]](friendNumber, state, FriendState.friendMessagesL,
-                FriendState.friendMessagesL.get(friend)
-                  + ((FriendState.friendMessagesL.get(friend).size, Message(messageType, timeDelta, content, MessageReceived())))),
-                NoAction()
-            )
-          }
+      case ReceiveFriendMessageEvent(friendNumber, messageType, timeDelta, content) => {
+
+        val friend = friendsL.get(state)(friendNumber)
+        (
+          friendEventHandler[Map[Int, Message]](friendNumber, state, FriendState.friendMessagesL,
+            FriendState.friendMessagesL.get(friend)
+              + ((FriendState.friendMessagesL.get(friend).size, Message(messageType, timeDelta, content, MessageReceived())))),
+            NoAction()
+        )
       }
 
-      case ReceiveFriendNameEvent(friendNumber, name) => State[ToxState, Action] {
-        state => (friendEventHandler[Array[Byte]](friendNumber, state, FriendState.friendNameL, name), NoAction())
+      case ReceiveFriendNameEvent(friendNumber, name) => {
+        (friendEventHandler[Array[Byte]](friendNumber, state, FriendState.friendNameL, name), NoAction())
       }
-      case ReceiveFriendRequestEvent() => State[ToxState, Action] {
-        state => (state, NoAction())
+      case ReceiveFriendRequestEvent() => {
+        (state, NoAction())
       }
-      case ReceiveFriendStatusEvent(friendNumber, status) => State[ToxState, Action] {
-        state => (friendEventHandler[UserStatus](friendNumber, state, FriendState.friendUserStatusL, status), NoAction())
+      case ReceiveFriendStatusEvent(friendNumber, status) => {
+        (friendEventHandler[UserStatus](friendNumber, state, FriendState.friendUserStatusL, status), NoAction())
       }
-      case ReceiveFriendStatusMessageEvent(friendNumber, statusMessage) => State[ToxState, Action] {
-        state => (friendEventHandler[Array[Byte]](friendNumber, state, FriendState.friendStatusMessageL, statusMessage), NoAction())
+      case ReceiveFriendStatusMessageEvent(friendNumber, statusMessage) => {
+        (friendEventHandler[Array[Byte]](friendNumber, state, FriendState.friendStatusMessageL, statusMessage), NoAction())
       }
-      case ReceiveFriendTypingEvent(friendNumber, isTyping) => State[ToxState, Action] {
-        state => (friendEventHandler[Boolean](friendNumber, state, FriendState.friendIsTypingL, isTyping), NoAction())
+      case ReceiveFriendTypingEvent(friendNumber, isTyping) => {
+        (friendEventHandler[Boolean](friendNumber, state, FriendState.friendIsTypingL, isTyping), NoAction())
       }
-      case ReceiveLossyPacketEvent() => State[ToxState, Action] {
-        state => (state, NoAction())
+      case ReceiveLossyPacketEvent() => {
+        (state, NoAction())
       }
-      case ReceiveLosslessPacketEvent() => State[ToxState, Action] {
-        state => (state, NoAction())
+      case ReceiveLosslessPacketEvent() => {
+        (state, NoAction())
       }
-      case ReceiveFriendReadReceiptEvent(friendNumber, messageId) => State[ToxState, Action] {
-        state =>
-          {
-            val friend = friendsL.get(state)(friendNumber)
-            (friendEventHandler[Map[Int, Message]](friendNumber, state, FriendState.friendMessagesL,
-              FriendState.friendMessagesL.get(friend).updated(
-                messageId,
-                MessageState.messageStatusL.set(FriendState.friendMessagesL.get(friend)(messageId), MessageRead())
-              )), NoAction())
-          }
+      case ReceiveFriendReadReceiptEvent(friendNumber, messageId) => {
+        val friend = friendsL.get(state)(friendNumber)
+        (friendEventHandler[Map[Int, Message]](friendNumber, state, FriendState.friendMessagesL,
+          FriendState.friendMessagesL.get(friend).updated(
+            messageId,
+            MessageState.messageStatusL.set(FriendState.friendMessagesL.get(friend)(messageId), MessageRead())
+          )), NoAction())
       }
     }
   }

@@ -23,23 +23,24 @@ final class ToxAdapter {
   var eventLoop: Thread = new Thread()
 
   def acceptEvent(e: Event): Unit = {
-    parseEvent(e)
+    val decision = parseEvent(e, state)
+    state = parseAction(decision._2, decision._1)
   }
 
   def acceptRequest(request: Request): Reply = {
     parseRequest(request, state)
   }
 
-  def parseEvent(e: Event): State[ToxState, Action] = {
+  def parseEvent(e: Event, state: ToxState): (ToxState, Action) = {
     e match {
-      case e: NetworkEventType => parseNetworkEvent(e)
-      case e: UiEventType      => parseUiEvent(e)
+      case e: NetworkEventType => parseNetworkEvent(e, state)
+      case e: UiEventType      => parseUiEvent(e, state)
     }
   }
 
-  def parseAction(action: Action): State[ToxState, Unit] = {
+  def parseAction(action: Action, state: ToxState): ToxState = {
     action match {
-      case networkAction: NetworkActionType => performNetworkAction(networkAction, this)
+      case networkAction: NetworkActionType => performNetworkAction(networkAction, this, state)
     }
   }
 

@@ -22,80 +22,74 @@ import scalaz._
 
 object NetworkActionPerformer {
 
-  def performNetworkAction(action: NetworkActionType, adapter: ToxAdapter): State[ToxState, Unit] = State {
-
-    state =>
-      {
-        action.networkAction match {
-          case SetNameAction(nickname) => {
-            adapter.tox.setName(nickname)
-            (state, Unit)
+  def performNetworkAction(action: NetworkActionType, adapter: ToxAdapter, state: ToxState): ToxState = {
+    action.networkAction match {
+      case SetNameAction(nickname) => {
+        adapter.tox.setName(nickname)
+        state
+      }
+      case SetStatusMessageAction(statusMessage) => {
+        adapter.tox.setStatusMessage(statusMessage)
+        state
+      }
+      case SetUserStatusAction(status) => {
+        status match {
+          case Online()  => adapter.tox.setStatus(ToxUserStatus.NONE)
+          case Away()    => adapter.tox.setStatus(ToxUserStatus.AWAY)
+          case Busy()    => adapter.tox.setStatus(ToxUserStatus.BUSY)
+          case Offline() => adapter.acceptEvent(UiEventType(ToxEndEvent()))
+        }
+        state
+      }
+      case SendFriendRequestAction(publicKey, request) => {
+        adapter.tox.addFriend(publicKey.key, request.request)
+        state
+      }
+      case DeleteFriend(friendNumber) => {
+        adapter.tox.deleteFriend(friendNumber)
+        state
+      }
+      case SendFriendMessageAction(friendNumber, message) => {
+        message.messageType match {
+          case NormalMessage() => {
+            adapter.tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, message.timeDelta, message.content)
           }
-          case SetStatusMessageAction(statusMessage) => {
-            adapter.tox.setStatusMessage(statusMessage)
-            (state, Unit)
-          }
-          case SetUserStatusAction(status) => {
-            status match {
-              case Online()  => adapter.tox.setStatus(ToxUserStatus.NONE)
-              case Away()    => adapter.tox.setStatus(ToxUserStatus.AWAY)
-              case Busy()    => adapter.tox.setStatus(ToxUserStatus.BUSY)
-              case Offline() => adapter.acceptEvent(UiEventType(ToxEndEvent()))
-            }
-            (state, Unit)
-          }
-          case SendFriendRequestAction(publicKey, request) => {
-            adapter.tox.addFriend(publicKey.key, request.request)
-            (state, Unit)
-          }
-          case DeleteFriend(friendNumber) => {
-            adapter.tox.deleteFriend(friendNumber)
-            (state, Unit)
-          }
-          case SendFriendMessageAction(friendNumber, message) => {
-            message.messageType match {
-              case NormalMessage() => {
-                adapter.tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, message.timeDelta, message.content)
-              }
-              case ActionMessage() => {
-                adapter.tox.friendSendMessage(friendNumber, ToxMessageType.ACTION, message.timeDelta, message.content)
-              }
-            }
-            (state, Unit)
-          }
-          case SendFileTransmissionRequestAction(friendNumber, file) => {
-            val fileKind = {
-              file.fileKind match {
-                case Data()   => ToxFileKind.DATA
-                case Avatar() => ToxFileKind.AVATAR
-              }
-            }
-            val fileId = adapter.tox.fileSend(friendNumber, fileKind, file.fileData.length, Array.ofDim[Byte](0), file.fileData)
-            val friend = CoreState.friendsL.get(state)(friendNumber)
-            (
-              friendEventHandler[Map[Int, File]](friendNumber, state, FriendState.friendFilesL,
-                FriendState.friendFilesL.get(friend) +
-                  ((fileId, FileState.fileFileStatusL.set(file, FileSent())))), Unit
-            )
-          }
-          case ToxInitAction(connectionOptions, toxClientListener) => {
-            (initConnection(adapter, state, connectionOptions, toxClientListener), Unit)
-          }
-          case ToxEndAction() => {
-            adapter.eventLoop.interrupt()
-            adapter.tox.close()
-            adapter.eventLoop.join()
-            (state, Unit)
-          }
-          case AddFriendNoRequestAction(publicKey) => {
-            val friendNumber = adapter.tox.addFriendNorequest(publicKey.key)
-            (CoreState.friendsL.set(
-              state,
-              CoreState.friendsL.get(state) + ((friendNumber, Friend(publicKey = publicKey)))
-            ), Unit)
+          case ActionMessage() => {
+            adapter.tox.friendSendMessage(friendNumber, ToxMessageType.ACTION, message.timeDelta, message.content)
           }
         }
+        state
       }
+      case SendFileTransmissionRequestAction(friendNumber, file) => {
+        val fileKind = {
+          file.fileKind match {
+            case Data()   => ToxFileKind.DATA
+            case Avatar() => ToxFileKind.AVATAR
+          }
+        }
+        val fileId = adapter.tox.fileSend(friendNumber, fileKind, file.fileData.length, Array.ofDim[Byte](0), file.fileData)
+        val friend = CoreState.friendsL.get(state)(friendNumber)
+        friendEventHandler[Map[Int, File]](friendNumber, state, FriendState.friendFilesL,
+          FriendState.friendFilesL.get(friend) +
+            ((fileId, FileState.fileFileStatusL.set(file, FileSent()))))
+      }
+      case ToxInitAction(connectionOptions, toxClientListener) => {
+        initConnection(adapter, state, connectionOptions, toxClientListener)
+      }
+      case ToxEndAction() => {
+        adapter.eventLoop.interrupt()
+        adapter.tox.close()
+        adapter.eventLoop.join()
+        state
+      }
+      case AddFriendNoRequestAction(publicKey) => {
+        val friendNumber = adapter.tox.addFriendNorequest(publicKey.key)
+        (CoreState.friendsL.set(
+          state,
+          CoreState.friendsL.get(state) + ((friendNumber, Friend(publicKey = publicKey)))
+        ))
+      }
+    }
   }
   def initConnection(adapter: ToxAdapter, state: ToxState, connectionOptions: ConnectionOptions, toxClientListener: ToxClientListener): ToxState = {
     val toxOption: ToxOptions = {
