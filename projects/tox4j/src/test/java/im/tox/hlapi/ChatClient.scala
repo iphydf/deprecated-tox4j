@@ -1,14 +1,17 @@
 package im.tox.hlapi
 
+import com.typesafe.scalalogging.Logger
 import im.tox.hlapi.adapter.ToxAdapter
 import im.tox.hlapi.listener.ToxClientListener
 import im.tox.hlapi.state.ConnectionState.ConnectionStatus
 import im.tox.hlapi.state.MessageState.Message
 import im.tox.hlapi.state.UserStatusState.UserStatus
+import org.slf4j.LoggerFactory
 
 abstract class ChatClient(name: String, friendName: String, adapter: ToxAdapter) extends ToxClientListener {
 
   val selfAdapter = adapter
+  protected val logger = Logger(LoggerFactory.getLogger(classOf[BrownConyTestBase]))
 
   protected def isBrown(): Boolean = {
     name == "Brown"
@@ -16,6 +19,10 @@ abstract class ChatClient(name: String, friendName: String, adapter: ToxAdapter)
 
   protected def isCony(): Boolean = {
     name == "Cony"
+  }
+
+  protected def debug(info: String): Unit = {
+    logger.info(name + ": " + info)
   }
 
   override def receiveSelfConnectionStatus(connectionStatus: ConnectionStatus): Unit = {}

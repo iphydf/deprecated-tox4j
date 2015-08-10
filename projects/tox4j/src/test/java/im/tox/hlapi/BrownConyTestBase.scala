@@ -42,6 +42,7 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
         brownAdapter.acceptEvent(UiEventType(AddFriendNoRequestEvent(publicKey)))
       }
     }
+    Thread.sleep(10000)
   }
 
   test("BrownConyTest") {
