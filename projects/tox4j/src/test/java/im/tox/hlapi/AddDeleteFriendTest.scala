@@ -36,6 +36,5 @@ final class AddDeleteFriendTest extends BrownConyTestBase {
         }
       }
     }
-    override def receiveFriendRequest
   }
 }

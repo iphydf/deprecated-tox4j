@@ -1,6 +1,6 @@
 package im.tox.hlapi.adapter
 
-import im.tox.hlapi.action.Action.NetworkActionType
+import im.tox.hlapi.action.Action.{ NoAction, NetworkActionType }
 import im.tox.hlapi.action.Action
 import im.tox.hlapi.event.Event
 import im.tox.hlapi.request.{ Reply, Request }
@@ -15,10 +15,11 @@ import EventParser._
 import RequestParser._
 import im.tox.hlapi.adapter.NetworkActionPerformer.performNetworkAction
 
+@SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Null"))
 final class ToxAdapter {
 
   var state: ToxState = ToxState()
-  var tox: ToxCoreImpl[ToxState] = new ToxCoreImpl[ToxState](ToxOptions())
+  var tox: ToxCoreImpl[ToxState] = null
   var isInit: Boolean = false
   var eventLoop: Thread = new Thread()
 
@@ -41,6 +42,7 @@ final class ToxAdapter {
   def parseAction(action: Action, state: ToxState): ToxState = {
     action match {
       case networkAction: NetworkActionType => performNetworkAction(networkAction, this, state)
+      case NoAction()                       => state
     }
   }
 
