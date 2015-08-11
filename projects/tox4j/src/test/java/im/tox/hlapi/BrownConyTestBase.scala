@@ -2,7 +2,8 @@ package im.tox.hlapi
 
 import com.typesafe.scalalogging.Logger
 import im.tox.hlapi.adapter.ToxAdapter
-import im.tox.hlapi.event.Event.{ UiEventType }
+import im.tox.hlapi.event.Event.{NetworkEventType, UiEventType}
+import im.tox.hlapi.event.NetworkEvent
 import im.tox.hlapi.event.UiEvent.{ SetNicknameEvent, AddFriendNoRequestEvent, ToxInitEvent }
 import im.tox.hlapi.request.Reply.{ GetSelfAddressReply, GetSelfPublicKeyReply }
 import im.tox.hlapi.request.Request.{ GetSelfAddressRequest, GetSelfPublicKeyRequest }
@@ -27,20 +28,20 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
     val cony = newChatClient("Cony", "Brown", new ToxAdapter())
     val brownAdapter = brown.selfAdapter
     val conyAdapter = cony.selfAdapter
-    brownAdapter.acceptEvent(UiEventType(ToxInitEvent(ConnectionOptions(), brown)))
-    conyAdapter.acceptEvent(UiEventType(ToxInitEvent(ConnectionOptions(), cony)))
+    brownAdapter.acceptUiEvent(UiEventType(ToxInitEvent(ConnectionOptions(), brown)))
+    conyAdapter.acceptUiEvent(UiEventType(ToxInitEvent(ConnectionOptions(), cony)))
     val brownRequest = brownAdapter.acceptRequest(GetSelfPublicKeyRequest())
     val conyRequest = conyAdapter.acceptRequest(GetSelfPublicKeyRequest())
     brownRequest match {
       case GetSelfPublicKeyReply(publicKey) => {
         brownPublicKey = publicKey
-        conyAdapter.acceptEvent(UiEventType(AddFriendNoRequestEvent(publicKey)))
+        conyAdapter.acceptUiEvent(UiEventType(AddFriendNoRequestEvent(publicKey)))
       }
     }
     conyRequest match {
       case GetSelfPublicKeyReply(publicKey) => {
         conyPublicKey = publicKey
-        brownAdapter.acceptEvent(UiEventType(AddFriendNoRequestEvent(publicKey)))
+        brownAdapter.acceptUiEvent(UiEventType(AddFriendNoRequestEvent(publicKey)))
       }
     }
     val addressRequest = conyAdapter.acceptRequest(GetSelfAddressRequest())
@@ -49,7 +50,13 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
         conyAddress = address
       }
     }
-    Thread.sleep(30000)
+    var brownEventList = Seq[NetworkEvent]()
+    var conyEventList = Seq[NetworkEvent]()
+    brownEventList = brownAdapter.tox.iterate(brownEventList)
+    conyEventList = conyAdapter.tox.iterate(conyEventList)
+    while(brownEventList.size != 0 || conyEventList.size != 0) {
+
+    }
   }
 
   test("BrownConyTest") {

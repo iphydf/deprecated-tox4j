@@ -1,7 +1,9 @@
 package im.tox.hlapi.event
 
 import im.tox.hlapi.state.ConnectionState.ConnectionStatus
+import im.tox.hlapi.state.FriendState.FriendRequest
 import im.tox.hlapi.state.MessageState.MessageType
+import im.tox.hlapi.state.PublicKeyState.PublicKey
 import im.tox.hlapi.state.UserStatusState.UserStatus
 
 sealed trait NetworkEvent
@@ -23,7 +25,7 @@ object NetworkEvent {
   //  A friend’s name changes
   final case class ReceiveFriendNameEvent(friendNumber: Int, name: Array[Byte]) extends NetworkEvent
   //  Receive a friend request
-  final case class ReceiveFriendRequestEvent() extends NetworkEvent
+  final case class ReceiveFriendRequestEvent(publicKey: PublicKey, request: FriendRequest) extends NetworkEvent
   //  A friend’s user status changes
   final case class ReceiveFriendStatusEvent(friendNumber: Int, userStatus: UserStatus) extends NetworkEvent
   //  A friend’s status message changes

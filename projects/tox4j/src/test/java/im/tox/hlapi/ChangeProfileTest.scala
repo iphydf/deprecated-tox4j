@@ -14,7 +14,7 @@ final class ChangeProfileTest extends BrownConyTestBase {
     new ChatClient(friendName, expectedFriendName, adapter) {
       override def receiveFriendConnectionStatus(friendNumber: Int, connectionStatus: ConnectionStatus): Unit = {
         if (isBrown) {
-          selfAdapter.acceptEvent(UiEventType(SetNicknameEvent("Brownie".getBytes)))
+          selfAdapter.acceptUiEvent(UiEventType(SetNicknameEvent("Brownie".getBytes)))
           debug("change name to Brownie")
           val reply = selfAdapter.acceptRequest(GetSelfProfileRequest())
           reply match {
@@ -35,13 +35,13 @@ final class ChangeProfileTest extends BrownConyTestBase {
             assert(brownName.deep == "Brownie".getBytes.deep)
           }
         }
-        selfAdapter.acceptEvent(UiEventType(SendFriendMessageEvent(friendNumber, "please change your status message".getBytes)))
+        selfAdapter.acceptUiEvent(UiEventType(SendFriendMessageEvent(friendNumber, "please change your status message".getBytes)))
         debug("ask Brown to change status message")
       }
       override def receiveFriendMessage(friendNumber: Int, message: Message): Unit = {
         assert(isBrown)
         assert(message.content.deep == "please change your status message".getBytes.deep)
-        selfAdapter.acceptEvent(UiEventType(SetStatusMessageEvent("I like Cony".getBytes)))
+        selfAdapter.acceptUiEvent(UiEventType(SetStatusMessageEvent("I like Cony".getBytes)))
         debug("change status message")
         val reply = selfAdapter.acceptRequest(GetSelfProfileRequest())
         reply match {

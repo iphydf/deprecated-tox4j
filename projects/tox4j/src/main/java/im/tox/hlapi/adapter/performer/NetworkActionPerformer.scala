@@ -1,28 +1,26 @@
-package im.tox.hlapi.adapter
+package im.tox.hlapi.adapter.performer
 
-import im.tox.hlapi.action.Action.NetworkActionType
+import im.tox.hlapi.action.NetworkAction
 import im.tox.hlapi.action.NetworkAction._
-import im.tox.hlapi.adapter.EventParser._
-import im.tox.hlapi.event.Event.UiEventType
+import im.tox.hlapi.adapter.ToxAdapter
+import im.tox.hlapi.event.NetworkEvent
 import im.tox.hlapi.event.UiEvent.ToxEndEvent
-import im.tox.hlapi.listener.{ ToxClientListener, ToxCoreListener }
+import im.tox.hlapi.listener.{ToxClientListener, ToxCoreListener}
 import im.tox.hlapi.state.ConnectionState._
 import im.tox.hlapi.state.CoreState.ToxState
-import im.tox.hlapi.state.FileState.{ File, FileSent, Avatar, Data }
+import im.tox.hlapi.state.FileState.{Avatar, Data, File, FileSent}
 import im.tox.hlapi.state.FriendState.Friend
-import im.tox.hlapi.state.MessageState.{ ActionMessage, NormalMessage }
-import im.tox.hlapi.state.{ FileState, CoreState, FriendState }
-import im.tox.hlapi.state.PublicKeyState.{ Address, PublicKey }
-import im.tox.hlapi.state.UserStatusState.{ Offline, Busy, Away, Online }
-import im.tox.tox4j.core.enums.{ ToxFileKind, ToxUserStatus, ToxMessageType }
-import im.tox.tox4j.core.options.{ SaveDataOptions, ProxyOptions, ToxOptions }
+import im.tox.hlapi.state.MessageState.{ActionMessage, NormalMessage}
+import im.tox.hlapi.state.PublicKeyState.{Address, PublicKey}
+import im.tox.hlapi.state.UserStatusState.{Away, Busy, Offline, Online}
+import im.tox.hlapi.state.{CoreState, FileState, FriendState}
+import im.tox.tox4j.core.enums.{ToxFileKind, ToxMessageType, ToxUserStatus}
+import im.tox.tox4j.core.options.{ProxyOptions, SaveDataOptions, ToxOptions}
 import im.tox.tox4j.impl.jni.ToxCoreImpl
-
-import scalaz._
 
 object NetworkActionPerformer {
 
-  def performNetworkAction(action: NetworkActionType, adapter: ToxAdapter, state: ToxState): ToxState = {
+  def perform(action: NetworkAction, tox: ToxCoreImpl, state: ToxState): ToxState = {
     action.networkAction match {
       case SetNameAction(nickname) => {
         adapter.tox.setName(nickname)
@@ -37,7 +35,7 @@ object NetworkActionPerformer {
           case Online()  => adapter.tox.setStatus(ToxUserStatus.NONE)
           case Away()    => adapter.tox.setStatus(ToxUserStatus.AWAY)
           case Busy()    => adapter.tox.setStatus(ToxUserStatus.BUSY)
-          case Offline() => adapter.acceptEvent(UiEventType(ToxEndEvent()))
+          case Offline() => adapter.acceptUiEvent(UiEventType(ToxEndEvent()))
         }
         state
       }
@@ -111,10 +109,10 @@ object NetworkActionPerformer {
       }
       ToxOptions(connectionOptions.enableIPv6, connectionOptions.enableUdp, proxy, saveData = saveData)
     }
-    adapter.tox = new ToxCoreImpl[ToxState](toxOption)
+    adapter.tox = new ToxCoreImpl[Seq[NetworkEvent]](toxOption)
     adapter.isInit = true
-    adapter.tox.callback(new ToxCoreListener(toxClientListener, adapter))
-    adapter.eventLoop = new Thread(new Runnable() {
+    adapter.tox.callback(new ToxCoreListener())
+    /*adapter.eventLoop = new Thread(new Runnable() {
       override def run(): Unit = {
         mainLoop(adapter.state)
       }
@@ -124,7 +122,7 @@ object NetworkActionPerformer {
         mainLoop(adapter.state)
       }
     })
-    adapter.eventLoop.start()
+    adapter.eventLoop.start()*/
     var returnState = CoreState.publicKeyL.set(state, PublicKey(adapter.tox.getPublicKey))
     returnState = CoreState.addressL.set(returnState, Address(adapter.tox.getAddress))
     returnState = CoreState.stateNicknameL.set(returnState, adapter.tox.getName)
