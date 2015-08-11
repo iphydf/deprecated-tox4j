@@ -6,8 +6,9 @@ import im.tox.hlapi.event.NetworkEvent._
 import im.tox.hlapi.state.ConnectionState.{ Connect, ConnectionOptions, Disconnect }
 import im.tox.hlapi.state.CoreState
 import im.tox.hlapi.state.CoreState.ToxState
-import im.tox.hlapi.state.FriendState.Friend
+import im.tox.hlapi.state.FriendState.{ FriendRequest, Friend }
 import im.tox.hlapi.state.MessageState.{ ActionMessage, Message, MessageReceived, NormalMessage }
+import im.tox.hlapi.state.PublicKeyState.PublicKey
 import im.tox.hlapi.state.UserStatusState.{ Away, Busy, Online }
 import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.enums.{ ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus }
@@ -101,15 +102,20 @@ class ToxCoreListener(toxClientListener: ToxClientListener, adapter: ToxAdapter)
     friendNumber: Int,
     @NotNull name: Array[Byte]
   )(state: ToxState): ToxState = {
-    adapter.acceptEvent(NetworkEventType(ReceiveFriendNameEvent(friendNumber, name)))
-    toxClientListener.receiveFriendName(friendNumber, name)
+    if (friendExist(friendNumber)) {
+      adapter.acceptEvent(NetworkEventType(ReceiveFriendNameEvent(friendNumber, name)))
+      toxClientListener.receiveFriendName(friendNumber, name)
+    }
     state
   }
 
   override def friendRequest(
     @NotNull publicKey: Array[Byte],
     timeDelta: Int, @NotNull message: Array[Byte]
-  )(state: ToxState): ToxState = state
+  )(state: ToxState): ToxState = {
+    toxClientListener.receiveFriendRequest(PublicKey(publicKey), FriendRequest(message, timeDelta))
+    state
+  }
 
   override def friendStatus(
     friendNumber: Int,
@@ -124,8 +130,10 @@ class ToxCoreListener(toxClientListener: ToxClientListener, adapter: ToxAdapter)
         Online()
       }
     }
-    adapter.acceptEvent(NetworkEventType(ReceiveFriendStatusEvent(friendNumber, userStatus)))
-    toxClientListener.receiveFriendStatus(friendNumber, userStatus)
+    if (friendExist(friendNumber)) {
+      adapter.acceptEvent(NetworkEventType(ReceiveFriendStatusEvent(friendNumber, userStatus)))
+      toxClientListener.receiveFriendStatus(friendNumber, userStatus)
+    }
     state
   }
 
@@ -133,8 +141,10 @@ class ToxCoreListener(toxClientListener: ToxClientListener, adapter: ToxAdapter)
     friendNumber: Int,
     @NotNull message: Array[Byte]
   )(state: ToxState): ToxState = {
-    adapter.acceptEvent(NetworkEventType(ReceiveFriendStatusMessageEvent(friendNumber, message)))
-    toxClientListener.receiveFriendStatusMessage(friendNumber, message)
+    if (friendExist(friendNumber)) {
+      adapter.acceptEvent(NetworkEventType(ReceiveFriendStatusMessageEvent(friendNumber, message)))
+      toxClientListener.receiveFriendStatusMessage(friendNumber, message)
+    }
     state
   }
 
@@ -142,8 +152,10 @@ class ToxCoreListener(toxClientListener: ToxClientListener, adapter: ToxAdapter)
     friendNumber: Int,
     isTyping: Boolean
   )(state: ToxState): ToxState = {
-    adapter.acceptEvent(NetworkEventType(ReceiveFriendTypingEvent(friendNumber, isTyping)))
-    toxClientListener.receiveFriendTyping(friendNumber, isTyping)
+    if (friendExist(friendNumber)) {
+      adapter.acceptEvent(NetworkEventType(ReceiveFriendTypingEvent(friendNumber, isTyping)))
+      toxClientListener.receiveFriendTyping(friendNumber, isTyping)
+    }
     state
   }
 
@@ -166,4 +178,8 @@ class ToxCoreListener(toxClientListener: ToxClientListener, adapter: ToxAdapter)
     state
   }
 
+  private def friendExist(friendNumber: Int): Boolean = {
+    val friends = CoreState.friendsL.get(adapter.state)
+    friends.contains(friendNumber)
+  }
 }

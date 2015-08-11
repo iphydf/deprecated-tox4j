@@ -18,7 +18,7 @@ object FriendState {
   )
 
   final case class FriendList(friends: Map[Int, Friend] = Map[Int, Friend]())
-  final case class FriendRequestMessage(request: Array[Byte] = Array.ofDim[Byte](0))
+  final case class FriendRequest(request: Array[Byte] = Array.ofDim[Byte](0), timeDelta: Int = 0)
 
   val friendListFriendsL = Lens.lensu[FriendList, Map[Int, Friend]](
     (a, value) => a.copy(friends = value),

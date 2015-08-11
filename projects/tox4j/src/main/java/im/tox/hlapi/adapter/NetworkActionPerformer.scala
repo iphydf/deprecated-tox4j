@@ -12,7 +12,7 @@ import im.tox.hlapi.state.FileState.{ File, FileSent, Avatar, Data }
 import im.tox.hlapi.state.FriendState.Friend
 import im.tox.hlapi.state.MessageState.{ ActionMessage, NormalMessage }
 import im.tox.hlapi.state.{ FileState, CoreState, FriendState }
-import im.tox.hlapi.state.PublicKeyState.PublicKey
+import im.tox.hlapi.state.PublicKeyState.{ Address, PublicKey }
 import im.tox.hlapi.state.UserStatusState.{ Offline, Busy, Away, Online }
 import im.tox.tox4j.core.enums.{ ToxFileKind, ToxUserStatus, ToxMessageType }
 import im.tox.tox4j.core.options.{ SaveDataOptions, ProxyOptions, ToxOptions }
@@ -41,9 +41,12 @@ object NetworkActionPerformer {
         }
         state
       }
-      case SendFriendRequestAction(publicKey, request) => {
-        adapter.tox.addFriend(publicKey.key, request.request)
-        state
+      case SendFriendRequestAction(address, request) => {
+        val friendNumber = adapter.tox.addFriend(address.address, request.request)
+        (CoreState.friendsL.set(
+          state,
+          CoreState.friendsL.get(state) + ((friendNumber, Friend()))
+        ))
       }
       case DeleteFriend(friendNumber) => {
         adapter.tox.deleteFriend(friendNumber)
@@ -123,6 +126,7 @@ object NetworkActionPerformer {
     })
     adapter.eventLoop.start()
     var returnState = CoreState.publicKeyL.set(state, PublicKey(adapter.tox.getPublicKey))
+    returnState = CoreState.addressL.set(returnState, Address(adapter.tox.getAddress))
     returnState = CoreState.stateNicknameL.set(returnState, adapter.tox.getName)
     returnState = CoreState.stateStatusMessageL.set(returnState, adapter.tox.getStatusMessage)
     val friendList = adapter.tox.getFriendList

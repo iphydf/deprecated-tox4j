@@ -4,10 +4,10 @@ import com.typesafe.scalalogging.Logger
 import im.tox.hlapi.adapter.ToxAdapter
 import im.tox.hlapi.event.Event.{ UiEventType }
 import im.tox.hlapi.event.UiEvent.{ SetNicknameEvent, AddFriendNoRequestEvent, ToxInitEvent }
-import im.tox.hlapi.request.Reply.GetSelfPublicKeyReply
-import im.tox.hlapi.request.Request.GetSelfPublicKeyRequest
+import im.tox.hlapi.request.Reply.{ GetSelfAddressReply, GetSelfPublicKeyReply }
+import im.tox.hlapi.request.Request.{ GetSelfAddressRequest, GetSelfPublicKeyRequest }
 import im.tox.hlapi.state.ConnectionState.ConnectionOptions
-import im.tox.hlapi.state.PublicKeyState.PublicKey
+import im.tox.hlapi.state.PublicKeyState.{ Address, PublicKey }
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Timeouts
 import org.scalatest.exceptions.TestFailedDueToTimeoutException
@@ -17,6 +17,7 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
 
   protected var brownPublicKey: PublicKey = PublicKey()
   protected var conyPublicKey: PublicKey = PublicKey()
+  protected var conyAddress: Address = Address()
   protected val logger = Logger(LoggerFactory.getLogger(classOf[BrownConyTestBase]))
 
   protected def newChatClient(name: String, expectedFriendName: String, adapter: ToxAdapter): ChatClient
@@ -40,6 +41,12 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
       case GetSelfPublicKeyReply(publicKey) => {
         conyPublicKey = publicKey
         brownAdapter.acceptEvent(UiEventType(AddFriendNoRequestEvent(publicKey)))
+      }
+    }
+    val addressRequest = conyAdapter.acceptRequest(GetSelfAddressRequest())
+    addressRequest match {
+      case GetSelfAddressReply(address) => {
+        conyAddress = address
       }
     }
     Thread.sleep(30000)

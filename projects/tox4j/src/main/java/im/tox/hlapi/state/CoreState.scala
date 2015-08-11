@@ -2,7 +2,7 @@ package im.tox.hlapi.state
 
 import im.tox.hlapi.state.ConnectionState._
 import im.tox.hlapi.state.FriendState.FriendList
-import im.tox.hlapi.state.PublicKeyState.PublicKey
+import im.tox.hlapi.state.PublicKeyState.{ Address, PublicKey }
 import im.tox.hlapi.state.UserProfileState.UserProfile
 import im.tox.hlapi.state.UserStatusState.{ Offline, UserStatus }
 
@@ -35,6 +35,11 @@ object CoreState {
     _.friendList
   )
 
+  val addressL = Lens.lensu[ToxState, Address](
+    (a, value) => a.copy(address = value),
+    _.address
+  )
+
   val stateNicknameL = userProfileL >=> UserProfileState.nicknameL
   val stateStatusMessageL = userProfileL >=> UserProfileState.statusMessageL
   val friendsL = friendListL >=> FriendState.friendListFriendsL
@@ -44,7 +49,8 @@ object CoreState {
     connectionStatus: ConnectionStatus = Disconnect(),
     userStatus: UserStatus = Offline(),
     friendList: FriendList = FriendList(),
-    publicKey: PublicKey = PublicKey()
+    publicKey: PublicKey = PublicKey(),
+    address: Address = Address()
   )
 
 }

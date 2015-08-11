@@ -16,10 +16,12 @@ final class InitiationTest extends BrownConyTestBase {
           friendListReply match {
             case GetFriendListReply(friendList) => {
               assert(friendList.friends.size == 1)
-              if (isBrown()) {
+              if (isBrown) {
                 assert(friendList.friends.seq(0).publicKey == conyPublicKey)
+                debug("has Cony as friend now.")
               } else {
                 assert(friendList.friends.seq(0).publicKey == brownPublicKey)
+                debug("has Brown as friend now.")
               }
             }
           }

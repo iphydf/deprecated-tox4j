@@ -9,9 +9,9 @@ import im.tox.hlapi.event.NetworkEvent._
 import im.tox.hlapi.event.UiEvent._
 import im.tox.hlapi.state.ConnectionState.{ Disconnect, Connect, ConnectionStatus }
 import im.tox.hlapi.state.CoreState._
-import im.tox.hlapi.state.{ MessageState, FriendState }
+import im.tox.hlapi.state.{ CoreState, MessageState, FriendState }
 import im.tox.hlapi.state.FriendState.Friend
-import im.tox.hlapi.state.MessageState.{ MessageRead, MessageReceived, Message }
+import im.tox.hlapi.state.MessageState._
 import im.tox.hlapi.state.UserStatusState.UserStatus
 
 import scalaz._
@@ -39,14 +39,15 @@ object EventParser {
       case DeleteFriendEvent(friendNumber) => {
         (friendsL.set(state, friendsL.get(state) - friendNumber), NetworkActionType(DeleteFriend(friendNumber)))
       }
-      case SendFriendMessageEvent(friendNumber, message) => {
+      case SendFriendMessageEvent(friendNumber, messageContent) => {
+        val message = Message(NormalMessage(), 0, messageContent, MessageSent())
         val friend = friendsL.get(state)(friendNumber)
         (friendEventHandler[Map[Int, Message]](friendNumber, state, FriendState.friendMessagesL,
           FriendState.friendMessagesL.get(friend)
             + ((FriendState.friendMessagesL.get(friend).size, message))), NetworkActionType(SendFriendMessageAction(friendNumber, message)))
       }
-      case SendFriendRequestEvent(publicKey, requestMessage) => {
-        (state, NetworkActionType(SendFriendRequestAction(publicKey, requestMessage)))
+      case SendFriendRequestEvent(address, requestMessage) => {
+        (state, NetworkActionType(SendFriendRequestAction(address, requestMessage)))
       }
       case SendFileTransmissionRequestEvent(friendNumber, fileDescription) => {
         (state, NetworkActionType(SendFileTransmissionRequestAction(friendNumber, fileDescription)))
@@ -73,7 +74,14 @@ object EventParser {
         (state, NoAction())
       }
       case ReceiveFriendConnectionStatusEvent(friendNumber, status) => {
-        (friendEventHandler[ConnectionStatus](friendNumber, state, FriendState.friendConnectionStatusL, status), NoAction())
+        var nextState = state
+        if (!friendExist(friendNumber, state)) {
+          nextState = CoreState.friendsL.set(
+            nextState,
+            CoreState.friendsL.get(nextState) + ((friendNumber, Friend()))
+          )
+        }
+        (friendEventHandler[ConnectionStatus](friendNumber, nextState, FriendState.friendConnectionStatusL, status), NoAction())
       }
       case ReceiveFriendMessageEvent(friendNumber, messageType, timeDelta, content) => {
 
@@ -97,9 +105,12 @@ object EventParser {
       }
       case ReceiveFriendStatusMessageEvent(friendNumber, statusMessage) => {
         (friendEventHandler[Array[Byte]](friendNumber, state, FriendState.friendStatusMessageL, statusMessage), NoAction())
+
       }
       case ReceiveFriendTypingEvent(friendNumber, isTyping) => {
+
         (friendEventHandler[Boolean](friendNumber, state, FriendState.friendIsTypingL, isTyping), NoAction())
+
       }
       case ReceiveLossyPacketEvent() => {
         (state, NoAction())
@@ -129,5 +140,11 @@ object EventParser {
       )
     )
   }
+
+  private def friendExist(friendNumber: Int, state: ToxState): Boolean = {
+    val friends = CoreState.friendsL.get(state)
+    friends.contains(friendNumber)
+  }
+
 }
 
