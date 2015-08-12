@@ -2,7 +2,7 @@ package im.tox.hlapi.event
 
 import im.tox.hlapi.state.ConnectionState.ConnectionStatus
 import im.tox.hlapi.state.FriendState.FriendRequest
-import im.tox.hlapi.state.MessageState.MessageType
+import im.tox.hlapi.state.MessageState.{ Message, MessageType }
 import im.tox.hlapi.state.PublicKeyState.PublicKey
 import im.tox.hlapi.state.UserStatusState.UserStatus
 
@@ -21,7 +21,7 @@ object NetworkEvent {
   //  A friend’s connection status changes (online/offline)
   final case class ReceiveFriendConnectionStatusEvent(friendNumber: Int, connectionStatus: ConnectionStatus) extends NetworkEvent
   //  Receive a message from a friend
-  final case class ReceiveFriendMessageEvent(friendNumber: Int, messageType: MessageType, timeDelta: Int, content: Array[Byte]) extends NetworkEvent
+  final case class ReceiveFriendMessageEvent(friendNumber: Int, message: Message) extends NetworkEvent
   //  A friend’s name changes
   final case class ReceiveFriendNameEvent(friendNumber: Int, name: Array[Byte]) extends NetworkEvent
   //  Receive a friend request

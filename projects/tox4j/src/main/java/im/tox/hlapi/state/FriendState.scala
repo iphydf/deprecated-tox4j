@@ -2,6 +2,7 @@ package im.tox.hlapi.state
 
 import im.tox.hlapi.state.ConnectionState.{ Disconnect, ConnectionStatus }
 import im.tox.hlapi.state.ConversationState.FriendConversation
+import im.tox.hlapi.state.CoreState._
 import im.tox.hlapi.state.PublicKeyState.PublicKey
 import im.tox.hlapi.state.UserProfileState.UserProfile
 import im.tox.hlapi.state.UserStatusState.{ UserStatus, Offline }
@@ -56,4 +57,16 @@ object FriendState {
   val friendStatusMessageL = friendProfileL >=> UserProfileState.statusMessageL
   val friendMessageListL = friendConversationL >=> ConversationState.ConversationMessageListL
   val friendMessagesL = friendMessageListL >=> MessageState.MessageListMessagesL
+
+  def friendEventHandler[T](friendNumber: Int, state: ToxState,
+    lens: Lens[Friend, T], attribute: T): ToxState = {
+    val friend = friendsL.get(state)(friendNumber)
+    friendsL.set(
+      state,
+      friendsL.get(state).updated(
+        friendNumber,
+        lens.set(friend, attribute)
+      )
+    )
+  }
 }

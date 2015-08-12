@@ -1,8 +1,8 @@
 package im.tox.hlapi.adapter.parser
 
-import im.tox.hlapi.request.Reply.{GetFriendListReply, GetSelfAddressReply, GetSelfProfileReply, GetSelfPublicKeyReply}
-import im.tox.hlapi.request.Request.{GetFriendListRequest, GetSelfAddressRequest, GetSelfProfileRequest, GetSelfPublicKeyRequest}
-import im.tox.hlapi.request.{Reply, Request}
+import im.tox.hlapi.request.Reply.{ GetFriendListReply, GetSelfAddressReply, GetSelfProfileReply, GetSelfPublicKeyReply }
+import im.tox.hlapi.request.Request.{ GetFriendListRequest, GetSelfAddressRequest, GetSelfProfileRequest, GetSelfPublicKeyRequest }
+import im.tox.hlapi.request.{ Reply, Request }
 import im.tox.hlapi.state.CoreState
 import im.tox.hlapi.state.CoreState.ToxState
 

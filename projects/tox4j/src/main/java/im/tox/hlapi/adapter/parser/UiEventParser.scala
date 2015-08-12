@@ -4,11 +4,10 @@ import im.tox.hlapi.action.NetworkAction
 import im.tox.hlapi.action.NetworkAction._
 import im.tox.hlapi.event.UiEvent
 import im.tox.hlapi.event.UiEvent._
-import im.tox.hlapi.state.ConnectionState.{Connect, Disconnect}
+import im.tox.hlapi.state.ConnectionState.{ Connect, Disconnect }
 import im.tox.hlapi.state.CoreState._
 import im.tox.hlapi.state.FriendState
 import im.tox.hlapi.state.MessageState._
-
 
 object UiEventParser extends EventParser {
 
@@ -36,7 +35,7 @@ object UiEventParser extends EventParser {
       case SendFriendMessageEvent(friendNumber, messageContent) => {
         val message = Message(NormalMessage(), 0, messageContent, MessageSent())
         val friend = friendsL.get(state)(friendNumber)
-        (friendEventHandler[Map[Int, Message]](friendNumber, state, FriendState.friendMessagesL,
+        (FriendState.friendEventHandler[Map[Int, Message]](friendNumber, state, FriendState.friendMessagesL,
           FriendState.friendMessagesL.get(friend)
             + ((FriendState.friendMessagesL.get(friend).size, message))), Some(SendFriendMessageAction(friendNumber, message)))
       }

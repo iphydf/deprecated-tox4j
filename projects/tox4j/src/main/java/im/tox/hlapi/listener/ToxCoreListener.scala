@@ -1,7 +1,5 @@
 package im.tox.hlapi.listener
 
-import im.tox.hlapi.adapter.ToxAdapter
-import im.tox.hlapi.event.Event.NetworkEventType
 import im.tox.hlapi.event.NetworkEvent
 import im.tox.hlapi.event.NetworkEvent._
 import im.tox.hlapi.state.ConnectionState.{ Connect, ConnectionOptions, Disconnect }
@@ -13,11 +11,13 @@ import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.enums.{ ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus }
 import org.jetbrains.annotations.NotNull
 
-class ToxCoreListener[Seq[NetworkEvent]] extends ToxEventListener[Seq[NetworkEvent]] {
+import scala.collection.immutable.Queue
+
+class ToxCoreListener extends ToxEventListener[Queue[NetworkEvent]] {
 
   override def selfConnectionStatus(
     @NotNull connectionStatus: ToxConnection
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = {
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
     val status = {
       if (connectionStatus == ToxConnection.NONE) {
         Disconnect()
@@ -27,33 +27,33 @@ class ToxCoreListener[Seq[NetworkEvent]] extends ToxEventListener[Seq[NetworkEve
         Connect(ConnectionOptions())
       }
     }
-    eventList :+ ReceiveSelfConnectionStatusEvent(status)
+    eventList.enqueue(ReceiveSelfConnectionStatusEvent(status))
   }
 
   override def fileRecvControl(
     friendNumber: Int,
     fileNumber: Int, @NotNull control: ToxFileControl
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = eventList
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = eventList
 
   override def fileRecv(
     friendNumber: Int, fileNumber: Int,
     kind: Int, fileSize: Long, @NotNull filename: Array[Byte]
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = eventList
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = eventList
 
   override def fileRecvChunk(
     friendNumber: Int, fileNumber: Int,
     position: Long, @NotNull data: Array[Byte]
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = eventList
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = eventList
 
   override def fileChunkRequest(
     friendNumber: Int, fileNumber: Int,
     position: Long, length: Int
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = eventList
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = eventList
 
   override def friendConnectionStatus(
     friendNumber: Int,
     @NotNull connectionStatus: ToxConnection
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = {
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
     val status = {
       if (connectionStatus == ToxConnection.NONE) {
         Disconnect()
@@ -63,13 +63,13 @@ class ToxCoreListener[Seq[NetworkEvent]] extends ToxEventListener[Seq[NetworkEve
         Connect(ConnectionOptions())
       }
     }
-    eventList :+ ReceiveFriendConnectionStatusEvent(friendNumber, status)
+    eventList.enqueue(ReceiveFriendConnectionStatusEvent(friendNumber, status))
   }
 
   override def friendMessage(
     friendNumber: Int,
     @NotNull messageType: ToxMessageType, timeDelta: Int, @NotNull message: Array[Byte]
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = {
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
     val mtype = {
       if (messageType == ToxMessageType.ACTION) {
         ActionMessage()
@@ -77,27 +77,28 @@ class ToxCoreListener[Seq[NetworkEvent]] extends ToxEventListener[Seq[NetworkEve
         NormalMessage()
       }
     }
-    eventList :+ ReceiveFriendMessageEvent(friendNumber, mtype, timeDelta, message)
+    val mes = Message(mtype, timeDelta, message, MessageReceived())
+    eventList.enqueue(ReceiveFriendMessageEvent(friendNumber, mes))
   }
 
   override def friendName(
     friendNumber: Int,
     @NotNull name: Array[Byte]
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = {
-    eventList :+ ReceiveFriendNameEvent(friendNumber, name)
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
+    eventList.enqueue(ReceiveFriendNameEvent(friendNumber, name))
   }
 
   override def friendRequest(
     @NotNull publicKey: Array[Byte],
     timeDelta: Int, @NotNull message: Array[Byte]
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = {
-    eventList :+ ReceiveFriendRequestEvent(PublicKey(publicKey), FriendRequest(message, timeDelta))
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
+    eventList.enqueue(ReceiveFriendRequestEvent(PublicKey(publicKey), FriendRequest(message, timeDelta)))
   }
 
   override def friendStatus(
     friendNumber: Int,
     @NotNull status: ToxUserStatus
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = {
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
     val userStatus = {
       if (status == ToxUserStatus.AWAY) {
         Away()
@@ -107,38 +108,38 @@ class ToxCoreListener[Seq[NetworkEvent]] extends ToxEventListener[Seq[NetworkEve
         Online()
       }
     }
-    eventList :+ ReceiveFriendStatusEvent(friendNumber, userStatus)
+    eventList.enqueue(ReceiveFriendStatusEvent(friendNumber, userStatus))
   }
 
   override def friendStatusMessage(
     friendNumber: Int,
     @NotNull message: Array[Byte]
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = {
-    eventList :+ ReceiveFriendStatusMessageEvent(friendNumber, message)
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
+    eventList.enqueue(ReceiveFriendStatusMessageEvent(friendNumber, message))
   }
 
   override def friendTyping(
     friendNumber: Int,
     isTyping: Boolean
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = {
-    eventList :+ ReceiveFriendTypingEvent(friendNumber, isTyping)
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
+    eventList.enqueue(ReceiveFriendTypingEvent(friendNumber, isTyping))
   }
 
   override def friendLosslessPacket(
     friendNumber: Int,
     @NotNull data: Array[Byte]
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = eventList
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = eventList
 
   override def friendLossyPacket(
     friendNumber: Int,
     @NotNull data: Array[Byte]
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = eventList
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = eventList
 
   override def friendReadReceipt(
     friendNumber: Int,
     messageId: Int
-  )(eventList: Seq[NetworkEvent]): Seq[NetworkEvent] = {
-    eventList :+ ReceiveFriendReadReceiptEvent(friendNumber, messageId)
+  )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
+    eventList.enqueue(ReceiveFriendReadReceiptEvent(friendNumber, messageId))
   }
 
 }
