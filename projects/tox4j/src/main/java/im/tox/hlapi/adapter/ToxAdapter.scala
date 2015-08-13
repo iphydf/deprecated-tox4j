@@ -52,6 +52,10 @@ final class ToxAdapter(toxClientListener: ToxClientListener) {
     ClientNotifier.notify(toxClientListener, e)
   }
 
+  def iterate(queue: Queue[NetworkEvent]): Queue[NetworkEvent] = {
+    tox.iterate(queue)
+  }
+
   def acceptRequest(request: Request): Reply = {
     parseRequest(request, state)
   }

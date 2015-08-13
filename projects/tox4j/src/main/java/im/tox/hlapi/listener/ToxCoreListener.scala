@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull
 
 import scala.collection.immutable.Queue
 
-class ToxCoreListener extends ToxEventListener[Queue[NetworkEvent]] {
+object ToxCoreListener extends ToxEventListener[Queue[NetworkEvent]] {
 
   override def selfConnectionStatus(
     @NotNull connectionStatus: ToxConnection
@@ -27,6 +27,7 @@ class ToxCoreListener extends ToxEventListener[Queue[NetworkEvent]] {
         Connect(ConnectionOptions())
       }
     }
+    println(eventList)
     eventList.enqueue(ReceiveSelfConnectionStatusEvent(status))
   }
 

@@ -1,7 +1,6 @@
 package im.tox.hlapi
 
 import im.tox.hlapi.adapter.ToxAdapter
-import im.tox.hlapi.event.Event.UiEventType
 import im.tox.hlapi.event.UiEvent.{ AddFriendNoRequestEvent, SendFriendRequestEvent, DeleteFriendEvent }
 import im.tox.hlapi.request.Reply.GetFriendListReply
 import im.tox.hlapi.request.Request.GetFriendListRequest
@@ -10,13 +9,20 @@ import im.tox.hlapi.state.FriendState.FriendRequest
 import im.tox.hlapi.state.PublicKeyState.PublicKey
 
 final class AddDeleteFriendTest extends BrownConyTestBase {
-  override def newChatClient(name: String, expectedFriendName: String, adapter: ToxAdapter) = new ChatClient(name, expectedFriendName, adapter) {
+  override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
     private var friendDeleted: Boolean = false
     override def receiveFriendConnectionStatus(friendNumber: Int, connectionStatus: ConnectionStatus): Unit = {
       connectionStatus match {
         case Connect(connectionOptions) => {
+          val selfAdapter = {
+            if (isBrown) {
+              brownAdapter
+            } else {
+              conyAdapter
+            }
+          }
           if (!friendDeleted) {
-            selfAdapter.acceptUiEvent(UiEventType(DeleteFriendEvent(friendNumber)))
+            selfAdapter.acceptUiEvent(DeleteFriendEvent(friendNumber))
             debug("delete friend " + expectedFriendName)
             friendDeleted = true
             val reply = selfAdapter.acceptRequest(GetFriendListRequest())
@@ -31,9 +37,9 @@ final class AddDeleteFriendTest extends BrownConyTestBase {
         }
         case Disconnect() => {
           if (isBrown) {
-            selfAdapter.acceptUiEvent(UiEventType(SendFriendRequestEvent(conyAddress, FriendRequest("I am Brown".getBytes))))
+            brownAdapter.acceptUiEvent(SendFriendRequestEvent(conyAddress, FriendRequest("I am Brown".getBytes)))
             debug("add Cony back")
-            val reply = selfAdapter.acceptRequest(GetFriendListRequest())
+            val reply = brownAdapter.acceptRequest(GetFriendListRequest())
             reply match {
               case GetFriendListReply(friendList) => {
                 assert(friendList.friends.size == 1)
@@ -46,8 +52,8 @@ final class AddDeleteFriendTest extends BrownConyTestBase {
     override def receiveFriendRequest(publicKey: PublicKey, friendRequestMessage: FriendRequest): Unit = {
       assert(isCony)
       debug("Brown send me friend request.")
-      selfAdapter.acceptUiEvent(UiEventType(AddFriendNoRequestEvent(publicKey)))
-      val reply = selfAdapter.acceptRequest(GetFriendListRequest())
+      conyAdapter.acceptUiEvent(AddFriendNoRequestEvent(publicKey))
+      val reply = conyAdapter.acceptRequest(GetFriendListRequest())
       reply match {
         case GetFriendListReply(friendList) => {
           assert(friendList.friends.size == 1)

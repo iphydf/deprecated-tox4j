@@ -10,9 +10,8 @@ import im.tox.hlapi.state.PublicKeyState.PublicKey
 import im.tox.hlapi.state.UserStatusState.UserStatus
 import org.slf4j.LoggerFactory
 
-abstract class ChatClient(name: String, friendName: String, adapter: ToxAdapter) extends ToxClientListener {
+abstract class ChatClient(name: String, friendName: String) extends ToxClientListener {
 
-  val selfAdapter = adapter
   protected val logger = Logger(LoggerFactory.getLogger(classOf[BrownConyTestBase]))
 
   protected def isBrown: Boolean = {

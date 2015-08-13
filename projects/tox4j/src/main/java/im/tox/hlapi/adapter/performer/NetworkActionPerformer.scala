@@ -78,11 +78,6 @@ object NetworkActionPerformer {
       }
 
       case ToxEndAction() => {
-        /*
-        eventLoop.interrupt()
-        tox.close()
-        eventLoop.join()
-        */
         state
       }
       case AddFriendNoRequestAction(publicKey) => {
@@ -112,18 +107,7 @@ object NetworkActionPerformer {
       ToxOptions(action.connectionOptions.enableIPv6, action.connectionOptions.enableUdp, proxy, saveData = saveData)
     }
     val tox = new ToxCoreImpl[Queue[NetworkEvent]](toxOption)
-    tox.callback(new ToxCoreListener())
-    /*eventLoop = new Thread(new Runnable() {
-      override def run(): Unit = {
-        mainLoop(state)
-      }
-      def mainLoop(toxState: ToxState): ToxState = {
-        Thread.sleep(tox.iterationInterval)
-        state = tox.iterate(state)
-        mainLoop(state)
-      }
-    })
-    eventLoop.start()*/
+    tox.callback(ToxCoreListener)
     var returnState = CoreState.publicKeyL.set(ToxState(), PublicKey(tox.getPublicKey))
     returnState = CoreState.addressL.set(returnState, Address(tox.getAddress))
     returnState = CoreState.stateNicknameL.set(returnState, tox.getName)

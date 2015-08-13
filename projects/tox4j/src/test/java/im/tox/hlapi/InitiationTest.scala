@@ -6,9 +6,16 @@ import im.tox.hlapi.request.Request.{ GetFriendListRequest, GetSelfPublicKeyRequ
 import im.tox.hlapi.state.ConnectionState.ConnectionStatus
 
 final class InitiationTest extends BrownConyTestBase {
-  override def newChatClient(name: String, friendName: String, adapter: ToxAdapter) = new ChatClient(name, friendName, adapter) {
+  override def newChatClient(name: String, friendName: String) = new ChatClient(name, friendName) {
 
     override def receiveFriendConnectionStatus(friendNumber: Int, connectionStatus: ConnectionStatus): Unit = {
+      val selfAdapter = {
+        if (isBrown) {
+          brownAdapter
+        } else {
+          conyAdapter
+        }
+      }
       val publicKeyReply = selfAdapter.acceptRequest(GetSelfPublicKeyRequest())
       publicKeyReply match {
         case GetSelfPublicKeyReply(publicKey) => {

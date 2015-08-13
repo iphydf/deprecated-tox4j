@@ -2,7 +2,6 @@ package im.tox.hlapi
 
 import com.typesafe.scalalogging.Logger
 import im.tox.hlapi.adapter.ToxAdapter
-import im.tox.hlapi.event.Event.{NetworkEventType, UiEventType}
 import im.tox.hlapi.event.NetworkEvent
 import im.tox.hlapi.event.UiEvent.{ SetNicknameEvent, AddFriendNoRequestEvent, ToxInitEvent }
 import im.tox.hlapi.request.Reply.{ GetSelfAddressReply, GetSelfPublicKeyReply }
@@ -14,34 +13,38 @@ import org.scalatest.concurrent.Timeouts
 import org.scalatest.exceptions.TestFailedDueToTimeoutException
 import org.slf4j.LoggerFactory
 
+import scala.collection.immutable.Queue
+
 abstract class BrownConyTestBase extends FunSuite with Timeouts {
 
   protected var brownPublicKey: PublicKey = PublicKey()
   protected var conyPublicKey: PublicKey = PublicKey()
   protected var conyAddress: Address = Address()
+  protected var brownAdapter: ToxAdapter = null
+  protected var conyAdapter: ToxAdapter = null
   protected val logger = Logger(LoggerFactory.getLogger(classOf[BrownConyTestBase]))
 
-  protected def newChatClient(name: String, expectedFriendName: String, adapter: ToxAdapter): ChatClient
+  protected def newChatClient(name: String, expectedFriendName: String): ChatClient
 
   protected def runBrownConyTest(): Unit = {
-    val brown = newChatClient("Brown", "Cony", new ToxAdapter())
-    val cony = newChatClient("Cony", "Brown", new ToxAdapter())
-    val brownAdapter = brown.selfAdapter
-    val conyAdapter = cony.selfAdapter
-    brownAdapter.acceptUiEvent(UiEventType(ToxInitEvent(ConnectionOptions(), brown)))
-    conyAdapter.acceptUiEvent(UiEventType(ToxInitEvent(ConnectionOptions(), cony)))
+    val brown = newChatClient("Brown", "Cony")
+    val cony = newChatClient("Cony", "Brown")
+    brownAdapter = new ToxAdapter(brown)
+    conyAdapter = new ToxAdapter(cony)
+    brownAdapter.initToxSession(ToxInitEvent(ConnectionOptions(), brown))
+    conyAdapter.initToxSession(ToxInitEvent(ConnectionOptions(), cony))
     val brownRequest = brownAdapter.acceptRequest(GetSelfPublicKeyRequest())
     val conyRequest = conyAdapter.acceptRequest(GetSelfPublicKeyRequest())
     brownRequest match {
       case GetSelfPublicKeyReply(publicKey) => {
         brownPublicKey = publicKey
-        conyAdapter.acceptUiEvent(UiEventType(AddFriendNoRequestEvent(publicKey)))
+        conyAdapter.acceptUiEvent(AddFriendNoRequestEvent(publicKey))
       }
     }
     conyRequest match {
       case GetSelfPublicKeyReply(publicKey) => {
         conyPublicKey = publicKey
-        brownAdapter.acceptUiEvent(UiEventType(AddFriendNoRequestEvent(publicKey)))
+        brownAdapter.acceptUiEvent(AddFriendNoRequestEvent(publicKey))
       }
     }
     val addressRequest = conyAdapter.acceptRequest(GetSelfAddressRequest())
@@ -50,12 +53,25 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
         conyAddress = address
       }
     }
-    var brownEventList = Seq[NetworkEvent]()
-    var conyEventList = Seq[NetworkEvent]()
-    brownEventList = brownAdapter.tox.iterate(brownEventList)
-    conyEventList = conyAdapter.tox.iterate(conyEventList)
-    while(brownEventList.size != 0 || conyEventList.size != 0) {
-
+    var brownEventList = Queue[NetworkEvent]()
+    var conyEventList = Queue[NetworkEvent]()
+    Thread.sleep(20000)
+    brownEventList = brownAdapter.iterate(brownEventList)
+    conyEventList = conyAdapter.iterate(conyEventList)
+    while (!brownEventList.isEmpty || !conyEventList.isEmpty) {
+      while (!brownEventList.isEmpty) {
+        val remain = brownEventList.dequeue
+        brownEventList = remain._2
+        brownAdapter.acceptNetworkEvent(remain._1)
+      }
+      while (!conyEventList.isEmpty) {
+        val remain = conyEventList.dequeue
+        conyEventList = remain._2
+        brownAdapter.acceptNetworkEvent(remain._1)
+      }
+      Thread.sleep(3000)
+      brownAdapter.iterate(brownEventList)
+      brownAdapter.iterate(conyEventList)
     }
   }
 
@@ -68,4 +84,5 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
       }
     }
   }
+
 }
