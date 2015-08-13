@@ -27,7 +27,6 @@ object ToxCoreListener extends ToxEventListener[Queue[NetworkEvent]] {
         Connect(ConnectionOptions())
       }
     }
-    println(eventList)
     eventList.enqueue(ReceiveSelfConnectionStatusEvent(status))
   }
 
@@ -140,7 +139,8 @@ object ToxCoreListener extends ToxEventListener[Queue[NetworkEvent]] {
     friendNumber: Int,
     messageId: Int
   )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
-    eventList.enqueue(ReceiveFriendReadReceiptEvent(friendNumber, messageId))
+    eventList
+    //eventList.enqueue(ReceiveFriendReadReceiptEvent(friendNumber, messageId))
   }
 
 }

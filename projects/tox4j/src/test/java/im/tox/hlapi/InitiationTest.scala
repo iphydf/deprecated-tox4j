@@ -32,6 +32,11 @@ final class InitiationTest extends BrownConyTestBase {
               }
             }
           }
+          if (isBrown) {
+            brownFinished = true
+          } else {
+            conyFinished = true
+          }
         }
       }
     }

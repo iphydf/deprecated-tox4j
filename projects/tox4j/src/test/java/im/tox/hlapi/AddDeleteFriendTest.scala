@@ -33,6 +33,11 @@ final class AddDeleteFriendTest extends BrownConyTestBase {
             }
           } else {
             debug("see friend appear online again")
+            if (isBrown) {
+              brownFinished = true
+            } else {
+              conyFinished = true
+            }
           }
         }
         case Disconnect() => {

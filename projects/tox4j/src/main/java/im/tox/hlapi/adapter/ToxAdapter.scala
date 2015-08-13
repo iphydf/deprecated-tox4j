@@ -8,6 +8,7 @@ import im.tox.hlapi.event.{ UiEvent, NetworkEvent }
 import im.tox.hlapi.listener.ToxClientListener
 import im.tox.hlapi.performer.NetworkActionPerformer
 import im.tox.hlapi.request.{ Reply, Request }
+import im.tox.hlapi.state.CoreState
 import im.tox.hlapi.state.CoreState.ToxState
 import im.tox.tox4j.impl.jni.ToxCoreImpl
 
@@ -28,8 +29,8 @@ final class ToxAdapter(toxClientListener: ToxClientListener) {
     val decision = UiEventParser.parse(state, e)
     state = {
       decision._2 match {
-        case Some(action) => NetworkActionPerformer.perform(action, tox, state)
-        case None         => state
+        case Some(action) => NetworkActionPerformer.perform(action, tox, decision._1)
+        case None         => decision._1
       }
     }
   }
@@ -41,12 +42,17 @@ final class ToxAdapter(toxClientListener: ToxClientListener) {
     state = result._2
   }
 
+  def closeToxSession(): Unit = {
+    tox.close()
+    tox = null
+  }
+
   def acceptNetworkEvent(e: NetworkEvent): Unit = {
     val decision = NetworkEventParser.parse(state, e)
     state = {
       decision._2 match {
-        case Some(action) => DiskIOActionPerformer.perform(state)
-        case None         => state
+        case Some(action) => DiskIOActionPerformer.perform(decision._1)
+        case None         => decision._1
       }
     }
     ClientNotifier.notify(toxClientListener, e)
@@ -54,6 +60,10 @@ final class ToxAdapter(toxClientListener: ToxClientListener) {
 
   def iterate(queue: Queue[NetworkEvent]): Queue[NetworkEvent] = {
     tox.iterate(queue)
+  }
+
+  def getIterateInterval: Int = {
+    tox.iterationInterval
   }
 
   def acceptRequest(request: Request): Reply = {

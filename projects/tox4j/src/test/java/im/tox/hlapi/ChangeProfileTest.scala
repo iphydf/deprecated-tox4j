@@ -9,8 +9,11 @@ import im.tox.hlapi.state.MessageState.Message
 import im.tox.hlapi.state.{ FriendState, CoreState }
 
 final class ChangeProfileTest extends BrownConyTestBase {
+
   override def newChatClient(friendName: String, expectedFriendName: String) =
     new ChatClient(friendName, expectedFriendName) {
+      private var initialName = true
+      private var initialStatusMessage = true
       override def receiveFriendConnectionStatus(friendNumber: Int, connectionStatus: ConnectionStatus): Unit = {
         if (isBrown) {
           brownAdapter.acceptUiEvent(SetNicknameEvent("Brownie".getBytes))
@@ -24,18 +27,23 @@ final class ChangeProfileTest extends BrownConyTestBase {
         }
       }
       override def receiveFriendName(friendNumber: Int, name: Array[Byte]): Unit = {
-        assert(isCony)
-        assert(name.deep == "Brownie".getBytes.deep)
-        debug("receive Brown's new name")
-        val reply = conyAdapter.acceptRequest(GetFriendListRequest())
-        reply match {
-          case GetFriendListReply(friendList) => {
-            val brownName = FriendState.friendNameL.get(friendList.friends.apply(friendNumber))
-            assert(brownName.deep == "Brownie".getBytes.deep)
+        debug("receive friend's name change")
+        if (initialName) {
+          initialName = false
+        } else {
+          assert(isCony)
+          assert(name.deep == "Brownie".getBytes.deep)
+          debug("receive Brown's new name")
+          val reply = conyAdapter.acceptRequest(GetFriendListRequest())
+          reply match {
+            case GetFriendListReply(friendList) => {
+              val brownName = FriendState.friendNameL.get(friendList.friends.apply(friendNumber))
+              assert(brownName.deep == "Brownie".getBytes.deep)
+            }
           }
+          conyAdapter.acceptUiEvent(SendFriendMessageEvent(friendNumber, "please change your status message".getBytes))
+          debug("ask Brown to change status message")
         }
-        conyAdapter.acceptUiEvent(SendFriendMessageEvent(friendNumber, "please change your status message".getBytes))
-        debug("ask Brown to change status message")
       }
       override def receiveFriendMessage(friendNumber: Int, message: Message): Unit = {
         assert(isBrown)
@@ -48,9 +56,26 @@ final class ChangeProfileTest extends BrownConyTestBase {
             assert(profile.statusMessage.deep == "I like Cony".getBytes.deep)
           }
         }
+        brownFinished = true
+
       }
       override def receiveFriendStatusMessage(friendNumber: Int, statusMessage: Array[Byte]): Unit = {
-        assert(isCony)
+        if (initialStatusMessage) {
+          initialStatusMessage = false
+        } else {
+          assert(isCony)
+          assert(statusMessage.deep == "I like Cony".getBytes.deep)
+          debug("see Brown changed status message")
+          val reply = conyAdapter.acceptRequest(GetFriendListRequest())
+          reply match {
+            case GetFriendListReply(friendList) => {
+              val brown = friendList.friends.apply(friendNumber)
+              assert(brown.userProfile.nickname.deep == "Brownie".getBytes.deep)
+              assert(brown.userProfile.statusMessage.deep == statusMessage.deep)
+            }
+          }
+          conyFinished = true
+        }
       }
     }
 }

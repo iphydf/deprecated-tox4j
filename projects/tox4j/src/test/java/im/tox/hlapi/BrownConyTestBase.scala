@@ -3,7 +3,7 @@ package im.tox.hlapi
 import com.typesafe.scalalogging.Logger
 import im.tox.hlapi.adapter.ToxAdapter
 import im.tox.hlapi.event.NetworkEvent
-import im.tox.hlapi.event.UiEvent.{ SetNicknameEvent, AddFriendNoRequestEvent, ToxInitEvent }
+import im.tox.hlapi.event.UiEvent.{ ToxEndEvent, SetNicknameEvent, AddFriendNoRequestEvent, ToxInitEvent }
 import im.tox.hlapi.request.Reply.{ GetSelfAddressReply, GetSelfPublicKeyReply }
 import im.tox.hlapi.request.Request.{ GetSelfAddressRequest, GetSelfPublicKeyRequest }
 import im.tox.hlapi.state.ConnectionState.ConnectionOptions
@@ -22,6 +22,8 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
   protected var conyAddress: Address = Address()
   protected var brownAdapter: ToxAdapter = null
   protected var conyAdapter: ToxAdapter = null
+  protected var brownFinished = false
+  protected var conyFinished = false
   protected val logger = Logger(LoggerFactory.getLogger(classOf[BrownConyTestBase]))
 
   protected def newChatClient(name: String, expectedFriendName: String): ChatClient
@@ -55,10 +57,9 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
     }
     var brownEventList = Queue[NetworkEvent]()
     var conyEventList = Queue[NetworkEvent]()
-    Thread.sleep(20000)
     brownEventList = brownAdapter.iterate(brownEventList)
     conyEventList = conyAdapter.iterate(conyEventList)
-    while (!brownEventList.isEmpty || !conyEventList.isEmpty) {
+    while (!brownFinished || !conyFinished) {
       while (!brownEventList.isEmpty) {
         val remain = brownEventList.dequeue
         brownEventList = remain._2
@@ -67,12 +68,14 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
       while (!conyEventList.isEmpty) {
         val remain = conyEventList.dequeue
         conyEventList = remain._2
-        brownAdapter.acceptNetworkEvent(remain._1)
+        conyAdapter.acceptNetworkEvent(remain._1)
       }
-      Thread.sleep(3000)
-      brownAdapter.iterate(brownEventList)
-      brownAdapter.iterate(conyEventList)
+      Thread.sleep(brownAdapter.getIterateInterval)
+      brownEventList = brownAdapter.iterate(brownEventList)
+      conyEventList = conyAdapter.iterate(conyEventList)
     }
+    brownAdapter.closeToxSession()
+    conyAdapter.closeToxSession()
   }
 
   test("BrownConyTest") {
