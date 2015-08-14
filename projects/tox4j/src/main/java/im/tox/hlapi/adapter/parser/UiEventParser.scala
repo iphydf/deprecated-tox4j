@@ -14,12 +14,6 @@ object UiEventParser extends EventParser {
   def parse(state: ToxState, e: UiEvent): (ToxState, Option[NetworkAction]) = {
 
     e match {
-      case ToxInitEvent(connectionOptions, eventListener) => {
-        (connectionStatusL.set(state, Connect(connectionOptions)), Some(ToxInitAction(connectionOptions, eventListener)))
-      }
-      case ToxEndEvent() => {
-        (connectionStatusL.set(state, Disconnect()), Some(ToxEndAction()))
-      }
       case SetUserStatusEvent(status) => {
         (userStatusL.set(state, status), Some(SetUserStatusAction(status)))
       }
@@ -34,10 +28,7 @@ object UiEventParser extends EventParser {
       }
       case SendFriendMessageEvent(friendNumber, messageContent) => {
         val message = Message(NormalMessage(), 0, messageContent, MessageSent())
-        val friend = friendsL.get(state)(friendNumber)
-        (FriendState.friendEventHandler[Map[Int, Message]](friendNumber, state, FriendState.friendMessagesL,
-          FriendState.friendMessagesL.get(friend)
-            + ((FriendState.friendMessagesL.get(friend).size, message))), Some(SendFriendMessageAction(friendNumber, message)))
+        (state, Some(SendFriendMessageAction(friendNumber, message)))
       }
       case SendFriendRequestEvent(address, requestMessage) => {
         (state, Some(SendFriendRequestAction(address, requestMessage)))
@@ -47,6 +38,9 @@ object UiEventParser extends EventParser {
       }
       case AddFriendNoRequestEvent(publicKey) => {
         (state, Some(AddFriendNoRequestAction(publicKey)))
+      }
+      case SetTypingEvent(friendNumber, isTyping) => {
+        (state, Some(SetTypingAction(friendNumber, isTyping)))
       }
     }
   }

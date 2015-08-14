@@ -2,7 +2,7 @@ package im.tox.hlapi.listener
 
 import im.tox.hlapi.event.NetworkEvent
 import im.tox.hlapi.event.NetworkEvent._
-import im.tox.hlapi.state.ConnectionState.{ Connect, ConnectionOptions, Disconnect }
+import im.tox.hlapi.state.ConnectionState.{ Connect, Disconnect, ConnectionOptions }
 import im.tox.hlapi.state.FriendState.{ FriendRequest, Friend }
 import im.tox.hlapi.state.MessageState.{ ActionMessage, Message, MessageReceived, NormalMessage }
 import im.tox.hlapi.state.PublicKeyState.PublicKey
@@ -18,16 +18,7 @@ object ToxCoreListener extends ToxEventListener[Queue[NetworkEvent]] {
   override def selfConnectionStatus(
     @NotNull connectionStatus: ToxConnection
   )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
-    val status = {
-      if (connectionStatus == ToxConnection.NONE) {
-        Disconnect()
-      } else if (connectionStatus == ToxConnection.TCP) {
-        Connect(ConnectionOptions().copy(enableUdp = false))
-      } else {
-        Connect(ConnectionOptions())
-      }
-    }
-    eventList.enqueue(ReceiveSelfConnectionStatusEvent(status))
+    eventList
   }
 
   override def fileRecvControl(
@@ -139,8 +130,7 @@ object ToxCoreListener extends ToxEventListener[Queue[NetworkEvent]] {
     friendNumber: Int,
     messageId: Int
   )(eventList: Queue[NetworkEvent]): Queue[NetworkEvent] = {
-    eventList
-    //eventList.enqueue(ReceiveFriendReadReceiptEvent(friendNumber, messageId))
+    eventList.enqueue(ReceiveFriendReadReceiptEvent(friendNumber, messageId))
   }
 
 }

@@ -4,13 +4,12 @@ import im.tox.hlapi.action.NetworkAction
 import im.tox.hlapi.action.NetworkAction._
 import im.tox.hlapi.adapter.ToxAdapter
 import im.tox.hlapi.event.NetworkEvent
-import im.tox.hlapi.event.UiEvent.ToxEndEvent
 import im.tox.hlapi.listener.{ ToxClientListener, ToxCoreListener }
 import im.tox.hlapi.state.ConnectionState._
 import im.tox.hlapi.state.CoreState.ToxState
 import im.tox.hlapi.state.FileState.{ Avatar, Data, File, FileSent }
 import im.tox.hlapi.state.FriendState.Friend
-import im.tox.hlapi.state.MessageState.{ ActionMessage, NormalMessage }
+import im.tox.hlapi.state.MessageState.Message
 import im.tox.hlapi.state.PublicKeyState.{ Address, PublicKey }
 import im.tox.hlapi.state.UserStatusState.{ Away, Busy, Offline, Online }
 import im.tox.hlapi.state.{ CoreState, FileState, FriendState }
@@ -53,15 +52,10 @@ object NetworkActionPerformer {
         state
       }
       case SendFriendMessageAction(friendNumber, message) => {
-        message.messageType match {
-          case NormalMessage() => {
-            tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, message.timeDelta, message.content)
-          }
-          case ActionMessage() => {
-            tox.friendSendMessage(friendNumber, ToxMessageType.ACTION, message.timeDelta, message.content)
-          }
-        }
-        state
+        val messageId = tox.friendSendMessage(friendNumber, ToxMessageType.NORMAL, message.timeDelta, message.content)
+        val friend = CoreState.friendsL.get(state)(friendNumber)
+        FriendState.friendSetHandler[Map[Int, Message]](friendNumber, state, FriendState.friendSentMessagesL,
+          FriendState.friendSentMessagesL.get(friend) + ((messageId, message)))
       }
       case SendFileTransmissionRequestAction(friendNumber, file) => {
         val fileKind = {
@@ -72,14 +66,11 @@ object NetworkActionPerformer {
         }
         val fileId = tox.fileSend(friendNumber, fileKind, file.fileData.length, Array.ofDim[Byte](0), file.fileData)
         val friend = CoreState.friendsL.get(state)(friendNumber)
-        FriendState.friendEventHandler[Map[Int, File]](friendNumber, state, FriendState.friendFilesL,
+        FriendState.friendSetHandler[Map[Int, File]](friendNumber, state, FriendState.friendFilesL,
           FriendState.friendFilesL.get(friend) +
             ((fileId, FileState.fileFileStatusL.set(file, FileSent()))))
       }
 
-      case ToxEndAction() => {
-        state
-      }
       case AddFriendNoRequestAction(publicKey) => {
         val friendNumber = tox.addFriendNorequest(publicKey.key)
         (CoreState.friendsL.set(
@@ -87,11 +78,15 @@ object NetworkActionPerformer {
           CoreState.friendsL.get(state) + ((friendNumber, Friend(publicKey = publicKey)))
         ))
       }
+      case SetTypingAction(friendNumber, isTyping) => {
+        tox.setTyping(friendNumber, isTyping)
+        state
+      }
     }
   }
-  def initConnection(action: ToxInitAction): (ToxCoreImpl[Queue[NetworkEvent]], ToxState) = {
+  def initConnection(connectionOptions: ConnectionOptions): (ToxCoreImpl[Queue[NetworkEvent]], ToxState) = {
     val toxOption: ToxOptions = {
-      val p = action.connectionOptions.proxyOption
+      val p = connectionOptions.proxyOption
       val proxy = {
         p match {
           case p: Http    => ProxyOptions.Http(p.proxyHost, p.proxyPort)
@@ -99,12 +94,12 @@ object NetworkActionPerformer {
           case p: NoProxy => ProxyOptions.None
         }
       }
-      val s = action.connectionOptions.saveDataOption
+      val s = connectionOptions.saveDataOption
       val saveData = s match {
         case s: NoSaveData => SaveDataOptions.None
         case s: ToxSave    => SaveDataOptions.ToxSave(s.data)
       }
-      ToxOptions(action.connectionOptions.enableIPv6, action.connectionOptions.enableUdp, proxy, saveData = saveData)
+      ToxOptions(connectionOptions.enableIPv6, connectionOptions.enableUdp, proxy, saveData = saveData)
     }
     val tox = new ToxCoreImpl[Queue[NetworkEvent]](toxOption)
     tox.callback(ToxCoreListener)
@@ -124,4 +119,5 @@ object NetworkActionPerformer {
     }
     (tox, returnState)
   }
+
 }

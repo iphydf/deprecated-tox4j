@@ -1,9 +1,8 @@
 package im.tox.hlapi
 
-import im.tox.hlapi.adapter.ToxAdapter
 import im.tox.hlapi.event.UiEvent.{ SetStatusMessageEvent, SendFriendMessageEvent, SetNicknameEvent }
-import im.tox.hlapi.request.Reply.{ GetSelfProfileReply, GetFriendListReply }
-import im.tox.hlapi.request.Request.{ GetSelfProfileRequest, GetFriendListRequest }
+import im.tox.hlapi.request.Reply.{ GetFriendProfileReply, GetSelfProfileReply, GetFriendListReply }
+import im.tox.hlapi.request.Request.{ GetFriendProfileRequest, GetSelfProfileRequest, GetFriendListRequest }
 import im.tox.hlapi.state.ConnectionState.ConnectionStatus
 import im.tox.hlapi.state.MessageState.Message
 import im.tox.hlapi.state.{ FriendState, CoreState }
@@ -20,8 +19,8 @@ final class ChangeProfileTest extends BrownConyTestBase {
           debug("change name to Brownie")
           val reply = brownAdapter.acceptRequest(GetSelfProfileRequest())
           reply match {
-            case GetSelfProfileReply(name) => {
-              assert(name.nickname.deep == "Brownie".getBytes.deep)
+            case GetSelfProfileReply(name, statusMessage) => {
+              assert(name.deep == "Brownie".getBytes.deep)
             }
           }
         }
@@ -34,11 +33,10 @@ final class ChangeProfileTest extends BrownConyTestBase {
           assert(isCony)
           assert(name.deep == "Brownie".getBytes.deep)
           debug("receive Brown's new name")
-          val reply = conyAdapter.acceptRequest(GetFriendListRequest())
+          val reply = conyAdapter.acceptRequest(GetFriendProfileRequest(friendNumber))
           reply match {
-            case GetFriendListReply(friendList) => {
-              val brownName = FriendState.friendNameL.get(friendList.friends.apply(friendNumber))
-              assert(brownName.deep == "Brownie".getBytes.deep)
+            case GetFriendProfileReply(name, statusMessage) => {
+              assert(name.deep == "Brownie".getBytes.deep)
             }
           }
           conyAdapter.acceptUiEvent(SendFriendMessageEvent(friendNumber, "please change your status message".getBytes))
@@ -52,8 +50,8 @@ final class ChangeProfileTest extends BrownConyTestBase {
         debug("change status message")
         val reply = brownAdapter.acceptRequest(GetSelfProfileRequest())
         reply match {
-          case GetSelfProfileReply(profile) => {
-            assert(profile.statusMessage.deep == "I like Cony".getBytes.deep)
+          case GetSelfProfileReply(name, statusMessage) => {
+            assert(statusMessage.deep == "I like Cony".getBytes.deep)
           }
         }
         brownFinished = true
@@ -66,12 +64,10 @@ final class ChangeProfileTest extends BrownConyTestBase {
           assert(isCony)
           assert(statusMessage.deep == "I like Cony".getBytes.deep)
           debug("see Brown changed status message")
-          val reply = conyAdapter.acceptRequest(GetFriendListRequest())
+          val reply = conyAdapter.acceptRequest(GetFriendProfileRequest(friendNumber))
           reply match {
-            case GetFriendListReply(friendList) => {
-              val brown = friendList.friends.apply(friendNumber)
-              assert(brown.userProfile.nickname.deep == "Brownie".getBytes.deep)
-              assert(brown.userProfile.statusMessage.deep == statusMessage.deep)
+            case GetFriendProfileReply(name, statusm) => {
+              assert(statusm.deep == statusMessage.deep)
             }
           }
           conyFinished = true

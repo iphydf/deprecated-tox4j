@@ -1,0 +1,12 @@
+- Asynchronization conversion
+- Code refactoring and design examination (need great help from iphy)
+- Error handling
+- File transmission
+- Disk IO interface
+- Image protocol
+- AV implementation
+- Write documentation (need to done last)
+- Logging
+- Test more exhaustively
+- Add bootstrap whatever
+- Try Android integration

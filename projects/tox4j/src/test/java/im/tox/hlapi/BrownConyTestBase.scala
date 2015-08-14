@@ -3,7 +3,7 @@ package im.tox.hlapi
 import com.typesafe.scalalogging.Logger
 import im.tox.hlapi.adapter.ToxAdapter
 import im.tox.hlapi.event.NetworkEvent
-import im.tox.hlapi.event.UiEvent.{ ToxEndEvent, SetNicknameEvent, AddFriendNoRequestEvent, ToxInitEvent }
+import im.tox.hlapi.event.UiEvent.{ SetNicknameEvent, AddFriendNoRequestEvent }
 import im.tox.hlapi.request.Reply.{ GetSelfAddressReply, GetSelfPublicKeyReply }
 import im.tox.hlapi.request.Request.{ GetSelfAddressRequest, GetSelfPublicKeyRequest }
 import im.tox.hlapi.state.ConnectionState.ConnectionOptions
@@ -33,8 +33,8 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
     val cony = newChatClient("Cony", "Brown")
     brownAdapter = new ToxAdapter(brown)
     conyAdapter = new ToxAdapter(cony)
-    brownAdapter.initToxSession(ToxInitEvent(ConnectionOptions(), brown))
-    conyAdapter.initToxSession(ToxInitEvent(ConnectionOptions(), cony))
+    brownAdapter.initToxSession(ConnectionOptions())
+    conyAdapter.initToxSession(ConnectionOptions())
     val brownRequest = brownAdapter.acceptRequest(GetSelfPublicKeyRequest())
     val conyRequest = conyAdapter.acceptRequest(GetSelfPublicKeyRequest())
     brownRequest match {
@@ -65,17 +65,25 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
         brownEventList = remain._2
         brownAdapter.acceptNetworkEvent(remain._1)
       }
-      while (!conyEventList.isEmpty) {
+      while (conyEventList.nonEmpty) {
         val remain = conyEventList.dequeue
         conyEventList = remain._2
         conyAdapter.acceptNetworkEvent(remain._1)
       }
-      Thread.sleep(brownAdapter.getIterateInterval)
-      brownEventList = brownAdapter.iterate(brownEventList)
-      conyEventList = conyAdapter.iterate(conyEventList)
+      Thread.sleep(conyAdapter.getIterateInterval)
+      if (brownAdapter.isInit) {
+        brownEventList = brownAdapter.iterate(brownEventList)
+      }
+      if (conyAdapter.isInit) {
+        conyEventList = conyAdapter.iterate(conyEventList)
+      }
     }
-    brownAdapter.closeToxSession()
-    conyAdapter.closeToxSession()
+    if (brownAdapter.isInit) {
+      brownAdapter.closeToxSession()
+    }
+    if (conyAdapter.isInit) {
+      conyAdapter.closeToxSession()
+    }
   }
 
   test("BrownConyTest") {

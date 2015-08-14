@@ -1,8 +1,8 @@
 package im.tox.hlapi
 
 import im.tox.hlapi.adapter.ToxAdapter
-import im.tox.hlapi.request.Reply.{ GetFriendListReply, GetSelfPublicKeyReply }
-import im.tox.hlapi.request.Request.{ GetFriendListRequest, GetSelfPublicKeyRequest }
+import im.tox.hlapi.request.Reply.{ GetFriendPublicKeyReply, GetFriendListReply, GetSelfPublicKeyReply }
+import im.tox.hlapi.request.Request.{ GetFriendPublicKeyRequest, GetFriendListRequest, GetSelfPublicKeyRequest }
 import im.tox.hlapi.state.ConnectionState.ConnectionStatus
 
 final class InitiationTest extends BrownConyTestBase {
@@ -22,12 +22,22 @@ final class InitiationTest extends BrownConyTestBase {
           val friendListReply = selfAdapter.acceptRequest(GetFriendListRequest())
           friendListReply match {
             case GetFriendListReply(friendList) => {
-              assert(friendList.friends.size == 1)
+              assert(friendList.size == 1)
               if (isBrown) {
-                assert(friendList.friends.seq(0).publicKey == conyPublicKey)
+                val reply = brownAdapter.acceptRequest(GetFriendPublicKeyRequest(friendNumber))
+                reply match {
+                  case GetFriendPublicKeyReply(publicKey) => {
+                    assert(publicKey.key.deep == conyPublicKey.key.deep)
+                  }
+                }
                 debug("has Cony as friend now.")
               } else {
-                assert(friendList.friends.seq(0).publicKey == brownPublicKey)
+                val reply = conyAdapter.acceptRequest(GetFriendPublicKeyRequest(friendNumber))
+                reply match {
+                  case GetFriendPublicKeyReply(publicKey) => {
+                    assert(publicKey.key.deep == brownPublicKey.key.deep)
+                  }
+                }
                 debug("has Brown as friend now.")
               }
             }

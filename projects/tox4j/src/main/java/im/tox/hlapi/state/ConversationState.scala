@@ -8,13 +8,19 @@ import scalaz.Lens
 object ConversationState {
   final case class FriendConversation(
     isTyping: Boolean = false,
-    messageList: MessageList = MessageList(),
+    sentMessageList: MessageList = MessageList(),
+    receivedMessageList: MessageList = MessageList(),
     fileList: FileList = FileList()
   )
 
-  val ConversationMessageListL = Lens.lensu[FriendConversation, MessageList](
-    (a, value) => a.copy(messageList = value),
-    _.messageList
+  val ConversationSentMessageListL = Lens.lensu[FriendConversation, MessageList](
+    (a, value) => a.copy(sentMessageList = value),
+    _.sentMessageList
+  )
+
+  val ConversationReceivedMessageListL = Lens.lensu[FriendConversation, MessageList](
+    (a, value) => a.copy(receivedMessageList = value),
+    _.receivedMessageList
   )
 
   val conversationIsTypingL = Lens.lensu[FriendConversation, Boolean](

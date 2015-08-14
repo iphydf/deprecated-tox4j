@@ -28,7 +28,7 @@ final class AddDeleteFriendTest extends BrownConyTestBase {
             val reply = selfAdapter.acceptRequest(GetFriendListRequest())
             reply match {
               case GetFriendListReply(friendList) => {
-                assert(friendList.friends.size == 0)
+                assert(friendList.size == 0)
               }
             }
           } else {
@@ -47,7 +47,7 @@ final class AddDeleteFriendTest extends BrownConyTestBase {
             val reply = brownAdapter.acceptRequest(GetFriendListRequest())
             reply match {
               case GetFriendListReply(friendList) => {
-                assert(friendList.friends.size == 1)
+                assert(friendList.size == 1)
               }
             }
           }
@@ -61,7 +61,7 @@ final class AddDeleteFriendTest extends BrownConyTestBase {
       val reply = conyAdapter.acceptRequest(GetFriendListRequest())
       reply match {
         case GetFriendListReply(friendList) => {
-          assert(friendList.friends.size == 1)
+          assert(friendList.size == 1)
         }
       }
     }

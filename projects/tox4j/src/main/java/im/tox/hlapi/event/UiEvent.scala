@@ -26,10 +26,7 @@ object UiEvent {
   final case class SetStatusMessageEvent(statusMessage: Array[Byte]) extends UiEvent
   //  Change self user status
   final case class SetUserStatusEvent(status: UserStatus) extends UiEvent
-  // Initiate a tox session
-  final case class ToxInitEvent(options: ConnectionOptions, toxClientListener: ToxClientListener) extends UiEvent
-  // End a tox session
-  final case class ToxEndEvent() extends UiEvent
+  final case class SetTypingEvent(friendNumber: Int, isTyping: Boolean) extends UiEvent
   final case class AddFriendNoRequestEvent(publicKey: PublicKey) extends UiEvent
 
 }

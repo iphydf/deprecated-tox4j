@@ -20,11 +20,6 @@ object CoreState {
     _.publicKey
   )
 
-  val connectionStatusL = Lens.lensu[ToxState, ConnectionStatus](
-    (a, value) => a.copy(connectionStatus = value),
-    _.connectionStatus
-  )
-
   val userStatusL = Lens.lensu[ToxState, UserStatus](
     (a, value) => a.copy(userStatus = value),
     _.userStatus
@@ -46,7 +41,6 @@ object CoreState {
 
   final case class ToxState(
     userProfile: UserProfile = UserProfile(),
-    connectionStatus: ConnectionStatus = Disconnect(),
     userStatus: UserStatus = Offline(),
     friendList: FriendList = FriendList(),
     publicKey: PublicKey = PublicKey(),

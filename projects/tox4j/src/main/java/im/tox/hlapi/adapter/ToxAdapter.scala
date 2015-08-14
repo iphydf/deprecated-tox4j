@@ -1,15 +1,15 @@
 package im.tox.hlapi.adapter
 
-import im.tox.hlapi.action.NetworkAction.ToxInitAction
 import im.tox.hlapi.adapter.parser.{ ClientNotifier, UiEventParser, RequestParser, NetworkEventParser }
 import im.tox.hlapi.adapter.performer.DiskIOActionPerformer
-import im.tox.hlapi.event.UiEvent.ToxInitEvent
 import im.tox.hlapi.event.{ UiEvent, NetworkEvent }
 import im.tox.hlapi.listener.ToxClientListener
 import im.tox.hlapi.performer.NetworkActionPerformer
 import im.tox.hlapi.request.{ Reply, Request }
-import im.tox.hlapi.state.CoreState
+import im.tox.hlapi.state.ConnectionState.ConnectionOptions
+import im.tox.hlapi.state.{ FriendState, CoreState }
 import im.tox.hlapi.state.CoreState.ToxState
+import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.ToxCoreImpl
 
 import RequestParser._
@@ -35,9 +35,8 @@ final class ToxAdapter(toxClientListener: ToxClientListener) {
     }
   }
 
-  def initToxSession(e: ToxInitEvent): Unit = {
-    val action = ToxInitAction(e.options, e.toxClientListener)
-    val result = NetworkActionPerformer.initConnection(action)
+  def initToxSession(connectionOptions: ConnectionOptions): Unit = {
+    val result = NetworkActionPerformer.initConnection(connectionOptions)
     tox = result._1
     state = result._2
   }
@@ -45,6 +44,7 @@ final class ToxAdapter(toxClientListener: ToxClientListener) {
   def closeToxSession(): Unit = {
     tox.close()
     tox = null
+    state = null
   }
 
   def acceptNetworkEvent(e: NetworkEvent): Unit = {
@@ -65,6 +65,8 @@ final class ToxAdapter(toxClientListener: ToxClientListener) {
   def getIterateInterval: Int = {
     tox.iterationInterval
   }
+
+  def isInit: Boolean = tox != null
 
   def acceptRequest(request: Request): Reply = {
     parseRequest(request, state)

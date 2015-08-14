@@ -23,6 +23,8 @@ object ClientNotifier {
         listener.receiveFriendStatusMessage(friendNumber, statusMessage)
       case ReceiveFriendTypingEvent(friendNumber, isTyping) =>
         listener.receiveFriendTyping(friendNumber, isTyping)
+      case ReceiveFriendReadReceiptEvent(friendNumber, messageId) =>
+        listener.receiveFriendReadReceipt(friendNumber, messageId)
     }
   }
 }
