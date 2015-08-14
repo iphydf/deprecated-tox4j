@@ -11,7 +11,7 @@ import im.tox.hlapi.state.FileState.{ Avatar, Data, File, FileSent }
 import im.tox.hlapi.state.FriendState.Friend
 import im.tox.hlapi.state.MessageState.Message
 import im.tox.hlapi.state.PublicKeyState.{ Address, PublicKey }
-import im.tox.hlapi.state.UserStatusState.{ Away, Busy, Offline, Online }
+import im.tox.hlapi.state.UserStatusState.{ Away, Busy, Online }
 import im.tox.hlapi.state.{ CoreState, FileState, FriendState }
 import im.tox.tox4j.core.enums.{ ToxFileKind, ToxMessageType, ToxUserStatus }
 import im.tox.tox4j.core.options.{ ProxyOptions, SaveDataOptions, ToxOptions }
@@ -33,10 +33,9 @@ object NetworkActionPerformer {
       }
       case SetUserStatusAction(status) => {
         status match {
-          case Online()  => tox.setStatus(ToxUserStatus.NONE)
-          case Away()    => tox.setStatus(ToxUserStatus.AWAY)
-          case Busy()    => tox.setStatus(ToxUserStatus.BUSY)
-          case Offline() =>
+          case Online() => tox.setStatus(ToxUserStatus.NONE)
+          case Away()   => tox.setStatus(ToxUserStatus.AWAY)
+          case Busy()   => tox.setStatus(ToxUserStatus.BUSY)
         }
         state
       }

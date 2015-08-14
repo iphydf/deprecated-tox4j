@@ -4,7 +4,7 @@ import im.tox.hlapi.state.ConnectionState._
 import im.tox.hlapi.state.FriendState.FriendList
 import im.tox.hlapi.state.PublicKeyState.{ Address, PublicKey }
 import im.tox.hlapi.state.UserProfileState.UserProfile
-import im.tox.hlapi.state.UserStatusState.{ Offline, UserStatus }
+import im.tox.hlapi.state.UserStatusState.{ Online, UserStatus }
 
 import scalaz.Lens
 
@@ -41,7 +41,7 @@ object CoreState {
 
   final case class ToxState(
     userProfile: UserProfile = UserProfile(),
-    userStatus: UserStatus = Offline(),
+    userStatus: UserStatus = Online(),
     friendList: FriendList = FriendList(),
     publicKey: PublicKey = PublicKey(),
     address: Address = Address()

@@ -1,14 +1,14 @@
-package im.tox.hlapi
+package im.tox.hlapi.browncony
 
-import im.tox.hlapi.event.UiEvent.{ SetTypingEvent, SendFriendMessageEvent }
-import im.tox.hlapi.request.Reply.{ GetFriendReceivedMessageReply, GetFriendSentMessageReply, GetFriendSentMessageListReply, GetFriendListReply }
-import im.tox.hlapi.request.Request.{ GetFriendReceivedMessageRequest, GetFriendSentMessageRequest, GetFriendSentMessageListRequest, GetFriendListRequest }
+import im.tox.hlapi.event.UiEvent.{ SendFriendMessageEvent, SetTypingEvent }
+import im.tox.hlapi.request.Reply.{ GetFriendReceivedMessageReply, GetFriendSentMessageListReply, GetFriendSentMessageReply }
+import im.tox.hlapi.request.Request.{ GetFriendReceivedMessageRequest, GetFriendSentMessageListRequest, GetFriendSentMessageRequest }
 import im.tox.hlapi.state.ConnectionState.ConnectionStatus
 import im.tox.hlapi.state.MessageState
 import im.tox.hlapi.state.MessageState._
 
 final class SendMessageTest extends BrownConyTestBase {
-  override def newChatClient(friendName: String, expectedFriendName: String) = new ChatClient(friendName, expectedFriendName) {
+  override def newChatClient(friendName: String, expectedFriendName: String) = new BrownConyChatClient(friendName, expectedFriendName) {
     override def receiveFriendConnectionStatus(friendNumber: Int, connectionStatus: ConnectionStatus): Unit = {
       if (isBrown) {
         brownAdapter.acceptUiEvent(SetTypingEvent(0, true))

@@ -1,15 +1,14 @@
-package im.tox.hlapi
+package im.tox.hlapi.browncony
 
-import im.tox.hlapi.adapter.ToxAdapter
-import im.tox.hlapi.event.UiEvent.{ AddFriendNoRequestEvent, SendFriendRequestEvent, DeleteFriendEvent }
+import im.tox.hlapi.event.UiEvent.{ AddFriendNoRequestEvent, DeleteFriendEvent, SendFriendRequestEvent }
 import im.tox.hlapi.request.Reply.GetFriendListReply
 import im.tox.hlapi.request.Request.GetFriendListRequest
-import im.tox.hlapi.state.ConnectionState.{ Disconnect, Connect, ConnectionStatus }
+import im.tox.hlapi.state.ConnectionState.{ Connect, ConnectionStatus, Disconnect }
 import im.tox.hlapi.state.FriendState.FriendRequest
 import im.tox.hlapi.state.PublicKeyState.PublicKey
 
 final class AddDeleteFriendTest extends BrownConyTestBase {
-  override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
+  override def newChatClient(name: String, expectedFriendName: String) = new BrownConyChatClient(name, expectedFriendName) {
     private var friendDeleted: Boolean = false
     override def receiveFriendConnectionStatus(friendNumber: Int, connectionStatus: ConnectionStatus): Unit = {
       connectionStatus match {

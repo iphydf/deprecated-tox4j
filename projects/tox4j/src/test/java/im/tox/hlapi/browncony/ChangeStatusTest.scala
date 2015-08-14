@@ -1,15 +1,15 @@
-package im.tox.hlapi
+package im.tox.hlapi.browncony
 
-import im.tox.hlapi.event.UiEvent.{ SetUserStatusEvent, SendFriendMessageEvent }
-import im.tox.hlapi.request.Reply.{ GetSelfStatusReply, GetFriendUserStatusReply, GetFriendConnectionStatusReply }
-import im.tox.hlapi.request.Request.{ GetSelfStatusRequest, GetFriendUserStatusRequest, GetFriendConnectionStatusRequest }
-import im.tox.hlapi.state.ConnectionState.{ Disconnect, ConnectionOptions, Connect, ConnectionStatus }
+import im.tox.hlapi.event.UiEvent.{ SendFriendMessageEvent, SetUserStatusEvent }
+import im.tox.hlapi.request.Reply.{ GetFriendConnectionStatusReply, GetFriendUserStatusReply, GetSelfStatusReply }
+import im.tox.hlapi.request.Request.{ GetFriendConnectionStatusRequest, GetFriendUserStatusRequest, GetSelfStatusRequest }
+import im.tox.hlapi.state.ConnectionState.{ ConnectionStatus, Disconnect }
 import im.tox.hlapi.state.MessageState
 import im.tox.hlapi.state.MessageState.Message
-import im.tox.hlapi.state.UserStatusState.{ Online, Busy, Away, UserStatus }
+import im.tox.hlapi.state.UserStatusState.{ Away, Busy, Online, UserStatus }
 
 final class ChangeStatusTest extends BrownConyTestBase {
-  override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
+  override def newChatClient(name: String, expectedFriendName: String) = new BrownConyChatClient(name, expectedFriendName) {
     var conyMessage = 0
     override def receiveFriendConnectionStatus(friendNumber: Int, connectionStatus: ConnectionStatus): Unit = {
       val selfAdapter = {

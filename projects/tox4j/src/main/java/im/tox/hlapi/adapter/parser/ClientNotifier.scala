@@ -7,8 +7,6 @@ import im.tox.hlapi.listener.ToxClientListener
 object ClientNotifier {
   def notify(listener: ToxClientListener, e: NetworkEvent): Unit = {
     e match {
-      case ReceiveSelfConnectionStatusEvent(connectionStatus) =>
-        listener.receiveSelfConnectionStatus(connectionStatus)
       case ReceiveFriendConnectionStatusEvent(friendNumber, connectionStatus) =>
         listener.receiveFriendConnectionStatus(friendNumber, connectionStatus)
       case ReceiveFriendMessageEvent(friendNumber, message) =>

@@ -1,12 +1,11 @@
-package im.tox.hlapi
+package im.tox.hlapi.browncony
 
-import im.tox.hlapi.adapter.ToxAdapter
-import im.tox.hlapi.request.Reply.{ GetFriendPublicKeyReply, GetFriendListReply, GetSelfPublicKeyReply }
-import im.tox.hlapi.request.Request.{ GetFriendPublicKeyRequest, GetFriendListRequest, GetSelfPublicKeyRequest }
+import im.tox.hlapi.request.Reply.{ GetFriendListReply, GetFriendPublicKeyReply, GetSelfPublicKeyReply }
+import im.tox.hlapi.request.Request.{ GetFriendListRequest, GetFriendPublicKeyRequest, GetSelfPublicKeyRequest }
 import im.tox.hlapi.state.ConnectionState.ConnectionStatus
 
 final class InitiationTest extends BrownConyTestBase {
-  override def newChatClient(name: String, friendName: String) = new ChatClient(name, friendName) {
+  override def newChatClient(name: String, friendName: String) = new BrownConyChatClient(name, friendName) {
 
     override def receiveFriendConnectionStatus(friendNumber: Int, connectionStatus: ConnectionStatus): Unit = {
       val selfAdapter = {

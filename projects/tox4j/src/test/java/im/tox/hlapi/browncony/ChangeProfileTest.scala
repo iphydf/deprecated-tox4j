@@ -1,16 +1,15 @@
-package im.tox.hlapi
+package im.tox.hlapi.browncony
 
-import im.tox.hlapi.event.UiEvent.{ SetStatusMessageEvent, SendFriendMessageEvent, SetNicknameEvent }
-import im.tox.hlapi.request.Reply.{ GetFriendProfileReply, GetSelfProfileReply, GetFriendListReply }
-import im.tox.hlapi.request.Request.{ GetFriendProfileRequest, GetSelfProfileRequest, GetFriendListRequest }
+import im.tox.hlapi.event.UiEvent.{ SendFriendMessageEvent, SetNicknameEvent, SetStatusMessageEvent }
+import im.tox.hlapi.request.Reply.{ GetFriendProfileReply, GetSelfProfileReply }
+import im.tox.hlapi.request.Request.{ GetFriendProfileRequest, GetSelfProfileRequest }
 import im.tox.hlapi.state.ConnectionState.ConnectionStatus
 import im.tox.hlapi.state.MessageState.Message
-import im.tox.hlapi.state.{ FriendState, CoreState }
 
 final class ChangeProfileTest extends BrownConyTestBase {
 
   override def newChatClient(friendName: String, expectedFriendName: String) =
-    new ChatClient(friendName, expectedFriendName) {
+    new BrownConyChatClient(friendName, expectedFriendName) {
       private var initialName = true
       private var initialStatusMessage = true
       override def receiveFriendConnectionStatus(friendNumber: Int, connectionStatus: ConnectionStatus): Unit = {

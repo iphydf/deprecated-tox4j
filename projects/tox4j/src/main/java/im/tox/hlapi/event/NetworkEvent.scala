@@ -10,8 +10,6 @@ sealed trait NetworkEvent
 
 object NetworkEvent {
 
-  //  Self connection status (connected/disconnected)
-  final case class ReceiveSelfConnectionStatusEvent(connectionStatus: ConnectionStatus) extends NetworkEvent
   //  Receive file transmission control from friends
   final case class ReceiveFileTransmissionControlEvent() extends NetworkEvent
   //  Receive file transmission request from friends

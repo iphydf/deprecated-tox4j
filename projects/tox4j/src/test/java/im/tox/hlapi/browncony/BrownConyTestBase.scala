@@ -1,9 +1,9 @@
-package im.tox.hlapi
+package im.tox.hlapi.browncony
 
 import com.typesafe.scalalogging.Logger
 import im.tox.hlapi.adapter.ToxAdapter
 import im.tox.hlapi.event.NetworkEvent
-import im.tox.hlapi.event.UiEvent.{ SetNicknameEvent, AddFriendNoRequestEvent }
+import im.tox.hlapi.event.UiEvent.AddFriendNoRequestEvent
 import im.tox.hlapi.request.Reply.{ GetSelfAddressReply, GetSelfPublicKeyReply }
 import im.tox.hlapi.request.Request.{ GetSelfAddressRequest, GetSelfPublicKeyRequest }
 import im.tox.hlapi.state.ConnectionState.ConnectionOptions
@@ -26,7 +26,7 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
   protected var conyFinished = false
   protected val logger = Logger(LoggerFactory.getLogger(classOf[BrownConyTestBase]))
 
-  protected def newChatClient(name: String, expectedFriendName: String): ChatClient
+  protected def newChatClient(name: String, expectedFriendName: String): BrownConyChatClient
 
   protected def runBrownConyTest(): Unit = {
     val brown = newChatClient("Brown", "Cony")
@@ -57,10 +57,8 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
     }
     var brownEventList = Queue[NetworkEvent]()
     var conyEventList = Queue[NetworkEvent]()
-    brownEventList = brownAdapter.iterate(brownEventList)
-    conyEventList = conyAdapter.iterate(conyEventList)
     while (!brownFinished || !conyFinished) {
-      while (!brownEventList.isEmpty) {
+      while (brownEventList.nonEmpty) {
         val remain = brownEventList.dequeue
         brownEventList = remain._2
         brownAdapter.acceptNetworkEvent(remain._1)
