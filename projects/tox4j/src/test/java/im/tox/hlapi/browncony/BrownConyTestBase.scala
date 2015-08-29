@@ -57,30 +57,35 @@ abstract class BrownConyTestBase extends FunSuite with Timeouts {
     }
     var brownEventList = Queue[NetworkEvent]()
     var conyEventList = Queue[NetworkEvent]()
-    while (!brownFinished || !conyFinished) {
-      while (brownEventList.nonEmpty) {
-        val remain = brownEventList.dequeue
-        brownEventList = remain._2
-        brownAdapter.acceptNetworkEvent(remain._1)
-      }
-      while (conyEventList.nonEmpty) {
-        val remain = conyEventList.dequeue
-        conyEventList = remain._2
-        conyAdapter.acceptNetworkEvent(remain._1)
-      }
-      Thread.sleep(conyAdapter.getIterateInterval)
-      if (brownAdapter.isInit) {
-        brownEventList = brownAdapter.iterate(brownEventList)
-      }
-      if (conyAdapter.isInit) {
-        conyEventList = conyAdapter.iterate(conyEventList)
-      }
-    }
+    mainLoop(brownFinished, conyFinished)
     if (brownAdapter.isInit) {
       brownAdapter.closeToxSession()
     }
     if (conyAdapter.isInit) {
       conyAdapter.closeToxSession()
+    }
+
+    def mainLoop(isBrownFinished: Boolean, isConyFinished: Boolean): Unit = {
+      if (!isBrownFinished || !isConyFinished) {
+        while (brownEventList.nonEmpty) {
+          val remain = brownEventList.dequeue
+          brownEventList = remain._2
+          brownAdapter.acceptNetworkEvent(remain._1)
+        }
+        while (conyEventList.nonEmpty) {
+          val remain = conyEventList.dequeue
+          conyEventList = remain._2
+          conyAdapter.acceptNetworkEvent(remain._1)
+        }
+        Thread.sleep(conyAdapter.getIterateInterval)
+        if (brownAdapter.isInit) {
+          brownEventList = brownAdapter.iterate(brownEventList)
+        }
+        if (conyAdapter.isInit) {
+          conyEventList = conyAdapter.iterate(conyEventList)
+        }
+        mainLoop(brownFinished, conyFinished)
+      }
     }
   }
 

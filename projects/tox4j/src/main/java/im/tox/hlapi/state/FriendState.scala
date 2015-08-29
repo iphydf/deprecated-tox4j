@@ -5,7 +5,7 @@ import im.tox.hlapi.state.ConversationState.FriendConversation
 import im.tox.hlapi.state.CoreState._
 import im.tox.hlapi.state.PublicKeyState.PublicKey
 import im.tox.hlapi.state.UserProfileState.UserProfile
-import im.tox.hlapi.state.UserStatusState.{ Online, UserStatus, Offline }
+import im.tox.hlapi.state.UserStatusState.{ UserStatus, Offline }
 
 import scalaz.Lens
 
