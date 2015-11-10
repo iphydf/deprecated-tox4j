@@ -97,6 +97,7 @@ INSTALL() {
 # libsodium
 (
   CLONE https://github.com/jedisct1 libsodium --depth=1
+  git checkout stable
   INSTALL sodium --disable-pie
 )
 # opus

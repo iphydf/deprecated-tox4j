@@ -1,6 +1,7 @@
 package im.tox.tox4j.impl.jni
 
 import com.typesafe.scalalogging.Logger
+import im.tox.tox4j.Optimised
 import im.tox.tox4j.ToxImplBase.tryAndLog
 import im.tox.tox4j.core.callbacks._
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
@@ -341,7 +342,7 @@ final class ToxCoreImpl[ToxCoreState](@NotNull val options: ToxOptions) extends 
     }
   }
 
-  @im.tox.tox4j.Optimised
+  @Optimised
   private def dispatchEvents(state: ToxCoreState, events: CoreEvents): ToxCoreState = {
     (state
       |> dispatchSelfConnectionStatus(events.selfConnectionStatus)
