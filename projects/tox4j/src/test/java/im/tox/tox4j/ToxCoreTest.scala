@@ -1,11 +1,12 @@
 package im.tox.tox4j
 
+import im.tox.core.network.Port
 import im.tox.core.random.RandomCore
 import im.tox.tox4j.TestConstants.Iterations
 import im.tox.tox4j.core.ToxCoreFactory.withTox
+import im.tox.tox4j.core._
 import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.core.options.{ProxyOptions, ToxOptions}
-import im.tox.tox4j.core._
 import im.tox.tox4j.testing.ToxTestMixin
 import org.scalatest.FunSuite
 
@@ -53,7 +54,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
       tox.bootstrap(
         DhtNodeSelector.node.ipv4,
         Port.unsafeFromInt(1),
-        PublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
+        ToxPublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
       )
     }
   }
@@ -63,7 +64,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
       tox.bootstrap(
         DhtNodeSelector.node.ipv4,
         Port.unsafeFromInt(65535),
-        PublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
+        ToxPublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
       )
     }
   }
@@ -143,7 +144,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("GetAndSetName") {
     withTox { tox =>
       assert(tox.getName.value.isEmpty)
-      tox.setName(Nickname.unsafeFromByteArray("myname".getBytes))
+      tox.setName(ToxNickname.unsafeFromByteArray("myname".getBytes))
       assert(new String(tox.getName.value) == "myname")
     }
   }
@@ -151,7 +152,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("SetNameMinSize") {
     withTox { tox =>
       val array = ToxCoreTestBase.randomBytes(1)
-      tox.setName(Nickname.unsafeFromByteArray(array))
+      tox.setName(ToxNickname.unsafeFromByteArray(array))
       assert(tox.getName.value sameElements array)
     }
   }
@@ -159,7 +160,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("SetNameMaxSize") {
     withTox { tox =>
       val array = ToxCoreTestBase.randomBytes(ToxCoreConstants.MaxNameLength)
-      tox.setName(Nickname.unsafeFromByteArray(array))
+      tox.setName(ToxNickname.unsafeFromByteArray(array))
       assert(tox.getName.value sameElements array)
     }
   }
@@ -168,7 +169,7 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
     withTox { tox =>
       (1 to ToxCoreConstants.MaxNameLength) foreach { i =>
         val array = ToxCoreTestBase.randomBytes(i)
-        tox.setName(Nickname.unsafeFromByteArray(array))
+        tox.setName(ToxNickname.unsafeFromByteArray(array))
         assert(tox.getName.value sameElements array)
       }
     }
@@ -177,34 +178,34 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
   test("UnsetName") {
     withTox { tox =>
       assert(tox.getName.value.isEmpty)
-      tox.setName(Nickname.unsafeFromByteArray("myname".getBytes))
+      tox.setName(ToxNickname.unsafeFromByteArray("myname".getBytes))
       assert(tox.getName.value.nonEmpty)
-      tox.setName(Nickname.unsafeFromByteArray(Array.empty))
+      tox.setName(ToxNickname.unsafeFromByteArray(Array.empty))
       assert(tox.getName.value.isEmpty)
     }
   }
 
   test("GetAndSetStatusMessage") {
     withTox { tox =>
-      assert(tox.getStatusMessage.isEmpty)
-      tox.setStatusMessage("message".getBytes)
-      assert(new String(tox.getStatusMessage) == "message")
+      assert(tox.getStatusMessage.value.isEmpty)
+      tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray("message".getBytes))
+      assert(new String(tox.getStatusMessage.value) == "message")
     }
   }
 
   test("SetStatusMessageMinSize") {
     withTox { tox =>
       val array = ToxCoreTestBase.randomBytes(1)
-      tox.setStatusMessage(array)
-      assert(tox.getStatusMessage sameElements array)
+      tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(array))
+      assert(tox.getStatusMessage.value sameElements array)
     }
   }
 
   test("SetStatusMessageMaxSize") {
     withTox { tox =>
       val array = ToxCoreTestBase.randomBytes(ToxCoreConstants.MaxStatusMessageLength)
-      tox.setStatusMessage(array)
-      assert(tox.getStatusMessage sameElements array)
+      tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(array))
+      assert(tox.getStatusMessage.value sameElements array)
     }
   }
 
@@ -212,19 +213,19 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
     withTox { tox =>
       (1 to ToxCoreConstants.MaxStatusMessageLength) foreach { i =>
         val array = ToxCoreTestBase.randomBytes(i)
-        tox.setStatusMessage(array)
-        assert(tox.getStatusMessage sameElements array)
+        tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(array))
+        assert(tox.getStatusMessage.value sameElements array)
       }
     }
   }
 
   test("UnsetStatusMessage") {
     withTox { tox =>
-      assert(tox.getStatusMessage.isEmpty)
-      tox.setStatusMessage("message".getBytes)
-      assert(tox.getStatusMessage.nonEmpty)
-      tox.setStatusMessage(Array.empty)
-      assert(tox.getStatusMessage.isEmpty)
+      assert(tox.getStatusMessage.value.isEmpty)
+      tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray("message".getBytes))
+      assert(tox.getStatusMessage.value.nonEmpty)
+      tox.setStatusMessage(ToxStatusMessage.unsafeFromByteArray(Array.empty))
+      assert(tox.getStatusMessage.value.isEmpty)
     }
   }
 
@@ -242,7 +243,10 @@ final class ToxCoreTest extends FunSuite with ToxTestMixin {
     withTox { tox =>
       (0 until Iterations) foreach { i =>
         withTox { friend =>
-          val friendNumber = tox.addFriend(friend.getAddress, "heyo".getBytes)
+          val friendNumber = tox.addFriend(
+            friend.getAddress,
+            ToxFriendRequestMessage.unsafeFromByteArray("heyo".getBytes)
+          )
           assert(friendNumber == i)
         }
       }

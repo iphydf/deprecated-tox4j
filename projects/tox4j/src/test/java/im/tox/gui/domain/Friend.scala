@@ -2,10 +2,10 @@ package im.tox.gui.domain
 
 import java.io.Serializable
 
-import im.tox.tox4j.core.{PublicKey, ToxCoreConstants}
 import im.tox.tox4j.core.enums.{ToxConnection, ToxUserStatus}
+import im.tox.tox4j.core.{ToxPublicKey, ToxCoreConstants}
 
-final class Friend(val publicKey: PublicKey) extends Serializable {
+final class Friend(val publicKey: ToxPublicKey) extends Serializable {
   require(publicKey.value.length == ToxCoreConstants.PublicKeySize)
 
   var name: String = "<No name>"

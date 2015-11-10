@@ -3,9 +3,10 @@ package im.tox.gui.events
 import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing._
 
+import im.tox.core.network.Port
 import im.tox.gui.MainView
 import im.tox.tox4j.ToxCoreTestBase.parsePublicKey
-import im.tox.tox4j.core.{PublicKey, Port}
+import im.tox.tox4j.core.ToxPublicKey
 import im.tox.tox4j.core.exceptions.ToxBootstrapException
 
 final class BootstrapButtonOnAction(toxGui: MainView) extends ActionListener {
@@ -18,7 +19,7 @@ final class BootstrapButtonOnAction(toxGui: MainView) extends ActionListener {
       ) foreach (_(
         toxGui.bootstrapHost.getText,
         Port.unsafeFromInt(toxGui.bootstrapPort.getText.toInt),
-        PublicKey.unsafeFromByteArray(parsePublicKey(toxGui.bootstrapKey.getText.trim))
+        ToxPublicKey.unsafeFromByteArray(parsePublicKey(toxGui.bootstrapKey.getText.trim))
       ))
     } catch {
       case e: ToxBootstrapException =>

@@ -1,15 +1,16 @@
 package im.tox.tox4j
 
-import im.tox.tox4j.core.{PublicKey, Port}
+import im.tox.core.network.Port
+import im.tox.tox4j.core.ToxPublicKey
 
-final case class DhtNode(ipv4: String, ipv6: String, udpPort: Port, tcpPort: Port, dhtId: PublicKey) {
+final case class DhtNode(ipv4: String, ipv6: String, udpPort: Port, tcpPort: Port, dhtId: ToxPublicKey) {
 
   def this(ipv4: String, ipv6: String, udpPort: Int, tcpPort: Int, dhtId: String) {
     this(
       ipv4, ipv6,
       Port.unsafeFromInt(udpPort),
       Port.unsafeFromInt(tcpPort),
-      PublicKey.unsafeFromByteArray(ToxCoreTestBase.parsePublicKey(dhtId))
+      ToxPublicKey.unsafeFromByteArray(ToxCoreTestBase.parsePublicKey(dhtId))
     )
   }
 

@@ -72,7 +72,7 @@ final class AvInvokeTest extends FunSuite with PropertyChecks {
     Arbitrary(Gen.oneOf(
       Gen.const(BitRate.Unchanged),
       Gen.const(BitRate.Disabled),
-      arbitrary[Int].map(BitRate).map(_.getOrElse(BitRate.Unchanged))
+      arbitrary[Int].map(BitRate.fromInt).map(_.getOrElse(BitRate.Unchanged))
     ))
   }
 
