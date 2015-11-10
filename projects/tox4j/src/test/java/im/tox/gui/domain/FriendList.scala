@@ -2,7 +2,7 @@ package im.tox.gui.domain
 
 import javax.swing._
 
-import im.tox.tox4j.core.PublicKey
+import im.tox.tox4j.core.ToxPublicKey
 import im.tox.tox4j.core.enums.{ToxConnection, ToxUserStatus}
 
 import scala.collection.mutable.ArrayBuffer
@@ -16,7 +16,7 @@ final class FriendList extends AbstractListModel[Friend] {
    * @param friendNumber Friend number from toxcore.
    * @param publicKey Public key as stable identifier for the friend.
    */
-  def add(friendNumber: Int, publicKey: PublicKey): Unit = {
+  def add(friendNumber: Int, publicKey: ToxPublicKey): Unit = {
     while (friends.size <= friendNumber) {
       friends += null
     }

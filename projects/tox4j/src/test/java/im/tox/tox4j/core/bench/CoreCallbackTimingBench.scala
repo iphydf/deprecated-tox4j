@@ -3,13 +3,13 @@ package im.tox.tox4j.core.bench
 import im.tox.tox4j.bench.PerformanceReportBase._
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
-import im.tox.tox4j.core.{Nickname, PublicKey, ToxCore, ToxCoreConstants}
+import im.tox.tox4j.core.{ToxNickname, ToxPublicKey, ToxCore, ToxCoreConstants}
 import im.tox.tox4j.impl.jni.ToxCoreImpl
 
 final class CoreCallbackTimingBench extends TimingReport {
 
-  val publicKey = PublicKey.unsafeFromByteArray(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize))
-  val nickname = Nickname.unsafeFromByteArray(Array.ofDim[Byte](Nickname.MaxSize))
+  val publicKey = ToxPublicKey.unsafeFromByteArray(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize))
+  val nickname = ToxNickname.unsafeFromByteArray(Array.ofDim[Byte](ToxNickname.MaxSize))
   val data = Array.ofDim[Byte](ToxCoreConstants.MaxCustomPacketSize)
 
   def invokePerformance(method: String, f: ToxCoreImpl[Unit] => Unit): Unit = {
