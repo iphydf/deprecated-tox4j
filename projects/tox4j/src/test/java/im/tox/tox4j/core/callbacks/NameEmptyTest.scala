@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.Nickname
+import im.tox.tox4j.core.ToxNickname
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
 final class NameEmptyTest extends AliceBobTest {
@@ -10,7 +10,7 @@ final class NameEmptyTest extends AliceBobTest {
 
   protected override def newChatClient(name: String, expectedFriendName: String) = new ChatClient(name, expectedFriendName) {
 
-    override def friendName(friendNumber: Int, name: Nickname)(state: ChatState): ChatState = {
+    override def friendName(friendNumber: Int, name: ToxNickname)(state: ChatState): ChatState = {
       debug("friend changed name to: " + new String(name.value))
       assert(friendNumber == AliceBobTestBase.FRIEND_NUMBER)
 
@@ -20,7 +20,7 @@ final class NameEmptyTest extends AliceBobTest {
           assert(name.value.isEmpty)
 
           state.addTask { (tox, state) =>
-            tox.setName(Nickname.unsafeFromByteArray("One".getBytes))
+            tox.setName(ToxNickname.unsafeFromByteArray("One".getBytes))
             state
           }.set(1)
 
@@ -28,7 +28,7 @@ final class NameEmptyTest extends AliceBobTest {
           assert(new String(name.value) == "One")
 
           state.addTask { (tox, state) =>
-            tox.setName(Nickname.unsafeFromByteArray("".getBytes))
+            tox.setName(ToxNickname.unsafeFromByteArray("".getBytes))
             state
           }.set(2)
 

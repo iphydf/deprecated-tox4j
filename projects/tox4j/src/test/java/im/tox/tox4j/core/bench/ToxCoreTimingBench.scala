@@ -1,15 +1,16 @@
 package im.tox.tox4j.core.bench
 
+import im.tox.core.network.Port
 import im.tox.tox4j.bench.PerformanceReportBase._
 import im.tox.tox4j.bench.TimingReport
 import im.tox.tox4j.core.callbacks.ToxEventAdapter
-import im.tox.tox4j.core.{PublicKey, Port, ToxCore, ToxCoreConstants}
+import im.tox.tox4j.core.{ToxPublicKey, ToxCore, ToxCoreConstants}
 import org.scalameter.api._
 
 final class ToxCoreTimingBench extends TimingReport {
 
   val port = Port.unsafeFromInt(8080)
-  val publicKey = PublicKey.unsafeFromByteArray(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize))
+  val publicKey = ToxPublicKey.unsafeFromByteArray(Array.ofDim[Byte](ToxCoreConstants.PublicKeySize))
 
   timing of classOf[ToxCore[Unit]] in {
 

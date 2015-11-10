@@ -1,6 +1,7 @@
 package im.tox.tox4j.core.exceptions
 
-import im.tox.tox4j.core.{Port, PublicKey, ToxCoreConstants}
+import im.tox.core.network.Port
+import im.tox.tox4j.core.{ToxPublicKey, ToxCoreConstants}
 import im.tox.tox4j.testing.ToxTestMixin
 import org.scalatest.FunSuite
 
@@ -11,7 +12,7 @@ final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
       _.bootstrap(
         "192.254.75.98",
         Port.unsafeFromInt(0),
-        PublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
+        ToxPublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
       )
     )
   }
@@ -21,7 +22,7 @@ final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
       _.bootstrap(
         "192.254.75.98",
         Port.unsafeFromInt(-10),
-        PublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
+        ToxPublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
       )
     )
   }
@@ -31,7 +32,7 @@ final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
       _.bootstrap(
         "192.254.75.98",
         Port.unsafeFromInt(65536),
-        PublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
+        ToxPublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
       )
     )
   }
@@ -41,7 +42,7 @@ final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
       _.bootstrap(
         ".",
         Port.unsafeFromInt(33445),
-        PublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
+        ToxPublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
       )
     )
   }
@@ -51,7 +52,7 @@ final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
       _.bootstrap(
         null,
         Port.unsafeFromInt(33445),
-        PublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
+        ToxPublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize))
       )
     )
   }
@@ -61,7 +62,7 @@ final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
       _.bootstrap(
         "localhost",
         Port.unsafeFromInt(33445),
-        PublicKey.unsafeFromByteArray(null)
+        ToxPublicKey.unsafeFromByteArray(null)
       )
     )
   }
@@ -71,7 +72,7 @@ final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
       _.bootstrap(
         "localhost",
         Port.unsafeFromInt(33445),
-        PublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize - 1))
+        ToxPublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize - 1))
       )
     )
   }
@@ -81,7 +82,7 @@ final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
       _.bootstrap(
         "localhost",
         Port.unsafeFromInt(33445),
-        PublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize + 1))
+        ToxPublicKey.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.PublicKeySize + 1))
       )
     )
   }
