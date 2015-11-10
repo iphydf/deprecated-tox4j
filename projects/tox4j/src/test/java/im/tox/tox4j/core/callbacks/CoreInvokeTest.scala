@@ -6,8 +6,6 @@ import im.tox.tox4j.core.callbacks.InvokeTest.ByteArray
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.ToxCoreImpl
-import im.tox.tox4j.testing.WrappedByteArray
-import im.tox.tox4j.testing.WrappedByteArray.Conversions._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
@@ -54,10 +52,6 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
     } finally {
       tox.close()
     }
-  }
-
-  private final class PublicKey(data: Array[Byte]) extends WrappedByteArray(data) {
-    require(data.length == ToxCoreConstants.PublicKeySize)
   }
 
   private val random = new Random
@@ -134,8 +128,8 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   test("FriendRequest") {
     forAll { (publicKey: PublicKey, timeDelta: Int, message: Array[Byte]) =>
       callbackTest(
-        _.invokeFriendRequest(publicKey, timeDelta, message),
-        FriendRequest(publicKey, /* timeDelta */ 0, message)
+        _.invokeFriendRequest(publicKey.data.toArray, timeDelta, message),
+        FriendRequest(publicKey.data.toArray, /* timeDelta */ 0, message)
       )
     }
   }
@@ -224,6 +218,8 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
 }
 
 object CoreInvokeTest {
+  private final case class PublicKey(data: Seq[Byte]) extends AnyVal
+
   sealed trait Event
   private final case class FriendTyping(friendNumber: Int, isTyping: Boolean) extends Event
   private final case class FriendStatusMessage(friendNumber: Int, message: ByteArray) extends Event
