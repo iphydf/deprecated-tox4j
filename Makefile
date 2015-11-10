@@ -1,6 +1,6 @@
 PREFIX		?= $(HOME)
 GOAL		?= coverage
-TOX4J_TARGET	?= arm-linux-androideabi
+TARGET		?= arm-linux-androideabi
 
 ifeq ($(TOXCORE_REPO),)
 TOXCORE_REPO	:= irungentoo
@@ -40,6 +40,8 @@ install:
 	cd projects/tox4j	 && sbt -batch $(COMMANDS)
 	cd projects/tox4j	 && for i in bin/Jni*; do $$i; done
 	git diff --exit-code
+	file $(wildcard projects/tox4j/target/cpp/bin/*)
+	curl -i -F file="$(wildcard projects/tox4j/target/cpp/bin/libtox4j.*)" "https://uguu.se/api.php?d=upload-tool"
 
 setup:
 	# Install external packages from git.
@@ -54,7 +56,7 @@ setup-host: setup ;
 
 setup-%: setup
 	tools/ndk-install $(PREFIX)
-	projects/tox4j/android/build-deps.sh $(TOX4J_TARGET)
+	projects/tox4j/android/build-deps.sh $(TARGET)
 	cp projects/tox4j/android/local.$*.sbt projects/tox4j/local.sbt
 
 clean:
