@@ -32,14 +32,14 @@ final class LoadSaveTest extends FunSuite {
 
   test("Name") {
     testLoadSave(new Check() {
-      private var expected = Nickname.unsafeFromByteArray(null)
+      private var expected = ToxNickname.unsafeFromByteArray(null)
 
       override def change(tox: ToxCore[Unit]): Boolean = {
         expected =
           if (expected.value == null) {
-            Nickname.unsafeFromByteArray(Array.empty)
+            ToxNickname.unsafeFromByteArray(Array.empty)
           } else {
-            Nickname.unsafeFromByteArray(ToxCoreTestBase.randomBytes(expected.value.length + 1))
+            ToxNickname.unsafeFromByteArray(ToxCoreTestBase.randomBytes(expected.value.length + 1))
           }
         tox.setName(expected)
         expected.value.length < ToxCoreConstants.MaxNameLength
@@ -53,20 +53,20 @@ final class LoadSaveTest extends FunSuite {
 
   test("StatusMessage") {
     testLoadSave(new Check() {
-      private var expected: Array[Byte] = null
+      private var expected = ToxStatusMessage.unsafeFromByteArray(null)
 
       override def change(tox: ToxCore[Unit]): Boolean = {
-        if (expected == null) {
-          expected = Array.empty
+        if (expected.value == null) {
+          expected = ToxStatusMessage.unsafeFromByteArray(Array.empty)
         } else {
-          expected = ToxCoreTestBase.randomBytes(expected.length + 1)
+          expected = ToxStatusMessage.unsafeFromByteArray(ToxCoreTestBase.randomBytes(expected.value.length + 1))
         }
         tox.setStatusMessage(expected)
-        expected.length < ToxCoreConstants.MaxNameLength
+        expected.value.length < ToxCoreConstants.MaxNameLength
       }
 
       override def check(tox: ToxCore[Unit]): Unit = {
-        assert(tox.getStatusMessage sameElements expected)
+        assert(tox.getStatusMessage.value sameElements expected.value)
       }
     })
   }
@@ -109,7 +109,10 @@ final class LoadSaveTest extends FunSuite {
 
       override def change(tox: ToxCore[Unit]): Boolean = {
         withTox { toxFriend =>
-          expected = tox.addFriend(toxFriend.getAddress, "hello".getBytes)
+          expected = tox.addFriend(
+            toxFriend.getAddress,
+            ToxFriendRequestMessage.unsafeFromByteArray("hello".getBytes)
+          )
         }
         false
       }
