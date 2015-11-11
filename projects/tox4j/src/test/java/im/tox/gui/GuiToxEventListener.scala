@@ -3,6 +3,7 @@ package im.tox.gui
 import javax.swing._
 
 import im.tox.tox4j.ToxCoreTestBase.readablePublicKey
+import im.tox.tox4j.core.{PublicKey, Nickname}
 import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
 import org.jetbrains.annotations.NotNull
@@ -119,13 +120,13 @@ final class GuiToxEventListener(toxGui: MainView) extends ToxEventListener[Unit]
     addMessage("friendMessage", friendNumber, messageType, timeDelta, new String(message))
   }
 
-  override def friendName(friendNumber: Int, @NotNull name: Array[Byte])(state: Unit): Unit = {
-    addMessage("friendName", friendNumber, new String(name))
-    toxGui.friendListModel.setName(friendNumber, new String(name))
+  override def friendName(friendNumber: Int, @NotNull name: Nickname)(state: Unit): Unit = {
+    addMessage("friendName", friendNumber, new String(name.value))
+    toxGui.friendListModel.setName(friendNumber, new String(name.value))
   }
 
-  override def friendRequest(@NotNull publicKey: Array[Byte], timeDelta: Int, @NotNull message: Array[Byte])(state: Unit): Unit = {
-    addMessage("friendRequest", readablePublicKey(publicKey), timeDelta, new String(message))
+  override def friendRequest(@NotNull publicKey: PublicKey, timeDelta: Int, @NotNull message: Array[Byte])(state: Unit): Unit = {
+    addMessage("friendRequest", readablePublicKey(publicKey.value), timeDelta, new String(message))
   }
 
   override def friendStatus(friendNumber: Int, @NotNull status: ToxUserStatus)(state: Unit): Unit = {

@@ -5,6 +5,7 @@ import javax.swing._
 
 import im.tox.gui.MainView
 import im.tox.tox4j.ToxCoreTestBase.parsePublicKey
+import im.tox.tox4j.core.{PublicKey, Port}
 import im.tox.tox4j.core.exceptions.ToxBootstrapException
 
 final class BootstrapButtonOnAction(toxGui: MainView) extends ActionListener {
@@ -16,8 +17,8 @@ final class BootstrapButtonOnAction(toxGui: MainView) extends ActionListener {
         toxGui.tox.bootstrap _
       ) foreach (_(
         toxGui.bootstrapHost.getText,
-        toxGui.bootstrapPort.getText.toInt,
-        parsePublicKey(toxGui.bootstrapKey.getText.trim)
+        Port.unsafeFromInt(toxGui.bootstrapPort.getText.toInt),
+        PublicKey.unsafeFromByteArray(parsePublicKey(toxGui.bootstrapKey.getText.trim))
       ))
     } catch {
       case e: ToxBootstrapException =>

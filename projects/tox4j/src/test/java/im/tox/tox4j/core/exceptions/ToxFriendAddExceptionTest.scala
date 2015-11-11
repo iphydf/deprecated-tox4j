@@ -1,6 +1,6 @@
 package im.tox.tox4j.core.exceptions
 
-import im.tox.tox4j.core.{ToxCoreConstants, ToxCoreFactory}
+import im.tox.tox4j.core.{FriendAddress, ToxCoreConstants, ToxCoreFactory}
 import im.tox.tox4j.testing.ToxTestMixin
 import org.scalatest.FunSuite
 
@@ -10,7 +10,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
   test("InvalidAddress1") {
     intercept[IllegalArgumentException] {
       ToxCoreFactory.withTox(
-        _.addFriend(Array.ofDim[Byte](1), Array.ofDim[Byte](1))
+        _.addFriend(FriendAddress.unsafeFromByteArray(Array.ofDim[Byte](1)), Array.ofDim[Byte](1))
       )
     }
   }
@@ -18,7 +18,7 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
   test("InvalidAddress2") {
     intercept[IllegalArgumentException] {
       ToxCoreFactory.withTox(
-        _.addFriend(new Array[Byte](ToxCoreConstants.AddressSize - 1), new Array[Byte](1))
+        _.addFriend(FriendAddress.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.AddressSize - 1)), new Array[Byte](1))
       )
     }
   }
@@ -26,14 +26,14 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
   test("InvalidAddress3") {
     intercept[IllegalArgumentException] {
       ToxCoreFactory.withTox(
-        _.addFriend(new Array[Byte](ToxCoreConstants.AddressSize + 1), new Array[Byte](1))
+        _.addFriend(FriendAddress.unsafeFromByteArray(new Array[Byte](ToxCoreConstants.AddressSize + 1)), new Array[Byte](1))
       )
     }
   }
 
   test("Null1") {
     interceptWithTox(ToxFriendAddException.Code.NULL)(
-      _.addFriend(null, new Array[Byte](1))
+      _.addFriend(FriendAddress.unsafeFromByteArray(null), new Array[Byte](1))
     )
   }
 
@@ -82,7 +82,10 @@ final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
 
   test("BadChecksum") {
     interceptWithTox(ToxFriendAddException.Code.BAD_CHECKSUM)(
-      _.addFriend(validAddress.updated(0, (validAddress(0) + 1).toByte), "hello".getBytes)
+      _.addFriend(
+        FriendAddress.unsafeFromByteArray(validAddress.value.updated(0, (validAddress.value(0) + 1).toByte)),
+        "hello".getBytes
+      )
     )
   }
 

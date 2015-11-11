@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.Nickname
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
@@ -14,7 +15,7 @@ final class FriendNameCallbackTest extends AliceBobTest {
       super.friendConnectionStatus(friendNumber, connectionStatus)(state)
       if (connectionStatus != ToxConnection.NONE) {
         state.addTask { (tox, state) =>
-          tox.setName(selfName.getBytes)
+          tox.setName(Nickname.unsafeFromByteArray(selfName.getBytes))
           state
         }
       } else {
@@ -22,16 +23,16 @@ final class FriendNameCallbackTest extends AliceBobTest {
       }
     }
 
-    override def friendName(friendNumber: Int, name: Array[Byte])(state: ChatState): ChatState = {
-      debug(s"friend changed name to: ${new String(name)}")
+    override def friendName(friendNumber: Int, name: Nickname)(state: ChatState): ChatState = {
+      debug(s"friend changed name to: ${new String(name.value)}")
       assert(friendNumber == AliceBobTestBase.FRIEND_NUMBER)
 
       state.get match {
         case 0 =>
-          assert(name.isEmpty)
+          assert(name.value.isEmpty)
           state.set(1)
         case 1 =>
-          assert(new String(name) == expectedFriendName)
+          assert(new String(name.value) == expectedFriendName)
           state.finish
       }
     }

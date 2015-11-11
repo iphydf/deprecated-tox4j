@@ -5,7 +5,8 @@ import java.util
 import com.google.protobuf.ByteString
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.Optimised
-import im.tox.tox4j.ToxImplBase.tryAndLog
+import im.tox.tox4j.impl.ToxImplBase
+import ToxImplBase.tryAndLog
 import im.tox.tox4j.av.callbacks._
 import im.tox.tox4j.av.enums.{ToxavCallControl, ToxavFriendCallState}
 import im.tox.tox4j.av.exceptions._

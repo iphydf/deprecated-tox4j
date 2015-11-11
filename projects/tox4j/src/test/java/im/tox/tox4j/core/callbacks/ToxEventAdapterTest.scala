@@ -1,5 +1,6 @@
 package im.tox.tox4j.core.callbacks
 
+import im.tox.tox4j.core.{PublicKey, Nickname}
 import im.tox.tox4j.core.enums._
 import im.tox.tox4j.core.proto.Core._
 import org.scalatest.FunSuite
@@ -41,11 +42,11 @@ final class ToxEventAdapterTest extends FunSuite {
   }
 
   test[FriendName] {
-    listener.friendName(0, Array.ofDim[Byte](0))(())
+    listener.friendName(0, Nickname.unsafeFromByteArray(Array.ofDim[Byte](0)))(())
   }
 
   test[FriendRequest] {
-    listener.friendRequest(null, 0, Array.ofDim[Byte](0))(())
+    listener.friendRequest(PublicKey.unsafeFromByteArray(null), 0, Array.ofDim[Byte](0))(())
   }
 
   test[FriendStatus] {

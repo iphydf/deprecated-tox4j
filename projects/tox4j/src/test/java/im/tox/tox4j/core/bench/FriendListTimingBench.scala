@@ -11,7 +11,7 @@ final class FriendListTimingBench extends TimingReport {
   /**
    * Deletes all but 1 friends.
    */
-  private def clearFriendList(pair: (Seq[Array[Byte]], ToxCore[Unit])): Unit = {
+  private def clearFriendList(pair: (_, ToxCore[Unit])): Unit = {
     val tox = pair._2
     tox.getFriendList.tail foreach tox.deleteFriend
   }
