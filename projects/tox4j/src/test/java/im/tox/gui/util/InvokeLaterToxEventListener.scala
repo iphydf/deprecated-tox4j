@@ -2,6 +2,7 @@ package im.tox.gui.util
 
 import javax.swing._
 
+import im.tox.tox4j.core.{PublicKey, Nickname}
 import im.tox.tox4j.core.callbacks.ToxEventListener
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
 import org.jetbrains.annotations.NotNull
@@ -54,11 +55,11 @@ final class InvokeLaterToxEventListener[ToxCoreState](underlying: ToxEventListen
     invokeLater(underlying.friendMessage(friendNumber, `type`, timeDelta, message))(state)
   }
 
-  override def friendName(friendNumber: Int, @NotNull name: Array[Byte])(state: ToxCoreState): ToxCoreState = {
+  override def friendName(friendNumber: Int, @NotNull name: Nickname)(state: ToxCoreState): ToxCoreState = {
     invokeLater(underlying.friendName(friendNumber, name))(state)
   }
 
-  override def friendRequest(@NotNull publicKey: Array[Byte], timeDelta: Int, @NotNull message: Array[Byte])(state: ToxCoreState): ToxCoreState = {
+  override def friendRequest(@NotNull publicKey: PublicKey, timeDelta: Int, @NotNull message: Array[Byte])(state: ToxCoreState): ToxCoreState = {
     invokeLater(underlying.friendRequest(publicKey, timeDelta, message))(state)
   }
 

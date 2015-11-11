@@ -1,7 +1,7 @@
 package im.tox.tox4j.core.exceptions
 
 import im.tox.tox4j.ToxCoreTestBase
-import im.tox.tox4j.core.ToxCoreConstants
+import im.tox.tox4j.core.{Nickname, ToxCoreConstants}
 import im.tox.tox4j.testing.ToxTestMixin
 import org.scalatest.FunSuite
 
@@ -11,7 +11,7 @@ final class ToxSetInfoExceptionTest extends FunSuite with ToxTestMixin {
     val array = ToxCoreTestBase.randomBytes(ToxCoreConstants.MaxNameLength + 1)
 
     interceptWithTox(ToxSetInfoException.Code.TOO_LONG)(
-      _.setName(array)
+      _.setName(Nickname.unsafeFromByteArray(array))
     )
   }
 
@@ -31,7 +31,7 @@ final class ToxSetInfoExceptionTest extends FunSuite with ToxTestMixin {
 
   test("SetNameNull") {
     interceptWithTox(ToxSetInfoException.Code.NULL)(
-      _.setName(null)
+      _.setName(Nickname.unsafeFromByteArray(null))
     )
   }
 
