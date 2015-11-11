@@ -40,8 +40,8 @@ CLONE() {
     git fetch
     git clean -fdx
     git reset --hard
-    git checkout master
-    git reset --hard origin/master
+    git checkout $3
+    git reset --hard origin/$3
   else
     git clone "$1/$2".git -b $3 $4
     cd $2
