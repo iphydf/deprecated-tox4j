@@ -126,7 +126,13 @@ trait ToxAv[ToxCoreState] extends Closeable {
    * rates are 8000, 12000, 16000, 24000, or 48000.
    */
   @throws[ToxavSendFrameException]
-  def audioSendFrame(friendNumber: Int, @NotNull pcm: Array[Short], sampleCount: SampleCount, channels: AudioChannels, samplingRate: SamplingRate): Unit
+  def audioSendFrame(
+    friendNumber: Int,
+    @NotNull pcm: Array[Short],
+    sampleCount: SampleCount,
+    channels: AudioChannels,
+    samplingRate: SamplingRate
+  ): Unit
 
   /**
    * Send a video frame to a friend.

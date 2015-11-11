@@ -32,20 +32,21 @@ final class LoadSaveTest extends FunSuite {
 
   test("Name") {
     testLoadSave(new Check() {
-      private var expected: Array[Byte] = null
+      private var expected = Nickname.unsafeFromByteArray(null)
 
       override def change(tox: ToxCore[Unit]): Boolean = {
-        if (expected == null) {
-          expected = Array.empty
-        } else {
-          expected = ToxCoreTestBase.randomBytes(expected.length + 1)
-        }
+        expected =
+          if (expected.value == null) {
+            Nickname.unsafeFromByteArray(Array.empty)
+          } else {
+            Nickname.unsafeFromByteArray(ToxCoreTestBase.randomBytes(expected.value.length + 1))
+          }
         tox.setName(expected)
-        expected.length < ToxCoreConstants.MaxNameLength
+        expected.value.length < ToxCoreConstants.MaxNameLength
       }
 
       override def check(tox: ToxCore[Unit]): Unit = {
-        assert(tox.getName sameElements expected)
+        assert(tox.getName.value sameElements expected.value)
       }
     })
   }
@@ -169,8 +170,8 @@ final class LoadSaveTest extends FunSuite {
     withTox { tox1 =>
       val data = tox1.getSecretKey
       withTox(SaveDataOptions.SecretKey(data)) { tox2 =>
-        assert(tox1.getSecretKey sameElements tox2.getSecretKey)
-        assert(tox1.getPublicKey sameElements tox2.getPublicKey)
+        assert(tox1.getSecretKey.value sameElements tox2.getSecretKey.value)
+        assert(tox1.getPublicKey.value sameElements tox2.getPublicKey.value)
       }
     }
   }
@@ -179,8 +180,8 @@ final class LoadSaveTest extends FunSuite {
     withTox { tox1 =>
       val data = tox1.getSecretKey
       withTox(tox1.load(ToxOptions(saveData = SaveDataOptions.SecretKey(data)))) { tox2 =>
-        assert(tox1.getSecretKey sameElements tox2.getSecretKey)
-        assert(tox1.getPublicKey sameElements tox2.getPublicKey)
+        assert(tox1.getSecretKey.value sameElements tox2.getSecretKey.value)
+        assert(tox1.getPublicKey.value sameElements tox2.getPublicKey.value)
       }
     }
   }

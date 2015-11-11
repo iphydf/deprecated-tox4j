@@ -78,7 +78,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @param publicKey the public key of the node.
    */
   @throws[ToxBootstrapException]
-  def bootstrap(@NotNull address: String, port: Int, @NotNull publicKey: Array[Byte]): Unit
+  def bootstrap(@NotNull address: String, port: Port, @NotNull publicKey: PublicKey): Unit
 
   /**
    * Connect to a TCP relay to forward traffic.
@@ -92,7 +92,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @param publicKey the public key of the node.
    */
   @throws[ToxBootstrapException]
-  def addTcpRelay(@NotNull address: String, port: Int, @NotNull publicKey: Array[Byte]): Unit
+  def addTcpRelay(@NotNull address: String, port: Port, @NotNull publicKey: PublicKey): Unit
 
   /**
    * Get the UDP port this instance is bound to.
@@ -100,7 +100,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return a port number between 1 and 65535.
    */
   @throws[ToxGetPortException]
-  def getUdpPort: Int
+  def getUdpPort: Port
 
   /**
    * Return the TCP port this Tox instance is bound to. This is only relevant if
@@ -109,7 +109,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return a port number between 1 and 65535.
    */
   @throws[ToxGetPortException]
-  def getTcpPort: Int
+  def getTcpPort: Port
 
   /**
    * Writes the temporary DHT public key of this instance to a byte array.
@@ -123,7 +123,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return a byte array of size [[ToxCoreConstants.PublicKeySize]]
    */
   @NotNull
-  def getDhtId: Array[Byte]
+  def getDhtId: PublicKey
 
   /**
    * Get the time in milliseconds until [[iterate]] should be called again for optimal performance.
@@ -144,14 +144,14 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return a byte array of size [[ToxCoreConstants.PublicKeySize]]
    */
   @NotNull
-  def getPublicKey: Array[Byte]
+  def getPublicKey: PublicKey
 
   /**
    * Copy the Tox Secret Key from the Tox object.
    * @return a byte array of size [[ToxCoreConstants.SecretKeySize]]
    */
   @NotNull
-  def getSecretKey: Array[Byte]
+  def getSecretKey: SecretKey
 
   /**
    * Set the 4-byte nospam part of the address.
@@ -180,7 +180,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return a byte array of size [[ToxCoreConstants.AddressSize]]
    */
   @NotNull
-  def getAddress: Array[Byte]
+  def getAddress: FriendAddress
 
   /**
    * Set the nickname for the Tox client.
@@ -190,13 +190,13 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @param name A byte array containing the new nickname..
    */
   @throws[ToxSetInfoException]
-  def setName(@NotNull name: Array[Byte]): Unit
+  def setName(@NotNull name: Nickname): Unit
 
   /**
    * Get our own nickname.
    */
   @NotNull
-  def getName: Array[Byte]
+  def getName: Nickname
 
   /**
    * Set our status message.
@@ -250,7 +250,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    */
   @throws[ToxFriendAddException]
   @throws[IllegalArgumentException]("if the Friend Address was not the right length.")
-  def addFriend(@NotNull address: Array[Byte], @NotNull message: Array[Byte]): Int
+  def addFriend(@NotNull address: FriendAddress, @NotNull message: Array[Byte]): Int
 
   /**
    * Add a friend without sending a friend request.
@@ -269,7 +269,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    */
   @throws[ToxFriendAddException]
   @throws[IllegalArgumentException]("if the Public Key was not the right length.")
-  def addFriendNorequest(@NotNull publicKey: Array[Byte]): Int
+  def addFriendNorequest(@NotNull publicKey: PublicKey): Int
 
   /**
    * Remove a friend from the friend list.
@@ -290,7 +290,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    * @return the friend number that is associated with the Public Key.
    */
   @throws[ToxFriendByPublicKeyException]
-  def friendByPublicKey(@NotNull publicKey: Array[Byte]): Int
+  def friendByPublicKey(@NotNull publicKey: PublicKey): Int
 
   /**
    * Gets the Public Key for the specified friend number.
@@ -300,7 +300,7 @@ trait ToxCore[ToxCoreState] extends Closeable {
    */
   @NotNull
   @throws[ToxFriendGetPublicKeyException]
-  def getFriendPublicKey(friendNumber: Int): Array[Byte]
+  def getFriendPublicKey(friendNumber: Int): PublicKey
 
   /**
    * Checks whether a friend with the specified friend number exists.

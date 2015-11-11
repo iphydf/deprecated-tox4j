@@ -1,9 +1,14 @@
 package im.tox.tox4j.av
 
+import im.tox.DiscreteIntCompanion
+
 final class SamplingRate private (val value: Int) extends AnyVal
 
 // scalastyle:off magic.number
-object SamplingRate extends IntWrapper[SamplingRate] {
+object SamplingRate extends DiscreteIntCompanion[SamplingRate](
+  8000, 12000, 16000, 24000, 48000
+) {
+
   final val Rate8k = new SamplingRate(8000)
   final val Rate12k = new SamplingRate(12000)
   final val Rate16k = new SamplingRate(16000)
@@ -12,10 +17,4 @@ object SamplingRate extends IntWrapper[SamplingRate] {
 
   override def unsafeFromInt(value: Int): SamplingRate = new SamplingRate(value)
 
-  override def apply(value: Int): Option[SamplingRate] = {
-    value match {
-      case 8000 | 12000 | 16000 | 24000 | 48000 => Some(new SamplingRate(value))
-      case _                                    => None
-    }
-  }
 }

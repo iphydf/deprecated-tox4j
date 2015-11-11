@@ -5,13 +5,13 @@ import java.util
 import com.google.protobuf.ByteString
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.OptimisedIdOps._
-import im.tox.tox4j.ToxImplBase.tryAndLog
 import im.tox.tox4j.av._
 import im.tox.tox4j.av.callbacks._
 import im.tox.tox4j.av.enums.{ToxavCallControl, ToxavFriendCallState}
 import im.tox.tox4j.av.exceptions._
 import im.tox.tox4j.av.proto.Av._
 import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.impl.ToxImplBase.tryAndLog
 import im.tox.tox4j.impl.jni.ToxAvImpl.{convert, logger}
 import org.jetbrains.annotations.NotNull
 import org.slf4j.LoggerFactory

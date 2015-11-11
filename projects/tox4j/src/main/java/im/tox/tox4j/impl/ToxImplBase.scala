@@ -1,4 +1,4 @@
-package im.tox.tox4j
+package im.tox.tox4j.impl
 
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory

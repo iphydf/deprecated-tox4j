@@ -2,6 +2,7 @@ package im.tox.tox4j.core.callbacks
 
 import java.util.Random
 
+import im.tox.tox4j.core.{FriendAddress, PublicKey}
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxFileKind}
 import im.tox.tox4j.testing.autotest.{AliceBobTest, AliceBobTestBase}
 
@@ -21,7 +22,7 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
   override def initialState: State = ()
 
   private val fileData = new Array[Byte](13710)
-  private var aliceAddress = Array.ofDim[Byte](0)
+  private var aliceAddress = FriendAddress.unsafeFromByteArray(Array.ofDim[Byte](0))
   new Random().nextBytes(fileData)
 
   protected override def newChatClient(name: String, expectedFriendName: String) = new Alice(name, expectedFriendName)
@@ -35,9 +36,9 @@ final class FileResumeAfterRestartTest extends AliceBobTest {
     private val receivedData = new Array[Byte](fileData.length)
     private var bobSentFileNumber = -1
     private var bobOffset = 0L
-    private var selfPublicKey = Array.ofDim[Byte](0)
+    private var selfPublicKey = PublicKey.unsafeFromByteArray(Array.ofDim[Byte](0))
 
-    override def friendRequest(publicKey: Array[Byte], timeDelta: Int, message: Array[Byte])(state: ChatState): ChatState = {
+    override def friendRequest(publicKey: PublicKey, timeDelta: Int, message: Array[Byte])(state: ChatState): ChatState = {
       assert(isAlice)
       state.addTask { (tox, state) =>
         debug("accept Bob's friend request")
