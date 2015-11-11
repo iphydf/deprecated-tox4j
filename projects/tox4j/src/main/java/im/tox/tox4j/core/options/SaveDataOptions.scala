@@ -44,8 +44,9 @@ object SaveDataOptions {
    * secret key, the friend list, name, and noSpam value is sufficient to restore the observable
    * behaviour of a Tox instance without the full save data in [[ToxSave]].
    */
-  final case class SecretKey(data: Seq[Byte]) extends SaveDataOptions {
+  final case class SecretKey(key: im.tox.tox4j.core.SecretKey) extends SaveDataOptions {
     override def kind: ToxSavedataType = ToxSavedataType.SECRET_KEY
+    override def data: Seq[Byte] = key.value
   }
 
 }

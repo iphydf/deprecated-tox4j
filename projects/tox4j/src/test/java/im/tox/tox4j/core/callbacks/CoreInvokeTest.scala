@@ -1,11 +1,12 @@
 package im.tox.tox4j.core.callbacks
 
-import im.tox.tox4j.core.ToxCoreConstants
+import im.tox.tox4j.core.{Nickname, PublicKey, ToxCoreConstants}
 import im.tox.tox4j.core.callbacks.CoreInvokeTest._
 import im.tox.tox4j.core.callbacks.InvokeTest.ByteArray
 import im.tox.tox4j.core.enums.{ToxConnection, ToxFileControl, ToxMessageType, ToxUserStatus}
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.ToxCoreImpl
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
@@ -27,12 +28,12 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
     override def fileChunkRequest(friendNumber: Int, fileNumber: Int, position: Long, length: Int)(state: Event): Event = setEvent(FileChunkRequest(friendNumber, fileNumber, position, length))(state)
     override def fileRecvChunk(friendNumber: Int, fileNumber: Int, position: Long, data: Array[Byte])(state: Event): Event = setEvent(FileRecvChunk(friendNumber, fileNumber, position, data))(state)
     override def friendConnectionStatus(friendNumber: Int, connectionStatus: ToxConnection)(state: Event): Event = setEvent(FriendConnectionStatus(friendNumber, connectionStatus))(state)
-    override def friendRequest(publicKey: Array[Byte], timeDelta: Int, message: Array[Byte])(state: Event): Event = setEvent(FriendRequest(publicKey, timeDelta, message))(state)
+    override def friendRequest(publicKey: PublicKey, timeDelta: Int, message: Array[Byte])(state: Event): Event = setEvent(FriendRequest(publicKey.value, timeDelta, message))(state)
     override def friendLossyPacket(friendNumber: Int, data: Array[Byte])(state: Event): Event = setEvent(FriendLossyPacket(friendNumber, data))(state)
     override def friendStatus(friendNumber: Int, status: ToxUserStatus)(state: Event): Event = setEvent(FriendStatus(friendNumber, status))(state)
     override def selfConnectionStatus(connectionStatus: ToxConnection)(state: Event): Event = setEvent(SelfConnectionStatus(connectionStatus))(state)
     override def friendReadReceipt(friendNumber: Int, messageId: Int)(state: Event): Event = setEvent(FriendReadReceipt(friendNumber, messageId))(state)
-    override def friendName(friendNumber: Int, name: Array[Byte])(state: Event): Event = setEvent(FriendName(friendNumber, name))(state)
+    override def friendName(friendNumber: Int, name: Nickname)(state: Event): Event = setEvent(FriendName(friendNumber, name.value))(state)
     override def friendLosslessPacket(friendNumber: Int, data: Array[Byte])(state: Event): Event = setEvent(FriendLosslessPacket(friendNumber, data))(state)
     override def friendMessage(friendNumber: Int, `type`: ToxMessageType, timeDelta: Int, message: Array[Byte])(state: Event): Event = setEvent(FriendMessage(friendNumber, `type`, timeDelta, message))(state)
     override def fileRecv(friendNumber: Int, fileNumber: Int, kind: Int, fileSize: Long, filename: Array[Byte])(state: Event): Event = setEvent(FileRecv(friendNumber, fileNumber, kind, fileSize, filename))(state)
@@ -60,8 +61,12 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
     Arbitrary(Gen.const(ToxCoreConstants.PublicKeySize).map(Array.ofDim[Byte]).map { array =>
       random.nextBytes(array)
       array(array.length - 1) = 0
-      new PublicKey(array)
+      PublicKey.unsafeFromByteArray(array)
     })
+  }
+
+  private implicit val arbNickname: Arbitrary[Nickname] = {
+    Arbitrary(arbitrary[Array[Byte]].map(Nickname.unsafeFromByteArray))
   }
 
   private implicit val arbToxConnection: Arbitrary[ToxConnection] = {
@@ -128,8 +133,8 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   test("FriendRequest") {
     forAll { (publicKey: PublicKey, timeDelta: Int, message: Array[Byte]) =>
       callbackTest(
-        _.invokeFriendRequest(publicKey.data.toArray, timeDelta, message),
-        FriendRequest(publicKey.data.toArray, /* timeDelta */ 0, message)
+        _.invokeFriendRequest(publicKey, timeDelta, message),
+        FriendRequest(publicKey.value, /* timeDelta */ 0, message)
       )
     }
   }
@@ -171,10 +176,10 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
   }
 
   test("FriendName") {
-    forAll { (friendNumber: Int, name: Array[Byte]) =>
+    forAll { (friendNumber: Int, name: Nickname) =>
       callbackTest(
         _.invokeFriendName(friendNumber, name),
-        FriendName(friendNumber, name)
+        FriendName(friendNumber, name.value)
       )
     }
   }
@@ -218,8 +223,6 @@ final class CoreInvokeTest extends FunSuite with PropertyChecks {
 }
 
 object CoreInvokeTest {
-  private final case class PublicKey(data: Seq[Byte]) extends AnyVal
-
   sealed trait Event
   private final case class FriendTyping(friendNumber: Int, isTyping: Boolean) extends Event
   private final case class FriendStatusMessage(friendNumber: Int, message: ByteArray) extends Event
