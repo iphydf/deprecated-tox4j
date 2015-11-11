@@ -5,20 +5,18 @@ import java.util
 import com.google.protobuf.ByteString
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.Optimised
-import im.tox.tox4j.impl.ToxImplBase
-import ToxImplBase.tryAndLog
+import im.tox.tox4j.av._
 import im.tox.tox4j.av.callbacks._
 import im.tox.tox4j.av.enums.{ToxavCallControl, ToxavFriendCallState}
 import im.tox.tox4j.av.exceptions._
 import im.tox.tox4j.av.proto.Av._
-import im.tox.tox4j.av._
 import im.tox.tox4j.core.ToxCore
+import im.tox.tox4j.impl.ToxImplBase
+import im.tox.tox4j.impl.ToxImplBase.tryAndLog
 import im.tox.tox4j.impl.jni.ToxAvImpl.{convert, logger}
 import org.jetbrains.annotations.NotNull
 import org.slf4j.LoggerFactory
 
-import scala.annotation.tailrec
-import scala.util.control.NonFatal
 import scalaz.Scalaz._
 
 private object ToxAvImpl {
