@@ -34,17 +34,17 @@ public final class ToxNewException extends ToxException<ToxNewException.Code> {
      */
     PORT_ALLOC,
     /**
-     * {@link im.tox.tox4j.core.ToxOptions#proxyType} was valid,
-     * but the {@link im.tox.tox4j.core.ToxOptions#proxyAddress} passed had an invalid format.
+     * {@link im.tox.tox4j.core.options.ProxyOptions#proxyType} was valid,
+     * but the {@link im.tox.tox4j.core.options.ProxyOptions#proxyAddress} passed had an invalid format.
      */
     PROXY_BAD_HOST,
     /**
-     * {@link im.tox.tox4j.core.ToxOptions#proxyType} was valid,
-     * but the {@link im.tox.tox4j.core.ToxOptions#proxyPort} was invalid.
+     * {@link im.tox.tox4j.core.options.ProxyOptions#proxyType} was valid,
+     * but the {@link im.tox.tox4j.core.options.ProxyOptions#proxyPort} was invalid.
      */
     PROXY_BAD_PORT,
     /**
-     * {@link im.tox.tox4j.core.ToxOptions#proxyType} was invalid.
+     * {@link im.tox.tox4j.core.options.ProxyOptions#proxyType} was invalid.
      */
     PROXY_BAD_TYPE,
     /**

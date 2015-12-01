@@ -101,14 +101,14 @@
       "have already been bound, e.g. by other Tox instances, or it may mean",
       "a permission error. You may be able to gather more information from errno."
     ],
-    "PROXY_BAD_TYPE": ["{@link im.tox.tox4j.core.ToxOptions#proxyType} was invalid."],
+    "PROXY_BAD_TYPE": ["{@link im.tox.tox4j.core.options.ProxyOptions#proxyType} was invalid."],
     "PROXY_BAD_HOST": [
-      "{@link im.tox.tox4j.core.ToxOptions#proxyType} was valid,",
-      "but the {@link im.tox.tox4j.core.ToxOptions#proxyAddress} passed had an invalid format."
+      "{@link im.tox.tox4j.core.options.ProxyOptions#proxyType} was valid,",
+      "but the {@link im.tox.tox4j.core.options.ProxyOptions#proxyAddress} passed had an invalid format."
     ],
     "PROXY_BAD_PORT": [
-      "{@link im.tox.tox4j.core.ToxOptions#proxyType} was valid,",
-      "but the {@link im.tox.tox4j.core.ToxOptions#proxyPort} was invalid."
+      "{@link im.tox.tox4j.core.options.ProxyOptions#proxyType} was valid,",
+      "but the {@link im.tox.tox4j.core.options.ProxyOptions#proxyPort} was invalid."
     ],
     "PROXY_NOT_FOUND": ["The proxy address passed could not be resolved."],
     "LOAD_ENCRYPTED": ["The byte array to be loaded contained an encrypted save."],

@@ -24,7 +24,7 @@ abstract class Documented {
    * Initialised to just the name of the package object. Any [[DocumentationInterpolator.doc]] calls in the actual
    * package object will override this, but [[name]] will already be set then.
    */
-  private var document: Doc = Doc.Ref("[[" + getClass.getName.replace(".package$", "") + "]]")
+  private var document: Doc = Doc.Ref("[[" + getClass.getName.replace(".package$", "") + "]]") // scalastyle:ignore var.field
 
   /**
    * The name of the package object. Used to link to other package object documentation blocks.
