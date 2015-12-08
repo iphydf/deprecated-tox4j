@@ -2,6 +2,8 @@ package im.tox.core.dht
 
 import com.typesafe.scalalogging.Logger
 import im.tox.core.crypto._
+import im.tox.core.settings.Settings
+import im.tox.core.settings.Settings.SettingKey
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
@@ -12,6 +14,7 @@ import scala.language.postfixOps
  * peer is very close to the DHT public key of a friend being searched.
  */
 final case class Dht private (
+    settings: Settings,
     keyPair: KeyPair,
     searchLists: Map[PublicKey, NodeSet]
 ) {
@@ -56,7 +59,7 @@ final case class Dht private (
       this
     } else {
       copy(
-        searchLists = searchLists.updated(publicKey, NodeSet(Dht.MaxFriendNodes, publicKey))
+        searchLists = searchLists.updated(publicKey, NodeSet(settings(Dht.MaxFriendNodes), publicKey))
       )
     }
   }
@@ -157,7 +160,7 @@ object Dht {
    * some of these nodes being impossible to find in the network would be too
    * high.
    */
-  val MaxClosestNodes = 32
+  val MaxClosestNodes = SettingKey("MaxClosestNodes") := 8
 
   /**
    * If the 8 nodes closest to each public key were increased to 16 it would
@@ -166,7 +169,7 @@ object Dht {
    * increase the reliability. Lowering this number would have the opposite
    * effect.
    */
-  val MaxFriendNodes = 8
+  val MaxFriendNodes = SettingKey("MaxFriendNodes") := 8
 
   /**
    * It also sends get node requests to a random node
@@ -176,12 +179,12 @@ object Dht {
    * seconds, with the search public key being its public key for the closest node
    * and the public key being searched for being the ones in the DHT friends list.
    */
-  val NodesRequestInterval = 20 seconds
+  val NodesRequestInterval = SettingKey("NodesRequestInterval", 20 seconds)
 
   /**
    * The DHT pings them every 60 seconds to see if they are alive.
    */
-  val PingInterval = 60 seconds
+  val PingInterval = SettingKey("PingInterval", 60 seconds)
 
   /**
    * Nodes are removed after 122 seconds of no response.
@@ -191,7 +194,7 @@ object Dht {
    * are still being stored in the lists. Decreasing these delays would do the
    * opposite.
    */
-  val PingTimeout = 122 seconds
+  val PingTimeout = SettingKey("PingTimeout", 122 seconds)
 
   /**
    * Every peer in the Tox DHT has an address which is a public key called the
@@ -199,12 +202,13 @@ object Dht {
    * the tox instance is closed/restarted.
    */
   def apply(
-    keyPair: KeyPair = CryptoCore.keyPair(),
-    maxClosestNodes: Int = MaxClosestNodes
+    settings: Settings = Settings(),
+    keyPair: KeyPair = CryptoCore.keyPair()
   ): Dht = {
     Dht(
+      settings,
       keyPair,
-      Map(keyPair.publicKey -> NodeSet(maxClosestNodes, keyPair.publicKey))
+      Map(keyPair.publicKey -> NodeSet(settings(MaxClosestNodes), keyPair.publicKey))
     )
   }
 
