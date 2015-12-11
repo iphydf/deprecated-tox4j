@@ -7,7 +7,6 @@ import java.io.{ByteArrayOutputStream, PrintStream}
 import java.util.concurrent.TimeUnit
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 
 object EvalBot extends PircBot {
 
