@@ -1,8 +1,9 @@
 package im.tox.tox4j.impl.jni
 
+import java.nio.ByteBuffer
 import java.util
 
-import com.google.protobuf.{ByteString, InvalidProtocolBufferException}
+import com.google.protobuf.{CodedInputStream, ByteString, InvalidProtocolBufferException}
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.callbacks._
@@ -139,13 +140,25 @@ object ToxAvEventDispatch {
       |> dispatchVideoReceiveFrame(handler, events.videoReceiveFrame))
   }
 
-  @SuppressWarnings(Array("org.brianmckenna.wartremover.warts.Null"))
+  private def decodeInt32(eventData: Array[Byte]): Int = {
+    assert(eventData.length >= 4)
+    (0
+      | eventData(0) << (8 * 3)
+      | eventData(1) << (8 * 2)
+      | eventData(2) << (8 * 1)
+      | eventData(3) << (8 * 0))
+  }
+
   def dispatch[S](handler: ToxAvEventListener[S], @Nullable eventData: Array[Byte])(state: S): S = {
-    if (eventData.isEmpty || eventData(0) == 0) {
+    val length = decodeInt32(eventData)
+
+    if (length == 0) {
       state
     } else {
       try {
-        val events = AvEvents.parseFrom(eventData)
+        val buffer = ByteBuffer.wrap(eventData, 4, length)
+        assert(buffer.hasArray)
+        val events = AvEvents.parseFrom(CodedInputStream.newInstance(buffer))
         dispatchEvents(handler, events)(state)
       } catch {
         case e: InvalidProtocolBufferException =>
