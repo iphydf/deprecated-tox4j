@@ -1,5 +1,6 @@
 package im.tox.client.commands
 
+/*
 import im.tox.client.{Say, ToxClientState}
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.callbacks.audio.AudioGenerators
@@ -27,3 +28,4 @@ object AudioCommandHandler extends Say {
   }
 
 }
+*/

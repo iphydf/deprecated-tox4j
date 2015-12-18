@@ -1,5 +1,6 @@
 package im.tox.client.commands
 
+/*
 import im.tox.client.{Say, ToxClientState}
 import im.tox.tox4j.OptimisedIdOps._
 import im.tox.tox4j.av.callbacks.video.{VideoGenerator, VideoGenerators}
@@ -45,3 +46,4 @@ object VideoCommandHandler extends Say {
   }
 
 }
+*/

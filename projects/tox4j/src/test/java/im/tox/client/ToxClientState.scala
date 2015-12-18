@@ -10,6 +10,8 @@ import im.tox.tox4j.core.data.{ToxFriendAddress, ToxFriendNumber, ToxPublicKey}
 import im.tox.tox4j.core.enums.ToxConnection
 
 import scala.collection.immutable.TreeMap
+import scala.concurrent.duration._
+import scala.language.postfixOps
 import scalaz.Lens
 
 final case class ToxClientState(
@@ -23,11 +25,15 @@ final case class ToxClientState(
     connection: ToxConnection = ToxConnection.NONE,
     friends: TreeMap[ToxFriendNumber, Friend] = TreeMap.empty,
     // Tasks to run on the next iteration.
-    tasks: List[ToxClientState.Task[ToxClientState]] = Nil
+    tasks: List[(Duration, ToxClientState.Task[ToxClientState])] = Nil
 ) {
 
+  def addTask(after: Duration)(task: ToxClientState.Task[ToxClientState]): ToxClientState = {
+    copy(tasks = (after, task) :: tasks)
+  }
+
   def addTask(task: ToxClientState.Task[ToxClientState]): ToxClientState = {
-    copy(tasks = task :: tasks)
+    addTask(0 millis)(task)
   }
 
 }

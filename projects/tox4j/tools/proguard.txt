@@ -1,4 +1,4 @@
--keepattributes *Annotation*,InnerClasses
+-keepattributes *
 
 # Main entry point.
 -keep public class im.tox.client.TestClient {
@@ -11,7 +11,7 @@
 }
 
 -keep public class **Exception$Code extends java.lang.Enum {
-  public *;
+  public protected private *;
 }
 
 # Constructed through descriptor reflection.

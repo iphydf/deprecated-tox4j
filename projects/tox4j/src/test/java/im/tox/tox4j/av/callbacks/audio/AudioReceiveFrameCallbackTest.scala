@@ -1,7 +1,6 @@
 package im.tox.tox4j.av.callbacks.audio
 
 import java.util
-import java.util.concurrent.ArrayBlockingQueue
 
 import com.typesafe.scalalogging.Logger
 import im.tox.tox4j.av.ToxAv
@@ -12,11 +11,7 @@ import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.testing.ToxExceptionChecks
 import im.tox.tox4j.testing.autotest.AutoTestSuite
-import jline.TerminalFactory
 import org.slf4j.LoggerFactory
-
-import scala.annotation.tailrec
-import scalaz.concurrent.Future
 
 final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptionChecks {
 
@@ -29,13 +24,14 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
   object Handler extends EventListener(0) {
 
     val bitRate = BitRate.fromInt(320).get
+    val channels = AudioChannels.Mono
     val audioLength = AudioLength.Length40
     val samplingRate = SamplingRate.Rate48k
     val frameSize = SampleCount(audioLength, samplingRate).value
     val framesPerIteration = 2
 
     val audio = AudioGenerators.default
-    val playback = new AudioPlayback(samplingRate)
+    val playback = new AudioPlayback(samplingRate, channels, audio.length(samplingRate) / 2)
     val displayWave = !sys.env.contains("TRAVIS")
 
     override def friendConnectionStatus(
@@ -78,7 +74,7 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
           friendNumber,
           pcm,
           SampleCount(audioLength, samplingRate),
-          AudioChannels.Mono,
+          channels,
           samplingRate
         )
       }
@@ -125,53 +121,14 @@ final class AudioReceiveFrameCallbackTest extends AutoTestSuite with ToxExceptio
       debug(state, s"Received audio frame: ${state.get} / ${audio.length(samplingRate)}")
       assert(channels == AudioChannels.Mono)
       assert(samplingRate == this.samplingRate)
-      frameBuffer.add(Some((state0.get, pcm)))
+      playback.play(pcm)
 
       if (state.get >= audio.length(samplingRate)) {
-        frameBuffer.add(None)
+        playback.close()
         waitForPlayback(audio.length(samplingRate))(state)
       } else {
         state
       }
-    }
-
-    @tailrec
-    private def playFrames(queue: ArrayBlockingQueue[Option[(Int, Array[Short])]]): Unit = {
-      queue.take() match {
-        case Some((t, receivedPcm)) =>
-          val expectedPcm = audio.nextFrame16(audioLength, samplingRate, t)
-
-          assert(receivedPcm.length == expectedPcm.length)
-
-          if (displayWave) {
-            val width = TerminalFactory.get.getWidth
-            if (t == 0) {
-              System.out.print("\u001b[2J")
-            }
-            System.out.print("\u001b[H")
-            System.out.println("Received:")
-            System.out.println(AudioPlayback.showWave(receivedPcm, width))
-            System.out.println("Expected:")
-            System.out.println(AudioPlayback.showWave(expectedPcm, width))
-          }
-
-          playback.play(receivedPcm)
-
-          playFrames(queue)
-
-        case None =>
-          logger.debug("Terminating audio playback thread")
-      }
-    }
-
-    private lazy val frameBuffer = {
-      // Make the queue large enough to hold half the audio frames.
-      val queue = new ArrayBlockingQueue[Option[(Int, Array[Short])]](audio.length(samplingRate) / frameSize / 2)
-
-      // Start a thread to consume the frames.
-      Future(playFrames(queue)).start
-
-      queue
     }
 
   }

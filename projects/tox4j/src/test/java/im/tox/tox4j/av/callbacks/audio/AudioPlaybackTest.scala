@@ -1,6 +1,6 @@
 package im.tox.tox4j.av.callbacks.audio
 
-import im.tox.tox4j.av.data.{AudioLength, SampleCount, SamplingRate}
+import im.tox.tox4j.av.data.{AudioChannels, AudioLength, SampleCount, SamplingRate}
 import jline.TerminalFactory
 import org.scalatest.FunSuite
 
@@ -12,7 +12,7 @@ final class AudioPlaybackTest extends FunSuite {
   val audioLength = AudioLength.Length60
   val frameSize = SampleCount(audioLength, samplingRate)
   val audio = AudioGenerators.default
-  val playback = new AudioPlayback(samplingRate)
+  val playback = new AudioPlayback(samplingRate, AudioChannels.Mono, 128)
 
   test("main") {
     val terminalWidth = TerminalFactory.get.getWidth

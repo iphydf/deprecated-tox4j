@@ -1,5 +1,6 @@
 package im.tox.client.commands
 
+/*
 import im.tox.client.{HostInfo, Say, ToxClientState}
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data.{ToxFriendMessage, ToxFriendNumber}
@@ -29,3 +30,4 @@ object ShowCommandHandler extends Say {
   }
 
 }
+*/

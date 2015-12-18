@@ -38,6 +38,7 @@ TOX_METHOD (jbyteArray, Iterate,
           data = env->NewByteArray (events.ByteSize () + sizeof(uint32_t));
 
         void *const dataPointer = env->GetPrimitiveArrayCritical (data, nullptr);
+
         uint8_t *bytes = static_cast<uint8_t *> (dataPointer);
         bytes = to_bytes (bytes, static_cast<uint32_t> (events.ByteSize ()));
 

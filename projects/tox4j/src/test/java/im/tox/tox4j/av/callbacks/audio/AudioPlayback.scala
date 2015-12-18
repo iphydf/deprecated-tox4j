@@ -1,10 +1,14 @@
 package im.tox.tox4j.av.callbacks.audio
 
+import java.io.Closeable
+import java.util.concurrent.ArrayBlockingQueue
 import javax.sound.sampled._
 
-import im.tox.tox4j.av.data.SamplingRate
+import im.tox.tox4j.av.data.{AudioChannels, SamplingRate}
 
+import scala.annotation.tailrec
 import scala.util.Try
+import scalaz.concurrent.Future
 
 object AudioPlayback {
 
@@ -38,26 +42,50 @@ object AudioPlayback {
 
 }
 
-final class AudioPlayback(samplingRate: SamplingRate) {
+final class AudioPlayback(
+    samplingRate: SamplingRate,
+    channels: AudioChannels,
+    queueLength: Int
+) extends Closeable {
 
-  def play(pcm: Array[Short]): Unit = {
-    soundLine.foreach { soundLine =>
-      val buffer = AudioPlayback.serialiseAudioFrame(pcm)
-      soundLine.write(buffer, 0, buffer.length)
+  @tailrec
+  private def playFrames(queue: ArrayBlockingQueue[Option[Array[Short]]]): Unit = {
+    queue.take() match {
+      case None =>
+      case Some(frame) =>
+        soundLine.foreach { soundLine =>
+          val buffer = AudioPlayback.serialiseAudioFrame(frame)
+          soundLine.write(buffer, 0, buffer.length)
+        }
+
+        playFrames(queue)
     }
   }
 
-  def done(length: Int): Boolean = {
-    soundLine.toOption.map(_.getLongFramePosition >= length).getOrElse(true)
-  }
+  private val frameBuffer = new ArrayBlockingQueue[Option[Array[Short]]](queueLength)
+
+  // Start a thread to consume the frames.
+  Future(playFrames(frameBuffer)).start
 
   private val soundLine = Try {
-    val format = new AudioFormat(samplingRate.value, 16, 1, true, true)
+    val format = new AudioFormat(samplingRate.value, 16, channels.value, true, true)
     val info = new DataLine.Info(classOf[SourceDataLine], format)
     val soundLine = AudioSystem.getLine(info).asInstanceOf[SourceDataLine]
     soundLine.open(format, samplingRate.value)
     soundLine.start()
     soundLine
+  }
+
+  override def close(): Unit = {
+    frameBuffer.add(None)
+  }
+
+  def play(pcm: Array[Short]): Unit = {
+    frameBuffer.put(Some(pcm))
+  }
+
+  def done(length: Int): Boolean = {
+    soundLine.toOption.map(_.getLongFramePosition >= length).getOrElse(true)
   }
 
 }
